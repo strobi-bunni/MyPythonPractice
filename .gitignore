@@ -137,3 +137,4 @@ dmypy.json
 # MY PROJECT
 
 !/lib/
+!/lib/*.*
