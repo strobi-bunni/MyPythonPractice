@@ -134,5 +134,10 @@ dmypy.json
 # IDE Specific
 /.idea/
 /.vscode/
+
+# sandbox
+/sandbox/
+
 # MY PROJECT
 !/lib/
+
