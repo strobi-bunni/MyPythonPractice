@@ -146,7 +146,6 @@ def timedelta_isoformat(td: datetime.timedelta,
     :param upper_timespec: 시간의 최대 단위, 만약 None이면 자동으로 알맞는 최대 단위를 찾는다.
     :return:
     """
-    # TODO: 함수 테스트 필요
     # days, hours, minutes, seconds, milliseconds, microseconds
     label = ['days', 'hours', 'minutes', 'seconds', 'milliseconds', 'microseconds']
     timedelta_parts = [td.days, td.seconds // 3600, td.seconds % 3600 // 60, td.seconds % 60,
