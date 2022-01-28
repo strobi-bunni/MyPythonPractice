@@ -138,21 +138,15 @@ def parse_iso8601_datetimespan(s: str) -> datetime.timedelta:
 
 def timedelta_isoformat(td: datetime.timedelta,
                         timespec: Optional[Literal['seconds', 'milliseconds', 'microseconds']] = None,
-                        upper_timespec: Optional[Literal['seconds', 'minutes', 'hours', 'days']] = None,
-                        suppress_leading_zeros=True,
-                        suppress_trailing_zeros=True,
-                        suppress_interleaving_zeros=True) -> str:
+                        upper_timespec: Optional[Literal['seconds', 'minutes', 'hours', 'days']] = None):
     """현재 timedelta를 ISO 8601 형식으로 바꾼다.
     
     :param td: timedelta 객체
     :param timespec: 시간의 최소 단위, 만약 None이면 자동으로 알맞은 최소 단위를 찾는다. 
     :param upper_timespec: 시간의 최대 단위, 만약 None이면 자동으로 알맞는 최대 단위를 찾는다.
-    :param suppress_leading_zeros: 선행 0 단위를 생략할지 여부
-    :param suppress_trailing_zeros: 후행 0 단위를 생략할지 여부
-    :param suppress_interleaving_zeros: 중간 0 단위를 생략할지 여부
     :return:
     """
-    # TODO: 이 함수를 구현할 것
+    # TODO: 함수 테스트 필요
     # days, hours, minutes, seconds, milliseconds, microseconds
     label = ['days', 'hours', 'minutes', 'seconds', 'milliseconds', 'microseconds']
     timedelta_parts = [td.days, td.seconds // 3600, td.seconds % 3600 // 60, td.seconds % 60,
@@ -191,5 +185,18 @@ def timedelta_isoformat(td: datetime.timedelta,
             else 4
 
     label = label[upper_index:lower_index]
-    timespec = timespec[upper_index:lower_index]
-    # TODO: suppress_~~~를 구현할 것
+    timedelta_parts = timedelta_parts[upper_index:lower_index]
+    timedelta_dict: dict[str, int] = dict(zip(label, timedelta_parts))
+
+    # 문자열로 변환
+    days_part = f'{timedelta_dict["days"]}D' if 'days' in timedelta_dict else ''
+    hours_part = f'{timedelta_dict["hours"]}H' if 'hours' in timedelta_dict else ''
+    minutes_part = f'{timedelta_dict["minutes"]}M' if 'minutes' in timedelta_dict else ''
+    seconds_part = f'{timedelta_dict["seconds"]}S' if lower_index == 4 \
+        else f'{timedelta_dict["seconds"]}.{timedelta_dict["milliseconds"]}S' if lower_index == 5 \
+        else f'{timedelta_dict["seconds"]}.{timedelta_dict["milliseconds"]}{timedelta_dict["microseconds"]}S'
+
+    return f'P{days_part}T{hours_part}{minutes_part}{seconds_part}'
+
+
+__all__ = ['parse_iso8601_datetime', 'parse_iso8601_datetimespan']

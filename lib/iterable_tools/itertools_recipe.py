@@ -333,3 +333,9 @@ def unique_justseen(iterable: Iterable[T], key: Callable[[T], Any] = None) -> It
     unique_justseen('ABBCcAD', str.lower) --> A B C A D
     """
     return map(next, map(operator.itemgetter(1), itertools.groupby(iterable, key)))
+
+
+__all__ = ['all_equal', 'consume', 'dotproduct', 'first_true', 'flatten', 'grouper', 'iter_except', 'ncycles', 'nth',
+           'padnone', 'pairwise', 'partition', 'powerset', 'quantify', 'random_combination',
+           'random_combination_with_replacement', 'random_permutation', 'random_product', 'repeatfunc', 'roundrobin',
+           'tabulate', 'tail', 'take', 'unique_everseen', 'unique_justseen']

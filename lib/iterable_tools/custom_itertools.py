@@ -3,7 +3,7 @@ from collections.abc import Callable, Iterable, Iterator, Sequence
 from typing import Any, Literal, TypeVar, Union
 
 from .itertools_recipe import all_equal, consume, partition
-from ..utils.func_utils import deprecated, identity, invert_bool
+from lib.func_tools import deprecated, identity, invert_bool
 
 T = TypeVar('T')
 V = TypeVar('V')
@@ -555,8 +555,8 @@ def strip(iterable: Iterable[T], pred: Callable[[T], Any] = bool) -> Iterator[T]
     return lstrip(rstrip(iterable, pred), pred)
 
 
-def classify_by_interval(iterable: Iterable[T], interval_size, offset: T = 0,
-                         include_empty_index=False) -> Iterator[tuple[T, list[T]]]:
+def group_by_interval(iterable: Iterable[T], interval_size, offset: T = 0,
+                      include_empty_index=False) -> Iterator[tuple[T, list[T]]]:
     r"""항목들을 구간에 맞춰서 분류한다.
 
     각 항목들이 구간 ``[interval * n + offset, interval * (n + 1) + offset)`` (``n``\는 정수) 안에 포함된다고 할 때
@@ -595,7 +595,7 @@ def classify_by_interval(iterable: Iterable[T], interval_size, offset: T = 0,
     다음은 위의 설명된 내용대로 항목들을 ``5n+2`` \구간에 맞춰서 분류한다.
 
     >>> items = [0, 1, 2, 3, 4, 5, 12, 14, 16, 25]
-    >>> for k, g in classify_by_interval(iterable, 5, 2):
+    >>> for k, g in group_by_interval(iterable, 5, 2):
     ...     print(k, g)
     -3 [0, 1]
     2 [2, 3, 4, 5]
@@ -605,7 +605,7 @@ def classify_by_interval(iterable: Iterable[T], interval_size, offset: T = 0,
     다음은 중간의 빈 구간을 포함해서 분류된 항목들을 출력한다.
 
     >>> items = [0, 1, 2, 3, 4, 5, 12, 14, 16, 25]
-    >>> for k, g in classify_by_interval(iterable, 5, 2, include_empty_index=True):
+    >>> for k, g in group_by_interval(iterable, 5, 2, include_empty_index=True):
     ...     print(k, g)
     -3 [0, 1]
     2 [2, 3, 4, 5]
@@ -705,6 +705,6 @@ def sort_by_specific_order(items: Iterable[T], orders: Sequence[V], key: Callabl
             return sorted_items + not_sorted_items
 
 
-__all__ = ['classify_by_interval', 'common_starts', 'dowhile', 'every_nth', 'get_duplicate_items', 'get_sorted_order',
+__all__ = ['common_starts', 'dowhile', 'every_nth', 'get_duplicate_items', 'get_sorted_order', 'group_by_interval',
            'index_pred', 'iterate', 'lstrip', 'multi_sorted', 'pairs', 'rstrip', 'skipper', 'slice_items',
            'sort_by_specific_order', 'strip']
