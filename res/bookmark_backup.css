@@ -1,0 +1,46 @@
+body > ul {
+    padding-left: 0px;
+}
+
+ul {
+    margin: 1em 0em;
+}
+ul li:first-child {
+    margin-top: 0px;
+}
+ul li:last-child{
+    margin-bottom: 0px;
+}
+
+p {
+    margin: 0px;
+}
+
+li {
+    list-style-type: none;
+    margin: 0.5em 0em;
+}
+li.bookmark-folder p {
+    cursor: pointer;
+    padding: 0.25em;
+    background-color: hsl(210, 80%, 90%);
+}
+li > ul.bookmark-list {
+    border-left: 2px solid hsl(210, 80%, 75%);
+    padding-left: 2em;
+    /* For collapsible */
+    display: none;
+    overflow: hidden;
+}
+.collapsible:before {
+    content: '\02795';
+    font-size: smaller;
+}
+.collapsible.active:before {
+    content: '\02796';
+    font-size: smaller;
+}
+
+a {
+    text-decoration: none;
+}
