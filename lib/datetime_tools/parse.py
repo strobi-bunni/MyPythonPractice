@@ -140,11 +140,29 @@ def timedelta_isoformat(td: datetime.timedelta,
                         timespec: Optional[Literal['seconds', 'milliseconds', 'microseconds']] = None,
                         upper_timespec: Optional[Literal['seconds', 'minutes', 'hours', 'days']] = None):
     """현재 timedelta를 ISO 8601 형식으로 바꾼다.
-    
-    :param td: timedelta 객체
-    :param timespec: 시간의 최소 단위, 만약 None이면 자동으로 알맞은 최소 단위를 찾는다. 
-    :param upper_timespec: 시간의 최대 단위, 만약 None이면 자동으로 알맞는 최대 단위를 찾는다.
-    :return:
+
+    Parameters
+    ----------
+    td : datetime.timedelta
+        timedelta 객체
+    timespec : {'seconds', 'milliseconds', 'microseconds'} : Optional
+        시간의 최소 단위, 만약 None이면 자동으로 알맞은 최소 단위를 찾는다.
+    upper_timespec : {'seconds', 'minutes', 'hours', 'days'} : Optional
+        시간의 최대 단위, 만약 None이면 자동으로 알맞는 최대 단위를 찾는다.
+
+    Returns
+    -------
+    s : str
+        ISO 8601 형식으로 지정된 시간간격
+
+    Examples
+    --------
+    >>> timedelta_isoformat(datetime.timedelta(seconds=1234, milliseconds=567))
+    'PT20M34.567S'
+
+    Notes
+    -----
+    모호성 때문에 upper_timespec 값으로 'months', 'years'는 지원하지 않는다.
     """
     # days, hours, minutes, seconds, milliseconds, microseconds
     label = ['days', 'hours', 'minutes', 'seconds', 'milliseconds', 'microseconds']
