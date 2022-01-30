@@ -210,10 +210,10 @@ def timedelta_isoformat(td: datetime.timedelta,
     hours_part = f'{timedelta_dict["hours"]}H' if 'hours' in timedelta_dict else ''
     minutes_part = f'{timedelta_dict["minutes"]}M' if 'minutes' in timedelta_dict else ''
     seconds_part = f'{timedelta_dict["seconds"]}S' if lower_index == 4 \
-        else f'{timedelta_dict["seconds"]}.{timedelta_dict["milliseconds"]}S' if lower_index == 5 \
-        else f'{timedelta_dict["seconds"]}.{timedelta_dict["milliseconds"]}{timedelta_dict["microseconds"]}S'
+        else f'{timedelta_dict["seconds"]}.{timedelta_dict["milliseconds"]:03d}S' if lower_index == 5 \
+        else f'{timedelta_dict["seconds"]}.{timedelta_dict["milliseconds"]:03d}{timedelta_dict["microseconds"]:03d}S'
 
     return f'P{days_part}T{hours_part}{minutes_part}{seconds_part}'
 
 
-__all__ = ['parse_iso8601_datetime', 'parse_iso8601_datetimespan']
+__all__ = ['parse_iso8601_datetime', 'parse_iso8601_datetimespan', 'timedelta_isoformat']

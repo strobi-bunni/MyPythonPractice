@@ -3,7 +3,7 @@ from collections.abc import Callable, Iterable, Iterator, Sequence
 from typing import Any, Literal, TypeVar, Union
 
 from .itertools_recipe import all_equal, consume, partition
-from lib.func_tools import deprecated, identity, invert_bool
+from ..func_tools import deprecated, identity, invert_bool
 
 T = TypeVar('T')
 V = TypeVar('V')
