@@ -1,7 +1,16 @@
 """
-URL의 각 요소를 분석함
+URL Analysis
 
-usage: url_analysis.py <url>
+다음 코드는 URL의 각 요소를 분석한다. URL의 쿼리 문자열에 어떤 요소가 포함되어 있는지 더 보기 좋게 표시한다.
+이를 사용해서 URL의 원치 않은 트래킹 정보를 지울 수 있다.
+
+사용 방법
+
+::
+
+    $ url_analysis.py <url>
+
+이 때 url은 반드시 "따옴표"로 감싸야 한다. 안 그러면 하나의 문자열로 인식하지 못할 수 있다.
 """
 import sys
 from urllib.parse import unquote, urlparse
