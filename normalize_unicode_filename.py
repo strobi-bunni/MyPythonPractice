@@ -17,10 +17,10 @@ path : 이름을 변경할 파일(들)
 """
 import argparse
 import unicodedata
+from os import PathLike
 from pathlib import Path
-from typing import Iterator, List, Literal, Union
+from typing import Iterator, List, Literal
 
-T_PathLike = Union[str, Path]
 T_NormalizeMode = Literal['NFC', 'NFD']
 
 
@@ -30,14 +30,14 @@ def normalized_name(filename: str, mode: T_NormalizeMode = 'NFC') -> str:
     return unicodedata.normalize(mode, filename)
 
 
-def rename_to_normalized(path: T_PathLike, mode: T_NormalizeMode = 'NFC') -> Path:
+def rename_to_normalized(path: PathLike, mode: T_NormalizeMode = 'NFC') -> Path:
     """정규화된 파일 이름으로 이름 바꾸기
     """
     path = Path(path)
     return path.rename(path.with_name(normalized_name(path.name, mode=mode)))
 
 
-def traverse_subpaths_dfs_post(path: T_PathLike) -> Iterator[Path]:
+def traverse_subpaths_dfs_post(path: PathLike) -> Iterator[Path]:
     """경로 path 안의 하위 경로를 DFS(Depth-first) 방식으로 후위 순회한다.
     """
     path = Path(path)
@@ -49,7 +49,7 @@ def traverse_subpaths_dfs_post(path: T_PathLike) -> Iterator[Path]:
     yield path
 
 
-def rename_item(path: T_PathLike, mode: T_NormalizeMode = 'NFC', recursive: bool = False) -> None:
+def rename_item(path: PathLike, mode: T_NormalizeMode = 'NFC', recursive: bool = False) -> None:
     path = Path(path)
     items: List[Path] = [path]
     if path.is_dir() and recursive:
@@ -65,7 +65,7 @@ if __name__ == '__main__':
                         help='유니코드 정규화 형식(NFC/NFD). 기본값은 NFC')
     args = parser.parse_args()
 
-    for path in args.path:
-        abs_path = path.absolute()
-        if abs_path.exists():
-            rename_item(abs_path, mode=args.mode, recursive=args.recursive)
+    for path_to_rename in args.path:
+        abs_path_to_rename = path_to_rename.absolute()
+        if abs_path_to_rename.exists():
+            rename_item(abs_path_to_rename, mode=args.mode, recursive=args.recursive)
