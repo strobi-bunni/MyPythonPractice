@@ -307,9 +307,9 @@ def apart_prefix(s: AnyStr, prefix: AnyStr) -> tuple[AnyStr, AnyStr]:
     Returns
     -------
     prefix : str or bytes
-        문자열의 시작 부분
+        문자열의 첫 부분
     last : str or bytes
-        문자열의 나머지 부분
+        문자열의 prefix를 제외한 뒤 부분
 
     Examples
     --------
@@ -340,8 +340,8 @@ def apart_suffix(s: AnyStr, suffix: AnyStr) -> tuple[AnyStr, AnyStr]:
 
     Returns
     -------
-    last : str or bytes
-        문자열의 나머지 부분
+    first : str or bytes
+        문자열의 suffix를 제외한 앞 부분
     suffix : str or bytes
         문자열의 끝 부분
 

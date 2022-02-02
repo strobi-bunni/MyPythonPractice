@@ -59,6 +59,7 @@ def group_dict(d: Mapping[KT, VT], key: Callable[[VT], T] = None) -> dict[T, dic
 def dict_merge(d1: Mapping[KT, VT], d2: Mapping[KT, VT], merge_method: Callable[[VT, VT], VT] = None) -> dict[KT, VT]:
     r"""딕셔너리를 합친다. merge_method에는 같은 키의 값을 합칠 함수를 정의한다.
     만약 merge_method가 정의되어 있지 않다면 d1의 값을 d2로 덮어씌우도록 동작한다.
+    이는 Python 3.9에서 추가된 ``d1 | d2`` 문법과 같다.
 
     Parameters
     ----------
@@ -68,16 +69,12 @@ def dict_merge(d1: Mapping[KT, VT], d2: Mapping[KT, VT], merge_method: Callable[
         두 번째 딕셔너리
     merge_method : Callable
         d1과 d2 모두 있는 키에 대해서 합칠 방법. 2변수 함수이다.
+        기본값은 d2의 해당 키의 값을 반환하는 함수(``lambda x, y: y``)이다.
 
     Returns
     -------
     return_dict : dict
         합쳐진 딕셔너리
-
-    Notes
-    -----
-    Python 3.9에서 추가된 ``d1 | d2`` 문법은 ``dict_merge(d1, d2, (lambda x, y: y))``\와 같다.
-    이는 merge_method가 정의되어 있지 않을 때의 동작 ``dict_merge(d1, d2)``\과 같다.
 
     Examples
     --------
