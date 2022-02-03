@@ -33,9 +33,51 @@ def _is_primitive(item: T_JSON_Object) -> bool:
            or item is None
 
 
-# TODO: 테스트할 것
 def get_json_tree_item(data: T_JSON_Container, *keys: Union[str, int], default=None, strict=False) -> T_JSON_Types:
-    # TODO: 문서 추가
+    r"""JSON 데이터에서 해당 경로의 값을 본다.
+
+    Parameters
+    ----------
+    data : Any
+        JSON 파일에서 가져온 데이터
+    keys : str or int
+        각 단계별 키
+    default : Any : Optional
+        값을 가져오지 못했을 시 대신 가져올 값. 기본값은 none이다. strict=False일 때만 동작한다.
+    strict : bool : Optional
+        값을 가져오지 못할 시 예외 처리할 지 여부. 기본값은 False이다.
+
+    Returns
+    -------
+    value : Any
+        가져온 값
+
+    Examples
+    --------
+    >>> d = {'a': 1, 'b': [2, 3, 4], 'c': {'d': 'hello', 'e': 'world', 'f': [True, False]}}
+    >>> get_json_tree_item(d, 'a')   # d['a']
+    1
+    >>> get_json_tree_item(d, 'b')   # d['b']
+    [2, 3, 4]
+    >>> get_json_tree_item(d, 'b', 2)   # d['b'][2]
+    4
+    >>> get_json_tree_item(d, 'c')   # d['c']
+    {'d': 'hello', 'e': 'world'}
+    >>> get_json_tree_item(d, 'c', 'd')   # d['c']['d']
+    'hello'
+    >>> get_json_tree_item(d, 'c', 'f', 0)   # d['c']['f'][0]
+    True
+    >>> get_json_tree_item(d, 'c', 'g', 'h')   # d['c']['g']['h']   # d['c']['g']는 없으므로 default=None을 반환
+    None
+
+    Notes
+    -----
+    get_json_tree_item(data, key0, key1, key2)는 data[key0][key1][key2]와 비슷하나,
+    중간에 없는 값이 있을 경우 None을 대신 반환하기 때문에 Null-safety 처리가 간단하다.
+
+    위의 예시에서 ``get_json_tree_item(d, 'c', 'g', 0)``\을 예외 처리를 한다고 할 경우
+    ``d.get('c', {}).get('g', {}).get('h', None)``\으로 대신 쓸 수 있다.
+    """
     # 종료 조건: keys가 없으면 그대로를 반환
     if not keys:
         return data
@@ -54,7 +96,7 @@ def get_json_tree_item(data: T_JSON_Container, *keys: Union[str, int], default=N
 
     # 리스트(Python) / 배열(JSON)
     elif isinstance(data, list):
-        # TODO: Non-strict일 시 작업 추가
+        # Non-strict일 시 작업?
         # 리스트의 인덱스는 숫자여야만 한다.
         if strict and not isinstance(keys_head, int):
             raise KeyError(f'Invalid key type for list: {keys_head} is not a int')
@@ -88,8 +130,34 @@ def _prepare_container_for_list(data: list, keys_head: Optional[Union[str, int]]
         data[keys_head] = new_container
 
 
-# TODO: 테스트할 것
-def set_json_tree_item(data: T_JSON_Container, *keys: Union[str, int], value=None) -> None:
+def set_json_tree_item(data: T_JSON_Container, *keys: Union[str, int, NewListItemSingleton], value=None) -> None:
+    r"""JSON 데이터에서 해당 경로의 값을 추가하거나 변경한다.
+
+    Parameters
+    ----------
+    data : Any
+        JSON 파일에서 가져온 데이터
+    keys : str or int or NEW_LIST_ITEM
+        각 단계별 키. 만약 리스트에 값을 추가하려고 한다면 ``NEW_LIST_ITEM``\을 사용한다.
+    value : Any : Optional
+        해당 경로에 설정할 값
+
+    Examples
+    --------
+    >>> d = {'a': 1, 'b': [2, 3, 4], 'c': {'d': 'hello', 'e': 'world', 'f': [True, False]}}
+    >>> set_json_tree_item(d, 'a', value=10)   # d['a'] = 10
+    >>> print(d)
+    {'a': 10, 'b': [2, 3, 4], 'c': {'d': 'hello', 'e': 'world', 'f': [True, False]}}
+    >>> set_json_tree_item(d, 'b', NEW_LIST_ITEM, value=5)   # d['b'].append(5)
+    >>> print(d)
+    {'a': 10, 'b': [2, 3, 4, 5], 'c': {'d': 'hello', 'e': 'world', 'f': [True, False]}}
+    >>> set_json_tree_item(d, 'c', 'f', 0, value=None)   # d['b']['f'][0] = None
+    >>> print(d)
+    {'a': 10, 'b': [2, 3, 4, 5], 'c': {'d': 'hello', 'e': 'world', 'f': [True, 0]}}
+    >>> set_json_tree_item(d, 'a', NEW_LIST_ITEM, NEW_LIST_ITEM, 'x', value=5)
+    >>> print(d)
+    {'a': [[{'x': 5}]], 'b': [2, 3, 4, 5], 'c': {'d': 'hello', 'e': 'world', 'f': [True, 0]}}
+    """
     # 종료 조건: key가 없으면 아무것도 하지 않는다.
     if not keys:
         return
@@ -143,8 +211,31 @@ def set_json_tree_item(data: T_JSON_Container, *keys: Union[str, int], value=Non
         raise ValueError(f'{data} is primitive type, not a container.')
 
 
-# TODO: 테스트할 것
 def delete_json_tree_item(data: T_JSON_Container, *keys: Union[str, int], strict=False) -> None:
+    r"""JSON 데이터에서 해당 경로의 값을 지운다.
+
+    Parameters
+    ----------
+    data : Any
+        JSON 파일에서 가져온 데이터
+    keys : str or int
+        각 단계별 키
+    strict : bool : Optional
+        값을 가져오지 못할 시 예외 처리할 지 여부. 기본값은 False이다.
+
+    Examples
+    --------
+    >>> d = {'a': 1, 'b': [2, 3, 4], 'c': {'d': 'hello', 'e': 'world', 'f': [True, False]}}
+    >>> delete_json_tree_item(d, 'a')   # del d['a']
+    >>> print(d)
+    {'b': [2, 3, 4], 'c': {'d': 'hello', 'e': 'world', 'f': [True, False]}}
+    >>> delete_json_tree_item(d, 'b', -1)   # del d['b'][-1]
+    >>> print(d)
+    {'b': [2, 3], 'c': {'d': 'hello', 'e': 'world', 'f': [True, False]}}
+    >>> delete_json_tree_item(d, 'c', 'f')   # d['b']['f'][0] = None
+    >>> print(d)
+    {'b': [2, 3], 'c': {'d': 'hello', 'e': 'world'}
+    """
     # 종료 조건: key가 없으면 아무것도 하지 않는다.
     if not keys:
         return
@@ -180,9 +271,6 @@ def delete_json_tree_item(data: T_JSON_Container, *keys: Union[str, int], strict
         raise ValueError('Cannot delete primitive value')
 
 
-__all__ = ['NewListItemSingleton', 'NEW_LIST_ITEM', 'delete_json_tree_item', 'get_json_tree_item', 'set_json_tree_item']
-
-
 def tokenize_json_path(s: str):
     return_tokens: list[Union[NewListItemSingleton, int, str]] = []
     if not s:
@@ -199,12 +287,115 @@ def tokenize_json_path(s: str):
 
 
 def get_json_item(data, json_path='', default=None, strict=False):
+    r"""이 함수는 ``get_json_tree_item``\의 간단한 버전이다. Javascript-style으로 JSON 내의 객체 값을 가져올 수 있다.
+
+    키의 구분은 ``.``\으로 한다. 예를 들어 ``get_json_tree_item(d, 'a', 'b', 'c')``\은
+    ``get_json_item(d, 'a.b.c')``\로 쓸 수 있다.
+
+    Parameters
+    ----------
+    data : Any
+        JSON 파일에서 가져온 데이터
+    json_path : str
+        JSON 객체 내의 값을 참조하기 위한 키 표현식. 각각의 키는 ``.``\로 구분한다.
+    default : Any : Optional
+        값을 가져오지 못했을 시 대신 가져올 값. 기본값은 none이다. strict=False일 때만 동작한다.
+    strict : bool : Optional
+        값을 가져오지 못할 시 예외 처리할 지 여부. 기본값은 False이다.
+
+    Returns
+    -------
+    value : Any
+        가져온 값
+
+    Examples
+    --------
+    >>> d = {'a': 1, 'b': [2, 3, 4], 'c': {'d': 'hello', 'e': 'world', 'f': [True, False]}}
+    >>> get_json_item(d, 'a')   # d['a']
+    1
+    >>> get_json_item(d, 'b')   # d['b']
+    [2, 3, 4]
+    >>> get_json_item(d, 'b.2')   # d['b'][2]
+    4
+    >>> get_json_item(d, 'c')   # d['c']
+    {'d': 'hello', 'e': 'world'}
+    >>> get_json_item(d, 'c.d')   # d['c']['d']
+    'hello'
+    >>> get_json_item(d, 'c.f.0')   # d['c']['f'][0]
+    True
+    >>> get_json_item(d, 'c.g.h')   # d['c']['g']['h']   # d['c']['g']는 없으므로 default=None을 반환
+    None
+    """
     return get_json_tree_item(data, *tokenize_json_path(json_path), default=default, strict=strict)
 
 
 def set_json_item(data, json_path='', value=None):
+    r"""이 함수는 ``set_json_item_tree``\의 간단한 버전이다. JSON 내의 객체 값을 손쉽게 수정할 수 있다.
+
+    키의 구분은 ``.``\으로 한다. 예를 들어 ``set_json_item_tree(d, 'a', 'b', 'c', value=10)``\은
+    ``set_json_item(d, 'a.b.c', 10)``\로 쓸 수 있다.
+    
+    리스트에 새 값을 쓰기 위해서는 ``+`` 기호를 사용한다. ``set_json_item_tree(d, 'a', NEW_LIST_ITEM value=10)``\은
+    ``set_json_item(d, 'a.+', 10)``\로 쓸 수 있다.
+
+    Parameters
+    ----------
+    data : Any
+        JSON 파일에서 가져온 데이터
+    json_path : str
+        JSON 객체 내의 값을 참조하기 위한 키 표현식. 각각의 키는 ``.``\로 구분한다.
+    value : Any : Optional
+        해당 경로에 설정할 값
+
+    Examples
+    --------
+    >>> d = {'a': 1, 'b': [2, 3, 4], 'c': {'d': 'hello', 'e': 'world', 'f': [True, False]}}
+    >>> set_json_item(d, 'a', 10)   # d['a'] = 10
+    >>> print(d)
+    {'a': 10, 'b': [2, 3, 4], 'c': {'d': 'hello', 'e': 'world', 'f': [True, False]}}
+    >>> set_json_item(d, 'b.+', 5)   # d['b'].append(5)
+    >>> print(d)
+    {'a': 10, 'b': [2, 3, 4, 5], 'c': {'d': 'hello', 'e': 'world', 'f': [True, False]}}
+    >>> set_json_item(d, 'c.f.0', None)   # d['b']['f'][0] = None
+    >>> print(d)
+    {'a': 10, 'b': [2, 3, 4, 5], 'c': {'d': 'hello', 'e': 'world', 'f': [True, 0]}}
+    >>> set_json_item(d, 'a.+.+.x', value=5)
+    >>> print(d)
+    {'a': [[{'x': 5}]], 'b': [2, 3, 4, 5], 'c': {'d': 'hello', 'e': 'world', 'f': [True, 0]}}
+    """
     set_json_tree_item(data, *tokenize_json_path(json_path), value=value)
 
 
 def delete_json_item(data, json_path='', strict=False):
+    r"""이 함수는 ``delete_json_tree_item``\의 간단한 버전이다. JSON 내의 객체 값을 손쉽게 수정할 수 있다.
+
+    키의 구분은 ``.``\으로 한다. 예를 들어 ``delete_json_tree_item(d, 'a', 'b', 'c')``\은
+    ``delete_json_item(d, 'a.b.c')``\로 쓸 수 있다.
+
+    Parameters
+    ----------
+    data : Any
+        JSON 파일에서 가져온 데이터
+    json_path : str
+        JSON 객체 내의 값을 참조하기 위한 키 표현식. 각각의 키는 ``.``\로 구분한다.
+    strict : bool : Optional
+        값을 가져오지 못할 시 예외 처리할 지 여부. 기본값은 False이다.
+
+    Examples
+    --------
+    >>> d = {'a': 1, 'b': [2, 3, 4], 'c': {'d': 'hello', 'e': 'world', 'f': [True, False]}}
+    >>> delete_json_item(d, 'a')   # del d['a']
+    >>> print(d)
+    {'b': [2, 3, 4], 'c': {'d': 'hello', 'e': 'world', 'f': [True, False]}}
+    >>> delete_json_item(d, 'b.-1')   # del d['b'][-1]
+    >>> print(d)
+    {'b': [2, 3], 'c': {'d': 'hello', 'e': 'world', 'f': [True, False]}}
+    >>> delete_json_item(d, 'c.f')   # d['b']['f'][0] = None
+    >>> print(d)
+    {'b': [2, 3], 'c': {'d': 'hello', 'e': 'world'}
+    """
     delete_json_tree_item(data, *tokenize_json_path(json_path), strict=strict)
+
+
+__all__ = ['NEW_LIST_ITEM', 'NewListItemSingleton', 'delete_json_item', 'delete_json_tree_item', 'get_json_item',
+           'get_json_tree_item', 'set_json_item', 'set_json_tree_item']
