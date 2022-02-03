@@ -26,6 +26,7 @@ def _is_primitive(item: T_JSON_Object) -> bool:
            or item is None
 
 
+# TODO: 테스트할 것
 def get_item_tree(data: T_JSON_Container, *keys: Union[str, int], default=None, strict=False) -> T_JSON_Types:
     # TODO: 문서 추가
     # 종료 조건: keys가 없으면 그대로를 반환
@@ -80,6 +81,7 @@ def _prepare_container_for_list(data: list, keys_head: Optional[Union[str, int]]
         data[keys_head] = new_container
 
 
+# TODO: 테스트할 것
 def set_item_tree_value(data: T_JSON_Container, *keys: Union[str, int], value=None) -> None:
     # 종료 조건: key가 없으면 아무것도 하지 않는다.
     if not keys:
@@ -141,6 +143,40 @@ def set_item_tree_value(data: T_JSON_Container, *keys: Union[str, int], value=No
         raise ValueError(f'{data} is primitive type, not a container.')
 
 
-# TODO: 구현할 것
+# TODO: 테스트할 것
 def delete_item_tree(data: T_JSON_Container, *keys: Union[str, int]) -> None:
-    raise NotImplementedError
+    # 종료 조건: key가 없으면 아무것도 하지 않는다.
+    if not keys:
+        return
+
+    # keys에서 첫 값은 인덱스를 찾을 때 쓰고, 마지막 값들은 재귀할 때 쓴다.
+    keys_head, *keys_tail = keys
+
+    if isinstance(data, dict):
+        # 만약에 꼬리가 없다면: 머리에 해당되는 값을 지운다.
+        if not keys_tail:
+            data.pop(keys_head, None)
+        else:
+            # 만약에 꼬리가 있다면 꼬리에 해당되는 값을 지운다.
+            if keys_head in data:
+                delete_item_tree(data[keys_head], *keys_tail)
+            else:
+                pass  # TODO: 여기에 strict=True일 때 동작?
+    elif isinstance(data, list):
+        # 만약에 꼬리가 없다면: 머리에 해당되는 값을 지운다.
+        if not keys_tail:
+            if isinstance(keys_head, int) and (-len(data) <= keys_head < len(data)):
+                data.pop(keys_head)
+            else:
+                pass  # TODO: strict=True일 떄 동작?
+        else:
+            # 만약에 꼬리가 있다면 꼬리에 해당되는 값을 지운다.
+            if isinstance(keys_head, int) and (-len(data) <= keys_head < len(data)):
+                delete_item_tree(data[keys_head], *keys_tail)
+            else:
+                pass  # TODO: 여기에 strict=True일 때 동작?
+    else:
+        raise ValueError('Cannot delete primitive value')
+
+
+__all__ = ['NEW_LIST_ITEM', 'delete_item_tree', 'get_item_tree', 'set_item_tree_value']
