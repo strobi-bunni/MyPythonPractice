@@ -9,15 +9,27 @@ T = TypeVar('T')
 
 def identity(x: T) -> T:
     """항등 함수
+
+    이 함수는 다른 함수의 인자로 사용할 용도로 만들어졌다.
+
+    Parameters
+    ----------
+    x : Any
+        아무 값
+
+    Returns
+    -------
+    x : Any
+        아무 값
     """
     return x
 
 
 def multi_func(func: Callable[[T], T], n: int) -> Callable[[T], T]:
-    """함수 func를 여러 번 중첩한 함수를 반환한다.
+    r"""함수 func를 여러 번 중첩한 함수를 반환한다.
 
-    예를 들어 ``double = lambda x: x * 2``일 때 ``multi_func(double, 3)(2)``는
-    ``double(double(double(2))) == 16``과 같다.
+    예를 들어 ``double = lambda x: x * 2``\일 때 ``multi_func(double, 3)(2)``는
+    ``double(double(double(2))) == 16``\과 같다.
 
     Parameters
     ----------
@@ -40,7 +52,7 @@ def multi_func(func: Callable[[T], T], n: int) -> Callable[[T], T]:
 
     Notes
     -----
-    이 함수는 재귀적으로 동작한다. 따라서 ``n``이 994를 초과할 경우 Python의 재귀 한계에 걸리게 된다.
+    이 함수는 재귀적으로 동작한다. 따라서 ``n``\이 994를 초과할 경우 Python의 재귀 한계에 걸리게 된다.
 
     Examples
     --------

@@ -113,8 +113,20 @@ def parse_iso8601_datetimespan(s: str) -> datetime.timedelta:
         >>> parse_iso8601_datetimespan('P1M') == parse_iso8601_datetimespan('P30D')
         True
 
-    :param s:
-    :return:
+    Parameters
+    ----------
+    s : str
+        ISO 8601 시간 표현
+
+    Returns
+    -------
+    td : datetime.timedelta
+        timedelta로 변환한 값.
+        
+    Exceptions
+    ----------
+    ValueError
+        s가 올바른 ISO 8601 시간 형식이 아닐 때
     """
     if matches := iso8601_datetimespan_regex.match(s):
         year = int(matches['yearspan']) if matches['yearspan'] else 0
