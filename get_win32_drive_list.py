@@ -56,11 +56,11 @@ class FileSystemFlags(IntFlag):
 
 
 class DriveInfo(NamedTuple):
-    drive_letter: str   # 드라이브 문자, 후행 역슬래시 포함(예: 'C:\\')
-    drive_label: str   # 드라이브 라벨(예: 'Windows')
-    volume_serial_number: int   # 볼륨 일련 번호(cmd에서 dir를 실행했을 때의 값과 같다)
-    filesystem_flags: FileSystemFlags   # 파일 시스템의 플래그
-    filesystem_name: str   # 파일 시스템 이름(예: 'NTFS')
+    drive_letter: str  # 드라이브 문자, 후행 역슬래시 포함(예: 'C:\\')
+    drive_label: str  # 드라이브 라벨(예: 'Windows')
+    volume_serial_number: int  # 볼륨 일련 번호(cmd에서 dir를 실행했을 때의 값과 같다)
+    filesystem_flags: FileSystemFlags  # 파일 시스템의 플래그
+    filesystem_name: str  # 파일 시스템 이름(예: 'NTFS')
 
 
 regex_drive_letter = re.compile(r'^([A-Z])(?::(?:\\)?)?$', re.I)

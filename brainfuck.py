@@ -226,4 +226,3 @@ if __name__ == '__main__':
         bf_code = f.read()
     bf = BrainfuckInterpreter(code=bf_code, use_null_terminated_str=True)
     bf.run()
-    

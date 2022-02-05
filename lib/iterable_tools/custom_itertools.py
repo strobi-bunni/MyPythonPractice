@@ -338,7 +338,7 @@ def pairs(iterable: Iterable[T]) -> Iterator[list[Union[tuple[T, T], tuple[T]]]]
                 yield [(items[0], items[i])] + group
 
 
-def get_duplicate_items(items: Iterable[T], key=None):
+def get_duplicate_items(items: Iterable[T], key: Callable[[T], Any] = None):
     r"""중복된 항목을 찾는다.
 
     만약 key가 지정되어 있다면 items의 각 항목에 대해서 key 함수를 적용한 결과가
@@ -379,7 +379,7 @@ def get_duplicate_items(items: Iterable[T], key=None):
     return {k: list_g for (k, g) in itertools.groupby(sorted_items, key=key) if len(list_g := list(g)) >= 2}
 
 
-def get_sorted_order(items: Iterable[T], key=None) -> int:
+def get_sorted_order(items: Iterable[T], key: Callable[[T], Any] = None) -> int:
     r"""리스트의 정렬 상태를 구한다.
 
     Parameters
@@ -705,6 +705,58 @@ def sort_by_specific_order(items: Iterable[T], orders: Sequence[V], key: Callabl
             return sorted_items + not_sorted_items
 
 
+def iterable_with_callback(iterable: Iterable[T], callback: Callable[[int, T], None],
+                           call_at: Literal['before', 'after'] = 'before') -> Iterator[T]:
+    """이터러블의 값들을 그대로 Pass-through해서 산출하고, 산출된 값에 대해서 callback 함수를 실행한다.
+
+    Parameters
+    ----------
+    iterable : Iterable of T
+        이터러블
+    callback : Callable object, ``(int, T) -> None``
+        이터러블의 각각의 값들에 대해서 실행할 함수.
+        첫 번째 인자는 이터러블의 항목 번호이며(0-based) 두번째는 이터러블의 값이다.
+    call_at : {'before', 'after'}
+        callback을 실행할 시점. 'before'이면 값을 산출하기 전에 callback을 실행하며,
+        'after'이면 값을 산출한 후에 callback을 실행한다. 기본값은 'before'이다.
+
+    Yields
+    ------
+    value : T
+        이터러블에서 산출된 값
+
+    Examples
+    --------
+    다음 코드는 매 3의 배수 항목마다 정해진 메세지로 출력을 한다.
+
+    >>> def notify_every_three(i, item):
+    ...     if i % 3 == 0:
+    ...         print(f'Item #{i} : {item}')
+    >>> for num in iterable_with_callback(range(10), notify_every_three):
+    ...     print(num)
+    Item #0 : 0
+    0
+    1
+    2
+    Item #3 : 3
+    3
+    4
+    5
+    Item #6 : 6
+    6
+    7
+    8
+    Item #9 : 9
+    9
+    """
+    for i, item in enumerate(iterable):
+        if call_at == 'before':
+            callback(i, item)
+        yield item
+        if call_at == 'after':
+            callback(i, item)
+
+
 __all__ = ['common_starts', 'dowhile', 'every_nth', 'get_duplicate_items', 'get_sorted_order', 'group_by_interval',
-           'index_pred', 'iterate', 'lstrip', 'multi_sorted', 'pairs', 'rstrip', 'skipper', 'slice_items',
-           'sort_by_specific_order', 'strip']
+           'index_pred', 'iterable_with_callback', 'iterate', 'lstrip', 'multi_sorted', 'pairs', 'rstrip', 'skipper',
+           'slice_items', 'sort_by_specific_order', 'strip']
