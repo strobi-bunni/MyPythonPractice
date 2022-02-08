@@ -320,11 +320,10 @@ def apart_prefix(s: AnyStr, prefix: AnyStr) -> tuple[AnyStr, AnyStr]:
     """
     if prefix and s.startswith(prefix):
         return prefix, s[len(prefix):]
+    elif isinstance(s, str):
+        return '', s
     else:
-        if isinstance(s, str):
-            return '', s
-        else:
-            return b'', s
+        return b'', s
 
 
 def apart_suffix(s: AnyStr, suffix: AnyStr) -> tuple[AnyStr, AnyStr]:
@@ -355,11 +354,10 @@ def apart_suffix(s: AnyStr, suffix: AnyStr) -> tuple[AnyStr, AnyStr]:
     # len(suffix) == 0이면 if suffix and... 부분을 안 붙였을 때 s[:-0] == ''가 되므로 테스트 케이스가 실패한다.
     if suffix and s.endswith(suffix):
         return s[:-len(suffix)], suffix
+    elif isinstance(s, str):
+        return s, ''
     else:
-        if isinstance(s, str):
-            return s, ''
-        else:
-            return s, b''
+        return s, b''
 
 
 __all__ = ['apart_prefix', 'apart_suffix', 'convert_newline', 'find_prefix', 'findall', 'get_str_hash', 'get_str_width',

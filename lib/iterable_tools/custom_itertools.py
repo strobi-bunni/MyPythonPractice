@@ -428,7 +428,7 @@ def get_sorted_order(items: Iterable[T], key: Callable[[T], Any] = None) -> int:
 
 
 def index_pred(items: Sequence[T], pred: Callable[[T], Any] = bool, fallback_value=None) -> int:
-    """items의 각 항목에 대해서 pred를 적용한 값이 True인 값의 인덱스를 반환한다.
+    """items의 각 항목에 대해서 pred를 적용한 값이 처음으로 True인 값의 인덱스를 반환한다.
 
     Parameters
     ----------
@@ -466,11 +466,10 @@ def index_pred(items: Sequence[T], pred: Callable[[T], Any] = bool, fallback_val
     truthy_values = [bool(pred(x)) for x in items]
     if any(truthy_values):
         return truthy_values.index(True)
+    elif fallback_value:
+        return fallback_value
     else:
-        if fallback_value:
-            return fallback_value
-        else:
-            raise ValueError('First truthy value not found')
+        raise ValueError('First truthy value not found')
 
 
 def lstrip(iterable: Iterable[T], pred: Callable[[T], Any] = bool) -> Iterator[T]:
@@ -697,12 +696,10 @@ def sort_by_specific_order(items: Iterable[T], orders: Sequence[V], key: Callabl
     sorted_items = sorted(items_in, key=lambda x: orders.index(key(x)), reverse=reverse)
     if if_not_found == 'ignore':
         return sorted_items
+    elif if_not_found == 'before':
+        return items_not_in + sorted_items
     else:
-        not_sorted_items = list(items_not_in)
-        if if_not_found == 'before':
-            return not_sorted_items + sorted_items
-        else:
-            return sorted_items + not_sorted_items
+        return sorted_items + items_not_in
 
 
 def iterable_with_callback(iterable: Iterable[T], callback: Callable[[int, T], None],
