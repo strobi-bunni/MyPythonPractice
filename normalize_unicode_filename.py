@@ -8,7 +8,7 @@
 
 ::
 
-    normalize_unicode_filename.py [-h] [-r] [-m {NFC,NFD}] path [path ...]
+    normalize_unicode_filename.py [-h] [-r] [-m {NFC,NFD,NFKC,NFKD}] path [path ...]
 
 -h : 도움말을 표시한다.
 -r : path가 폴더일 경우, 하위 폴더 및 파일의 이름까지 정규화한다.
@@ -21,7 +21,7 @@ from os import PathLike
 from pathlib import Path
 from typing import Iterator, List, Literal
 
-T_NormalizeMode = Literal['NFC', 'NFD']
+T_NormalizeMode = Literal['NFC', 'NFD', 'NFKC', 'NFKD']
 
 
 def normalized_name(filename: str, mode: T_NormalizeMode = 'NFC') -> str:
@@ -38,7 +38,7 @@ def rename_to_normalized(path: PathLike, mode: T_NormalizeMode = 'NFC') -> Path:
 
 
 def traverse_subpaths_dfs_post(path: PathLike) -> Iterator[Path]:
-    """경로 path 안의 하위 경로를 DFS(Depth-first) 방식으로 후위 순회한다.
+    """경로 path 안의 하위 경로를 DFS(Depth-first) 방식으로 후위 순회한다. 자신도 포함한다.
     """
     path = Path(path)
     for child in path.iterdir():
@@ -51,9 +51,10 @@ def traverse_subpaths_dfs_post(path: PathLike) -> Iterator[Path]:
 
 def rename_item(path: PathLike, mode: T_NormalizeMode = 'NFC', recursive: bool = False) -> None:
     path = Path(path)
-    items: List[Path] = [path]
     if path.is_dir() and recursive:
-        items.extend(traverse_subpaths_dfs_post(path))
+        items: List[Path] = list(traverse_subpaths_dfs_post(path))
+    else:
+        items: List[Path] = [path]
     [rename_to_normalized(p, mode=mode) for p in items]
 
 
@@ -61,8 +62,8 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='유니코드 파일 이름을 정규화합니다.')
     parser.add_argument('path', type=Path, nargs='+', help='변경할 파일의 경로(들)')
     parser.add_argument('-r', '--recursive', action='store_true', help='폴더 안의 파일이름도 변경할지 여부')
-    parser.add_argument('-m', '--mode', choices=['NFC', 'NFD'], default='NFC',
-                        help='유니코드 정규화 형식(NFC/NFD). 기본값은 NFC')
+    parser.add_argument('-m', '--mode', choices=('NFC', 'NFD', 'NFKC', 'NFKD'), default='NFC',
+                        help='유니코드 정규화 형식(NFC/NFD/NFKC/NFKD). 기본값은 NFC')
     args = parser.parse_args()
 
     for path_to_rename in args.path:

@@ -12,6 +12,7 @@ URL Analysis
 
 이 때 url은 반드시 "따옴표"로 감싸야 한다. 안 그러면 하나의 문자열로 인식하지 못할 수 있다.
 """
+import json
 import sys
 from urllib.parse import unquote, urlparse
 
@@ -26,20 +27,19 @@ else:
     query_partitions = []
 query_dict = {x[0]: unquote(x[2]) for x in query_partitions}
 
-# 머리열의 너비 구하기
-field_length = max(
-    max((len(x) for x in query_dict.keys()), default=0) + 2,  # query 키의 최대 길이(+2한 이유는 인덴트 2칸)
-    10)  # query가 없을 때 열의 최대 길이(len("  username"))
-
-print(f'{"scheme":<{field_length}} : {parse_result.scheme or ""}')
-print(f'{"netloc":<{field_length}} : {parse_result.netloc or ""}')
-print(f'{"  username":<{field_length}} : {parse_result.username or ""}')
-print(f'{"  password":<{field_length}} : {parse_result.password or ""}')
-print(f'{"  hostname":<{field_length}} : {parse_result.hostname or ""}')
-print(f'{"  port":<{field_length}} : {parse_result.port or ""}')
-print(f'{"path":<{field_length}} : {unquote(parse_result.path or "")}')
-print(f'{"params":<{field_length}} : {parse_result.params or ""}')
-print(f'{"query":<{field_length}} : ')
-for query_key, query_value in query_dict.items():
-    print(f'{"  " + query_key:<{field_length}} : {query_value or ""}')
-print(f'{"fragment":<{field_length}} : {parse_result.fragment or ""}')
+analysis_result = {
+    'url': url,
+    'scheme': parse_result.scheme or '',
+    'netloc': parse_result.netloc or '',
+    'netloc_details': {
+        'username': parse_result.username or '',
+        'password': parse_result.password or '',
+        'hostname': parse_result.hostname or '',
+        'port': parse_result.port or ''
+    },
+    'path': unquote(parse_result.path or ''),
+    'params': parse_result.params or '',
+    'query': query_dict,
+    'fragment': parse_result.fragment or ''
+}
+print(json.dumps(analysis_result, ensure_ascii=False, indent=4))

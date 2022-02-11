@@ -74,16 +74,11 @@ def format_output(out: Dict[bytes, List[Path]], file: TextIO = sys.stdout) -> No
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('-d', '--dir', nargs=argparse.ONE_OR_MORE,
-                        metavar='DIR', required=True, type=str,
-                        help='파일이 저장된 경로')
-    parser.add_argument('-a', '--algorithm', metavar='ALGORITHM',
-                        type=str, help='해시를 계산할 알고리즘',
-                        default='md5')
-    parser.add_argument('-o', '--out', metavar='OUT',
-                        type=argparse.FileType('w', encoding='utf-8'),
-                        default=sys.stdout,
-                        help='결과를 출력할 파일')
+    parser.add_argument('dir', nargs=argparse.ONE_OR_MORE, metavar='DIR', type=str, help='파일이 저장된 경로')
+    parser.add_argument('-a', '--algorithm', metavar='ALGORITHM', type=str, help='해시를 계산할 알고리즘',
+                        default='md5', choices=('md5', 'sha1', 'sha224', 'sha256'))
+    parser.add_argument('-o', '--out', metavar='OUT', type=argparse.FileType('w', encoding='utf-8'),
+                        default=sys.stdout, help='결과를 출력할 파일')
     args = parser.parse_args()
     format_output(find_duplicate(*args.dir, algorithm=args.algorithm), args.out)
     args.out.close()

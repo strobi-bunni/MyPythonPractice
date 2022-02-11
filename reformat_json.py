@@ -44,8 +44,7 @@ def reformat_json(filename: PathLike, **kwargs) -> int:
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('-f', '--file', metavar='FILE', nargs='+', type=str, help='JSON 파일(들)')
-    parser.add_argument('-d', '--dir', metavar='DIR', nargs='+', type=str, help='JSON 파일들이 저장된 폴더(들)')
+    parser.add_argument('path', metavar='PATH', nargs='+', type=str, help='JSON 파일(들) 혹은 저장된 폴더(들)')
     indent_options = parser.add_mutually_exclusive_group()
     indent_options.add_argument('-t', '-tab', '--tab-indent', action='store_true', help='탭으로 인덴트를 구분할지 여부')
     indent_options.add_argument('-i', '-in', '--indent', metavar='INDENT_VALUE', type=int, default=4,
@@ -69,14 +68,18 @@ if __name__ == '__main__':
                               'indent': None, 'separators': (',', ':')}
 
     # JSON 파일의 리스트를 구한다
-    dirs: List[Path] = [Path(p) for p in args.dir] if args.dir else []
-    files: List[Path] = [Path(p) for p in args.file] if args.file else []
+    paths: List[Path] = [Path(p) for p in args.path]
+    dirs: List[Path] = [p for p in paths if p.is_dir()]
+    files: List[Path] = [p for p in paths if p.is_file()]
 
+    # 폴더 안의 JSON 파일들
     json_files_in_dir: Iterator[Iterator[Path]] = (dir_path.glob('**/*.json') for dir_path in dirs)
     json_files_in_dir_flatten: Iterator[Path] = chain.from_iterable(json_files_in_dir)
 
+    # 모든 JSON 파일들
     json_files = chain(files, json_files_in_dir_flatten)
 
+    # --verbose 옵션에서 사용할 카운트
     num_of_json_files = 0
     num_of_formatted_json_files = 0
     for json_file in json_files:
