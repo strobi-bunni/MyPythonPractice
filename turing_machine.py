@@ -237,9 +237,9 @@ if __name__ == '__main__':
     time_start = time.time()
     steps = 0
     busy_beaver = 0
-    for i, result in enumerate(tm.iterate_machine()):
-        steps = i
-        if (count_1s := sum(result.tape)) > busy_beaver:
+    for tm_step, tm_result in enumerate(tm.iterate_machine()):
+        steps = tm_step
+        if (count_1s := sum(tm_result.tape)) > busy_beaver:
             busy_beaver = count_1s
 
     time_end = time.time()

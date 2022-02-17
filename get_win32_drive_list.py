@@ -63,7 +63,7 @@ class DriveInfo(NamedTuple):
     filesystem_name: str  # 파일 시스템 이름(예: 'NTFS')
 
 
-regex_drive_letter = re.compile(r'^([A-Z])(?::(?:\\)?)?$', re.I)
+regex_drive_letter = re.compile(r'^([A-Z])(?::\\?)?$', re.I)
 
 
 def normalize_drive_letter(letter: str, trailing_backslash=True) -> str:

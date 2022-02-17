@@ -24,10 +24,10 @@ def match_bracket(s: str, loc: int) -> int:
     loc=10(e와 f 사이) 위치의 열리는 괄호 '['에 대응하는 닫히는 괄호는 위치 32(p와 q 사이)에 있으며
     loc=26(m과 n 사이) 위치의 닫히는 괄호 ']'에 대응하는 열리는 괄호는 위치 12(f와 g 사이)에 있다.
 
-    >>> s = '[a[b]c[d]e[f[g[h]i[j[k]l]m]n[o]p]q[r]s]'
-    >>> match_bracket(s, 10)
+    >>> test_string = '[a[b]c[d]e[f[g[h]i[j[k]l]m]n[o]p]q[r]s]'
+    >>> match_bracket(test_string, 10)
     32
-    >>> match_bracket(s, 26)
+    >>> match_bracket(test_string, 26)
     12
     """
     bracket = s[loc]  # 해당 위치에 있는 괄호를 찾는다.

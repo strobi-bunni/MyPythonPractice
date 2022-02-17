@@ -164,7 +164,7 @@ def grouper(iterable: Iterable[T], n: int, fillvalue: T_Other = None) -> Iterabl
     return itertools.zip_longest(*args, fillvalue=fillvalue)
 
 
-def iter_except(func: Callable[[], T], exception: Exception, first=None) -> Iterator[T]:
+def iter_except(func: Callable[[], T], exception: type(Exception), first=None) -> Iterator[T]:
     """ Call a function repeatedly until an exception is raised.
 
     Converts a call-until-exception interface to an iterator interface.

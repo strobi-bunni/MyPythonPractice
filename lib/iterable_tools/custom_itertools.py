@@ -550,8 +550,8 @@ def strip(iterable: Iterable[T], pred: Callable[[T], Any] = bool) -> Iterator[T]
     [1, 2, 0, 0, 3, 4]
     >>> list(lstrip([None, None, 1, 2, None, 0, 3, 4, None, None], lambda x: isinstance(x, int)))
     [1, 2, None, 0, 3, 4]
-        """
-    return lstrip(rstrip(iterable, pred), pred)
+    """
+    return lstrip(rstrip(iterable, pred), pred)  # noqa # lstrip의 반환타입이 Iterable[T]이므로 억제시켜도 된다
 
 
 def group_by_interval(iterable: Iterable[T], interval_size, offset: T = 0,
