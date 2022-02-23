@@ -101,7 +101,7 @@ def _bgcolor_code(value: int = None, *values: int) -> str:
         raise ValueError('Input value must be one(16color or 256color) or three(24-bit color) integers.')
 
 
-def set_fgcolor(text: str = '', *, color: Union[int, tuple[int, int, int]] = None, reset=False,
+def set_fgcolor(text: str = '', color: Union[int, tuple[int, int, int]] = None, *, reset=False,
                 reset_color=False) -> str:
     """글자의 색을 설정한다. 경우에 따라서 동시에 출력할 수 있다.
 
@@ -140,7 +140,7 @@ def set_fgcolor(text: str = '', *, color: Union[int, tuple[int, int, int]] = Non
 
     밝은 파란색 'Hello World' 출력
 
-    >>> print(set_fgcolor('Hello World',color=12,reset=True))
+    >>> print(set_fgcolor('Hello World', 12, reset=True))
     """
     if color is None or isinstance(color, int):
         color_code = _fgcolor_code(color)
@@ -152,7 +152,7 @@ def set_fgcolor(text: str = '', *, color: Union[int, tuple[int, int, int]] = Non
     return color_code + text + reset_code
 
 
-def set_bgcolor(text: str = '', *, color: Union[int, tuple[int, int, int]] = None, reset=False,
+def set_bgcolor(text: str = '', color: Union[int, tuple[int, int, int]] = None, *, reset=False,
                 reset_color=False) -> str:
     """글자 배경의 색을 설정한다. 경우에 따라서 동시에 출력할 수 있다.
 
@@ -191,7 +191,7 @@ def set_bgcolor(text: str = '', *, color: Union[int, tuple[int, int, int]] = Non
 
     밝은 파랑 배경의 'Hello World' 출력
 
-    >>> print(set_bgcolor('Hello World',color=12, reset=True))
+    >>> print(set_bgcolor('Hello World', reset=True))
     """
     if color is None or isinstance(color, int):
         color_code = _bgcolor_code(color)

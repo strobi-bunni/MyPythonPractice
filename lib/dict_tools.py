@@ -1,10 +1,11 @@
 from collections.abc import Callable, Mapping
 from itertools import groupby
-from typing import TypeVar, overload
+from typing import Optional, TypeVar, overload
 
 KT = TypeVar('KT')
 VT = TypeVar('VT')
 T = TypeVar('T')
+VT2 = TypeVar('VT2')
 
 
 def _identity(x: T) -> T:
@@ -208,4 +209,123 @@ def dict_gets(d: Mapping[KT, VT], *keys: KT, default: VT = None) -> VT:
     return value
 
 
-__all__ = ['dict_gets', 'dict_merge', 'group_dict', 'dict_rename_key', 'dict_rename_key_with_mapping']
+def left_join(d1: Mapping[KT, VT], d2: Mapping[KT, VT2]) -> dict[KT, tuple[VT, Optional[VT2]]]:
+    r"""{d1의 키: (d1의 값, d1의 키에 매칭되는 d2의 값)} 딕셔너리를 제작한다.
+
+    만약에 d1의 키에 매칭되는 d2의 값이 없다면 해당 값은 None으로 대체된다.
+
+    이는 SQL의 LEFT JOIN 키워드와 유사하다.
+
+    Parameters
+    ----------
+    d1 : Dict
+        키의 원본이 되는 딕셔너리
+    d2 : Dict
+        병합할 대상 딕셔너리
+
+    Returns
+    -------
+    new_d : Dict
+        병합된 딕셔너리
+
+    Examples
+    --------
+    >>> a = {'a': 1, 'b': 2, 'c': 3, 'd': 4}
+    >>> b = {'c': 10, 'd': 20, 'e': 30, 'f': 40}
+    >>> left_join(a, b))
+    {'a': (1, None), 'b': (2, None), 'c': (3, 10), 'd': (4, 20)}
+    """
+    return {k: (v, d2.get(k)) for (k, v) in d1.items()}
+
+
+def right_join(d1: Mapping[KT, VT], d2: Mapping[KT, VT2]) -> dict[KT, tuple[Optional[VT], VT2]]:
+    r"""{d2의 키: (d1의 값, d2의 키에 매칭되는 d1의 값)} 딕셔너리를 제작한다.
+
+    만약에 d2의 키에 매칭되는 d1의 값이 없다면 해당 값은 None으로 대체된다.
+
+    이는 SQL의 RIGHT JOIN 키워드와 유사하다.
+
+    Parameters
+    ----------
+    d1 : Dict
+        병합할 대상 딕셔너리
+    d2 : Dict
+        키의 원본이 되는 딕셔너리
+
+    Returns
+    -------
+    new_d : Dict
+        병합된 딕셔너리
+
+    Examples
+    --------
+    >>> a = {'a': 1, 'b': 2, 'c': 3, 'd': 4}
+    >>> b = {'c': 10, 'd': 20, 'e': 30, 'f': 40}
+    >>> right_join(a, b))
+    {'c': (3, 10), 'd': (4, 20), 'e': (None, 30), 'f': (None, 40)}
+    """
+    return {k: (d1.get(k), v2) for (k, v2) in d2.items()}
+
+
+def full_outer_join(d1: Mapping[KT, VT], d2: Mapping[KT, VT2]) -> dict[KT, tuple[Optional[VT], Optional[VT2]]]:
+    """{d1 및 d2의 키: (매칭되는 d1의 값, 매칭되는 d2의 값)} 딕셔너리를 제작한다.
+
+    만약에 d1의 키에 매칭되는 d2의 값이 없거나, d2의 키에 매칭되는 d1의 값이 해당 값이 없다면 해당 값은 None으로 대체된다.
+
+    이는 SQL의 FULL OUTER JOIN 키워드와 유사하다.
+
+    Parameters
+    ----------
+    d1 : Dict
+        키의 원본이 되는 딕셔너리
+    d2 : Dict
+        병합할 대상 딕셔너리
+
+    Returns
+    -------
+    new_d : Dict
+        병합된 딕셔너리
+
+    Examples
+    --------
+    >>> a = {'a': 1, 'b': 2, 'c': 3, 'd': 4}
+    >>> b = {'c': 10, 'd': 20, 'e': 30, 'f': 40}
+    >>> full_outer_join(a, b)
+    {'a': (1, None), 'b': (2, None), 'c': (3, 10), 'd': (4, 20), 'e': (None, 30), 'f': (None, 40)}
+    """
+    d = left_join(d1, d2)
+    for k, v in d2.items():
+        if k not in d:
+            d[k] = (None, v)
+    return d
+
+
+def inner_join(d1: Mapping[KT, VT], d2: Mapping[KT, VT2]) -> dict[KT, tuple[VT, VT2]]:
+    """{d1와 d2에 공통으로 있는 키: (매칭되는 d1의 값, 매칭되는 d2의 값)} 딕셔너리를 제작한다.
+
+    이는 SQL의 INNER JOIN 키워드와 유사하다.
+
+    Parameters
+    ----------
+    d1 : Dict
+        첫 번째 딕셔너리
+    d2 : Dict
+        두 번째 딕셔너리
+
+    Returns
+    -------
+    new_d : Dict
+        병합된 딕셔너리
+
+    Examples
+    --------
+    >>> a = {'a': 1, 'b': 2, 'c': 3, 'd': 4}
+    >>> b = {'c': 10, 'd': 20, 'e': 30, 'f': 40}
+    >>> inner_join(a, b)
+    {'c': (3, 10), 'd': (4, 20)}
+    """
+    return {k: (v, d2[k]) for (k, v) in d1.items() if k in d2}
+
+
+__all__ = ['dict_gets', 'dict_merge', 'dict_rename_key', 'dict_rename_key_with_mapping', 'full_outer_join',
+           'group_dict', 'inner_join', 'left_join', 'right_join']
