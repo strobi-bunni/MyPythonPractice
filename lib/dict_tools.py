@@ -34,8 +34,8 @@ def group_dict(d: Mapping[KT, VT], key: Callable[[VT], T] = None) -> dict[T, dic
     Examples
     --------
     >>> d1 = {1: 'a', 2: 'b', 3: 'a', 4: 'c', 5: 'b'}
-    >>> for k, v in group_dict(d1).items():
-    ...     print(f'{{{k}: {v}}}')
+    >>> for d_key, d_value, v in group_dict(d1).items():
+    ...     print(f'{{{d_key}: {d_value}}}')
     {'a': {1: 'a', 3: 'a'}}
     {'b': {2: 'b', 5: 'b'}}
     {'c': {4: 'c'}}
@@ -43,8 +43,8 @@ def group_dict(d: Mapping[KT, VT], key: Callable[[VT], T] = None) -> dict[T, dic
     ...         'horse', 'sheep', 'monkey', 'rooster', 'dog', 'pig']
     >>> d2 = dict(enumerate(data))
     >>> # 문자열의 길이대로 키를 묶는다.
-    >>> for k, v in group_dict(d2, key=len).items():
-    ...     print(f'{{{k}: {v}}}')
+    >>> for d_key, d_value in group_dict(d2, key=len).items():
+    ...     print(f'{{{d_key}: {d_value}}}')
     {2: {1: 'ox'}}
     {3: {0: 'rat', 10: 'dog', 11: 'pig'}}
     {5: {2: 'tiger', 5: 'snake', 6: 'horse', 7: 'sheep'}}
@@ -79,9 +79,9 @@ def dict_merge(d1: Mapping[KT, VT], d2: Mapping[KT, VT], merge_method: Callable[
 
     Examples
     --------
-    >>> d1 = {'a': [1, 2], 'b': [3, 4, 5]}
-    >>> d2 = {'b': [3, 4, 5, 6], 'c': [6, 7, 8]}
-    >>> dict_merge(d1, d2, (lambda x, y: x + y))
+    >>> dict1 = {'a': [1, 2], 'b': [3, 4, 5]}
+    >>> dict2 = {'b': [3, 4, 5, 6], 'c': [6, 7, 8]}
+    >>> dict_merge(dict1, dict2, (lambda x, y: x + y))
     {'a': [1, 2], 'b': [3, 4, 5, 3, 4, 5, 6], 'c': [6, 7, 8]}
     """
     if merge_method is None:
@@ -327,5 +327,58 @@ def inner_join(d1: Mapping[KT, VT], d2: Mapping[KT, VT2]) -> dict[KT, tuple[VT, 
     return {k: (v, d2[k]) for (k, v) in d1.items() if k in d2}
 
 
-__all__ = ['dict_gets', 'dict_merge', 'dict_rename_key', 'dict_rename_key_with_mapping', 'full_outer_join',
-           'group_dict', 'inner_join', 'left_join', 'right_join']
+def find_with_value(d: Mapping[KT, VT], value: VT, default=None) -> KT:
+    """딕셔너리에서 키에 대응하는 값이 value인 첫 키를 찾는다.
+
+    Parameters
+    ----------
+    d : Dict
+        대상 딕셔너리
+    value : Any
+        찾을 값
+    default : Any : Optional
+        만약에 값을 찾지 못했을 경우 대신 반환할 값
+
+    Returns
+    -------
+    key : Any
+        찾은 키
+
+    Examples
+    --------
+    >>> a = {'a': 1, 'b': 2, 'c': 3, 'd': 4}
+    >>> find_with_value(a, 4)
+    'd'
+    """
+    for (k, v) in d.items():
+        if v == value:
+            return k
+    return default
+
+
+def findall_with_value(d: Mapping[KT, VT], value: VT) -> list[KT]:
+    """딕셔너리에서 키에 대응하는 값이 value인 키들을 찾는다.
+
+    Parameters
+    ----------
+    d : Dict
+        대상 딕셔너리
+    value : Any
+        찾을 값
+
+    Returns
+    -------
+    key : Any
+        찾은 키들
+
+    Examples
+    --------
+    >>> a = {'a': 1, 'b': 2, 'c': 3, 'd': 4, 'e': 3}
+    >>> find_with_value(a, 3)
+    ['c', 'e']
+    """
+    return [k for (k, v) in d.items() if v == value]
+
+
+__all__ = ['dict_gets', 'dict_merge', 'dict_rename_key', 'dict_rename_key_with_mapping', 'find_with_value',
+           'findall_with_value', 'full_outer_join', 'group_dict', 'inner_join', 'left_join', 'right_join']

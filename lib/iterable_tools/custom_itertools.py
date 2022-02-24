@@ -726,9 +726,9 @@ def iterable_with_callback(iterable: Iterable[T], callback: Callable[[int, T], N
     --------
     다음 코드는 매 3의 배수 항목마다 정해진 메세지로 출력을 한다.
 
-    >>> def notify_every_three(i, item):
+    >>> def notify_every_three(index, value):
     ...     if i % 3 == 0:
-    ...         print(f'Item #{i} : {item}')
+    ...         print(f'Item #{index} : {value}')
     >>> for num in iterable_with_callback(range(10), notify_every_three):
     ...     print(num)
     Item #0 : 0
