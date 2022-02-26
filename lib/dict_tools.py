@@ -1,6 +1,7 @@
+from collections import defaultdict
 from collections.abc import Callable, Mapping
 from itertools import groupby
-from typing import Optional, TypeVar, overload
+from typing import Literal, Optional, TypeVar, overload
 
 KT = TypeVar('KT')
 VT = TypeVar('VT')
@@ -380,5 +381,80 @@ def findall_with_value(d: Mapping[KT, VT], value: VT) -> list[KT]:
     return [k for (k, v) in d.items() if v == value]
 
 
-__all__ = ['dict_gets', 'dict_merge', 'dict_rename_key', 'dict_rename_key_with_mapping', 'find_with_value',
-           'findall_with_value', 'full_outer_join', 'group_dict', 'inner_join', 'left_join', 'right_join']
+def swap_key_and_value(d: Mapping[KT, VT],
+                       duplicate_handler: Literal['strict', 'first', 'last'] = 'first') -> dict[VT, KT]:
+    """딕셔너리의 키와 값을 서로 뒤바꾼다.
+
+    Parameters
+    ----------
+    d : dict
+        대상 딕셔너리
+    duplicate_handler : {'strict', 'first', 'last'}
+        중복된 값이 있을 때 처리법. 기본값은 first이다.
+
+        - strict는 KeyError를 반환
+        - first는 처음 등장하는 값 반환
+        - last는 마지막 등장하는 값 반환
+
+    Returns
+    -------
+    d : dict
+        키와 값을 뒤바꾼 딕셔너리
+
+    Examples
+    --------
+    >>> a = {'a': 1, 'b': 2, 'c': 3, 'd': 2, 'e': 4, 'f': 3}
+    >>> swap_key_and_value(a)
+    {1: 'a', 2: 'b', 3: 'c', 4: 'e'}
+    >>> swap_key_and_value(a, 'last')
+    {1: 'a', 2: 'd', 3: 'f', 4: 'e'}
+    >>> swap_key_and_value(a, 'strict')
+    Traceback (most recent call last):
+      ...
+    KeyError: duplicated key
+    """
+    grouped: defaultdict[VT, list[KT]] = defaultdict(list)
+    for k, v in d.items():
+        grouped[v].append(k)
+
+    if duplicate_handler == 'first':
+        return {v: k[0] for (v, k) in grouped.items()}
+    elif duplicate_handler == 'last':
+        return {v: k[-1] for (v, k) in grouped.items()}
+    # duplicate_handler == 'strict'
+    elif any((len(k) >= 2) for k in grouped.values()):
+        raise KeyError('duplicated key')
+    else:
+        return {v: k[0] for (v, k) in grouped.items()}
+
+
+def chain_dict(d1: Mapping[KT, VT], d2: Mapping[VT, VT2], default=None) -> dict[KT, VT2]:
+    """딕셔너리 d1의 값을 딕셔너리 d2의 키로 매핑해서, 딕셔너리 d1과 d2를 연결한 딕셔너리를 반환한다.
+
+    Parameters
+    ----------
+    d1 : dict
+        첫 번째 딕셔너리
+    d2 : dict
+        두 번째 딕셔너리
+    default : Any
+        d1의 값을 d2에서 찾지 못했을 때, d2의 값으로 대신 반환할 값
+
+    Returns
+    -------
+    d : dict
+        연결한 딕셔너리
+
+    Examples
+    --------
+    >>> a = {'a': 1, 'b': 2, 'c': 3, 'd': 2, 'e': 4, 'f': 3}
+    >>> b = {1: 10, 2: 20, 3: 30}
+    >>> chain_dict(a, b)
+    {'a': 10, 'b': 20, 'c': 30, 'd': 20, 'e': None, 'f': 30}
+    """
+    return {k: d2.get(v, default) for (k, v) in d1.items()}
+
+
+__all__ = ['chain_dict', 'dict_gets', 'dict_merge', 'dict_rename_key', 'dict_rename_key_with_mapping',
+           'find_with_value', 'findall_with_value', 'full_outer_join', 'group_dict', 'inner_join', 'left_join',
+           'right_join', 'swap_key_and_value']
