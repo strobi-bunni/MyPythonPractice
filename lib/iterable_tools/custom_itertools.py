@@ -1,6 +1,5 @@
 import itertools
-from collections.abc import Callable, Iterable, Iterator, Sequence
-from typing import Any, Literal, TypeVar, Union
+from typing import Any, Callable, Iterable, Iterator, List, Literal, Sequence, Tuple, TypeVar, Union
 
 from .itertools_recipe import all_equal, consume, partition
 from ..func_tools import deprecated, identity, invert_bool
@@ -103,7 +102,7 @@ def common_starts(*iterables: Iterable[T]) -> Iterator[T]:
     return (x[0] for x in itertools.takewhile(all_equal, zip(*iterables)))
 
 
-def multi_sorted(iterable: Iterable[T], *criteria: tuple[Callable[[T], Any], bool]) -> list[T]:
+def multi_sorted(iterable: Iterable[T], *criteria: Tuple[Callable[[T], Any], bool]) -> List[T]:
     r"""리스트를 여러 기준에 맞춰서 정렬한다.
 
     기준 ``criterias``\은 튜플 (key, reverse)의 리스트로 표현한다.
@@ -307,7 +306,7 @@ def iterate(func: Callable[..., T], a_0: T, *args, **kwargs) -> Iterator[T]:
         a_n = func(a_n, *args, **kwargs)
 
 
-def pairs(iterable: Iterable[T]) -> Iterator[list[Union[tuple[T, T], tuple[T]]]]:
+def pairs(iterable: Iterable[T]) -> Iterator[List[Union[Tuple[T, T], Tuple[T]]]]:
     r"""yields all combination of pairing items.
 
     >>> for pair in pairs(range(6)):
@@ -519,7 +518,7 @@ def rstrip(iterable: Iterable[T], pred: Callable[[T], Any] = bool) -> Iterator[T
     >>> list(lstrip([1, 2, None, 0, 3, 4, None, None], lambda x: isinstance(x, int)))
     [1, 2, None, 0, 3, 4]
     """
-    cache: list[T] = []
+    cache: List[T] = []
     for item in iterable:
         if pred(item):
             yield from cache
@@ -555,7 +554,7 @@ def strip(iterable: Iterable[T], pred: Callable[[T], Any] = bool) -> Iterator[T]
 
 
 def group_by_interval(iterable: Iterable[T], interval_size, offset: T = 0,
-                      include_empty_index=False) -> Iterator[tuple[T, list[T]]]:
+                      include_empty_index=False) -> Iterator[Tuple[T, List[T]]]:
     r"""항목들을 구간에 맞춰서 분류한다.
 
     각 항목들이 구간 ``[interval * n + offset, interval * (n + 1) + offset)`` (``n``\는 정수) 안에 포함된다고 할 때
@@ -614,13 +613,13 @@ def group_by_interval(iterable: Iterable[T], interval_size, offset: T = 0,
     22 [25]
     """
     # 우선 값들을 순서대로 정렬한다.
-    sorted_items: list[T] = sorted(iterable)
+    sorted_items: List[T] = sorted(iterable)
     # 만약에 빈 항목들이라면 빈 이터레이터를 반환
     if not sorted_items:
         return iter([])
 
     # itertools.groupby를 사용해서 그룹으로 나눈다.
-    groups: Iterator[tuple[int, Iterator[T]]] = itertools.groupby(sorted_items,
+    groups: Iterator[Tuple[int, Iterator[T]]] = itertools.groupby(sorted_items,
                                                                   key=lambda x: (x - offset) // interval_size)
 
     # iterable의 각 항목들에 해당되는 인덱스의 최솟값과 최댓값을 구한다.
@@ -637,7 +636,7 @@ def group_by_interval(iterable: Iterable[T], interval_size, offset: T = 0,
 
 
 def sort_by_specific_order(items: Iterable[T], orders: Sequence[V], key: Callable[[T], V] = None, reverse: bool = False,
-                           if_not_found: Literal['strict', 'ignore', 'before', 'after'] = 'strict') -> list[T]:
+                           if_not_found: Literal['strict', 'ignore', 'before', 'after'] = 'strict') -> List[T]:
     r"""항목들을 정해진 순서에 맞춰서 정렬한다.
 
     항목들의 순서가 월(``['Jan', 'Feb', 'Mar', ...]``) 혹은 직급(``['사장', '부장', '과장', ...]``) 과 같이

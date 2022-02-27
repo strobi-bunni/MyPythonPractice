@@ -1,11 +1,10 @@
 import hashlib
 import re
 import unicodedata
-from collections.abc import Iterator
-from typing import AnyStr, Literal, Union, overload
+from typing import AnyStr, Iterator, List, Literal, Tuple, Union, overload
 
 
-def find_prefix(prefix: str, s: str, flags=re.M, *, include_prefix=False) -> list[str]:
+def find_prefix(prefix: str, s: str, flags=re.M, *, include_prefix=False) -> List[str]:
     """
     텍스트에서 특정 접두어로 시작하는 줄의 내용을 반환한다.
 
@@ -293,7 +292,7 @@ def get_str_width(s: str, east_asian=False) -> int:
     return width
 
 
-def apart_prefix(s: AnyStr, prefix: AnyStr) -> tuple[AnyStr, AnyStr]:
+def apart_prefix(s: AnyStr, prefix: AnyStr) -> Tuple[AnyStr, AnyStr]:
     r"""문자열의 시작 부분에서 prefix 부분만을 떼어낸다.
     만약 문자열이 prefix로 시작하지 않는다면 ``('', s)``\를 반환한다.
 
@@ -326,7 +325,7 @@ def apart_prefix(s: AnyStr, prefix: AnyStr) -> tuple[AnyStr, AnyStr]:
         return b'', s
 
 
-def apart_suffix(s: AnyStr, suffix: AnyStr) -> tuple[AnyStr, AnyStr]:
+def apart_suffix(s: AnyStr, suffix: AnyStr) -> Tuple[AnyStr, AnyStr]:
     r"""문자열의 끝 부분에서 suffix 부분만을 떼어낸다.
     만약 문자열이 suffix로 시작하지 않는다면 ``(s, '')``\를 반환한다.
 

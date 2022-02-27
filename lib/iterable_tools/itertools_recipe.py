@@ -8,9 +8,8 @@ import collections
 import itertools
 import operator
 import random
-from collections.abc import Callable, Iterable, Iterator
 from numbers import Number
-from typing import Any, Optional, TypeVar, Union
+from typing import Any, Callable, Iterable, Iterator, List, Optional, Tuple, TypeVar, Union
 
 T = TypeVar('T')
 T_Other = TypeVar('T_Other')  # 대체 T
@@ -206,14 +205,14 @@ def padnone(iterable: Iterable[T]) -> Iterator[Union[T, None]]:
     return itertools.chain(iterable, itertools.repeat(None))
 
 
-def pairwise(iterable: Iterable[T]) -> Iterator[tuple[T, T]]:
+def pairwise(iterable: Iterable[T]) -> Iterator[Tuple[T, T]]:
     """s -> (s0,s1), (s1,s2), (s2, s3), ..."""
     a, b = itertools.tee(iterable)
     next(b, None)
     return zip(a, b)
 
 
-def partition(pred: Callable[[T], Any], iterable: Iterable[T]) -> tuple[Iterator[T], Iterator[T]]:
+def partition(pred: Callable[[T], Any], iterable: Iterable[T]) -> Tuple[Iterator[T], Iterator[T]]:
     """Use a predicate to partition entries into false entries and true entries"""
     # partition(is_odd, range(10)) --> 0 2 4 6 8   and  1 3 5 7 9
     t1, t2 = itertools.tee(iterable)
@@ -231,25 +230,25 @@ def quantify(iterable: Iterable[T], pred: Callable[[T], bool] = bool) -> int:
     return sum(map(pred, iterable))
 
 
-def random_combination(iterable: Iterable[T], r: int, rand: random.Random = None) -> tuple[T, ...]:
+def random_combination(iterable: Iterable[T], r: int, rand: random.Random = None) -> Tuple[T, ...]:
     """Random selection from itertools.combinations(iterable, r)"""
     if rand is None:
         rand = random.Random()
-    pool: tuple[T, ...] = tuple(iterable)
+    pool: Tuple[T, ...] = tuple(iterable)
     n = len(pool)
-    indices: list[int] = sorted(rand.sample(range(n), r))
+    indices: List[int] = sorted(rand.sample(range(n), r))
     return tuple(pool[i] for i in indices)
 
 
-def random_combination_with_replacement(iterable: Iterable[T], r: int, rand: random.Random = None) -> tuple[T, ...]:
+def random_combination_with_replacement(iterable: Iterable[T], r: int, rand: random.Random = None) -> Tuple[T, ...]:
     """Random selection from itertools.combinations_with_replacement(iterable, r)"""
-    pool: tuple[T, ...] = tuple(iterable)
+    pool: Tuple[T, ...] = tuple(iterable)
     n = len(pool)
-    indices: list[int] = sorted(rand.randrange(n) for _ in range(r))
+    indices: List[int] = sorted(rand.randrange(n) for _ in range(r))
     return tuple(pool[i] for i in indices)
 
 
-def random_permutation(iterable: Iterable[T], r=None, rand: random.Random = None) -> tuple[T, ...]:
+def random_permutation(iterable: Iterable[T], r=None, rand: random.Random = None) -> Tuple[T, ...]:
     """Random selection from itertools.permutations(iterable, r)"""
     if rand is None:
         rand = random.Random()
@@ -258,7 +257,7 @@ def random_permutation(iterable: Iterable[T], r=None, rand: random.Random = None
     return tuple(rand.sample(pool, r))
 
 
-def random_product(*args: Iterable[T], repeat: int = 1, rand: random.Random = None) -> tuple[T, ...]:
+def random_product(*args: Iterable[T], repeat: int = 1, rand: random.Random = None) -> Tuple[T, ...]:
     """Random selection from itertools.product(*args, **kwds)"""
     if rand is None:
         rand = random.Random()
@@ -303,7 +302,7 @@ def tail(n: int, iterable: Iterable[T]) -> Iterator[T]:
     return iter(collections.deque(iterable, maxlen=n))
 
 
-def take(n: int, iterable: Iterable[T]) -> list[T]:
+def take(n: int, iterable: Iterable[T]) -> List[T]:
     """Return first n items of the iterable as a list"""
     return list(itertools.islice(iterable, n))
 

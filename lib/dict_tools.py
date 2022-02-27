@@ -1,7 +1,6 @@
 from collections import defaultdict
-from collections.abc import Callable, Mapping
 from itertools import groupby
-from typing import Literal, Optional, TypeVar, overload
+from typing import Callable, DefaultDict, Dict, List, Literal, Mapping, Optional, Tuple, TypeVar, overload
 
 KT = TypeVar('KT')
 VT = TypeVar('VT')
@@ -15,7 +14,7 @@ def _identity(x: T) -> T:
     return x
 
 
-def group_dict(d: Mapping[KT, VT], key: Callable[[VT], T] = None) -> dict[T, dict[KT, VT]]:
+def group_dict(d: Mapping[KT, VT], key: Callable[[VT], T] = None) -> Dict[T, Dict[KT, VT]]:
     """딕셔너리의 값을 키를 사용해서 묶는다
 
     Parameters
@@ -58,7 +57,7 @@ def group_dict(d: Mapping[KT, VT], key: Callable[[VT], T] = None) -> dict[T, dic
     return {k: dict(g) for (k, g) in groupby(items, key=lambda x: key(x[1]))}
 
 
-def dict_merge(d1: Mapping[KT, VT], d2: Mapping[KT, VT], merge_method: Callable[[VT, VT], VT] = None) -> dict[KT, VT]:
+def dict_merge(d1: Mapping[KT, VT], d2: Mapping[KT, VT], merge_method: Callable[[VT, VT], VT] = None) -> Dict[KT, VT]:
     r"""딕셔너리를 합친다. merge_method에는 같은 키의 값을 합칠 함수를 정의한다.
     만약 merge_method가 정의되어 있지 않다면 d1의 값을 d2로 덮어씌우도록 동작한다.
     이는 Python 3.9에서 추가된 ``d1 | d2`` 문법과 같다.
@@ -88,7 +87,7 @@ def dict_merge(d1: Mapping[KT, VT], d2: Mapping[KT, VT], merge_method: Callable[
     if merge_method is None:
         merge_method = (lambda x, y: y)
 
-    d1_copy: dict[KT, VT] = dict(d1)
+    d1_copy: Dict[KT, VT] = dict(d1)
     for d2_key, d2_value in d2.items():
         if d2_key in d1_copy:
             d1_copy[d2_key] = merge_method(d1_copy[d2_key], d2_value)
@@ -98,14 +97,14 @@ def dict_merge(d1: Mapping[KT, VT], d2: Mapping[KT, VT], merge_method: Callable[
 
 
 @overload
-def dict_rename_key(target_dict: Mapping[KT, VT], oldkey: KT, newkey: KT) -> dict[KT, VT]: ...
+def dict_rename_key(target_dict: Mapping[KT, VT], oldkey: KT, newkey: KT) -> Dict[KT, VT]: ...
 
 
 @overload
-def dict_rename_key(d: Mapping[KT, VT], **kwargs) -> dict[KT, VT]: ...
+def dict_rename_key(d: Mapping[KT, VT], **kwargs) -> Dict[KT, VT]: ...
 
 
-def dict_rename_key(target_dict: Mapping[KT, VT], oldkey: KT = None, newkey: KT = None, **kwargs) -> dict[KT, VT]:
+def dict_rename_key(target_dict: Mapping[KT, VT], oldkey: KT = None, newkey: KT = None, **kwargs) -> Dict[KT, VT]:
     r"""딕셔너리의 oldkey에 해당되는 키를 newkey로 바꾼다.
 
     혹은 kwargs에 oldkey1=newkey1 식으로 지정할 수도 있다.
@@ -137,14 +136,14 @@ def dict_rename_key(target_dict: Mapping[KT, VT], oldkey: KT = None, newkey: KT 
     if (oldkey is None) ^ (newkey is None):
         raise ValueError('Both oldkey and newkey should be null, or not null.')
     elif oldkey is not None:
-        rename_mapping: dict[KT, KT] = {oldkey: newkey}
+        rename_mapping: Dict[KT, KT] = {oldkey: newkey}
     else:
-        rename_mapping: dict[KT, KT] = kwargs
+        rename_mapping: Dict[KT, KT] = kwargs
 
     return dict_rename_key_with_mapping(target_dict, rename_mapping)
 
 
-def dict_rename_key_with_mapping(target_dict: Mapping[KT, VT], rename_mapping: Mapping[KT, KT]) -> dict[KT, VT]:
+def dict_rename_key_with_mapping(target_dict: Mapping[KT, VT], rename_mapping: Mapping[KT, KT]) -> Dict[KT, VT]:
     r"""딕셔너리의 키를 주어진 {oldkey: newkey} 매핑에 따라 바꾼다.
 
     Parameters
@@ -210,7 +209,7 @@ def dict_gets(d: Mapping[KT, VT], *keys: KT, default: VT = None) -> VT:
     return value
 
 
-def left_join(d1: Mapping[KT, VT], d2: Mapping[KT, VT2]) -> dict[KT, tuple[VT, Optional[VT2]]]:
+def left_join(d1: Mapping[KT, VT], d2: Mapping[KT, VT2]) -> Dict[KT, Tuple[VT, Optional[VT2]]]:
     r"""{d1의 키: (d1의 값, d1의 키에 매칭되는 d2의 값)} 딕셔너리를 제작한다.
 
     만약에 d1의 키에 매칭되는 d2의 값이 없다면 해당 값은 None으로 대체된다.
@@ -239,7 +238,7 @@ def left_join(d1: Mapping[KT, VT], d2: Mapping[KT, VT2]) -> dict[KT, tuple[VT, O
     return {k: (v, d2.get(k)) for (k, v) in d1.items()}
 
 
-def right_join(d1: Mapping[KT, VT], d2: Mapping[KT, VT2]) -> dict[KT, tuple[Optional[VT], VT2]]:
+def right_join(d1: Mapping[KT, VT], d2: Mapping[KT, VT2]) -> Dict[KT, Tuple[Optional[VT], VT2]]:
     r"""{d2의 키: (d1의 값, d2의 키에 매칭되는 d1의 값)} 딕셔너리를 제작한다.
 
     만약에 d2의 키에 매칭되는 d1의 값이 없다면 해당 값은 None으로 대체된다.
@@ -268,7 +267,7 @@ def right_join(d1: Mapping[KT, VT], d2: Mapping[KT, VT2]) -> dict[KT, tuple[Opti
     return {k: (d1.get(k), v2) for (k, v2) in d2.items()}
 
 
-def full_outer_join(d1: Mapping[KT, VT], d2: Mapping[KT, VT2]) -> dict[KT, tuple[Optional[VT], Optional[VT2]]]:
+def full_outer_join(d1: Mapping[KT, VT], d2: Mapping[KT, VT2]) -> Dict[KT, Tuple[Optional[VT], Optional[VT2]]]:
     """{d1 및 d2의 키: (매칭되는 d1의 값, 매칭되는 d2의 값)} 딕셔너리를 제작한다.
 
     만약에 d1의 키에 매칭되는 d2의 값이 없거나, d2의 키에 매칭되는 d1의 값이 해당 값이 없다면 해당 값은 None으로 대체된다.
@@ -301,7 +300,7 @@ def full_outer_join(d1: Mapping[KT, VT], d2: Mapping[KT, VT2]) -> dict[KT, tuple
     return d
 
 
-def inner_join(d1: Mapping[KT, VT], d2: Mapping[KT, VT2]) -> dict[KT, tuple[VT, VT2]]:
+def inner_join(d1: Mapping[KT, VT], d2: Mapping[KT, VT2]) -> Dict[KT, Tuple[VT, VT2]]:
     """{d1와 d2에 공통으로 있는 키: (매칭되는 d1의 값, 매칭되는 d2의 값)} 딕셔너리를 제작한다.
 
     이는 SQL의 INNER JOIN 키워드와 유사하다.
@@ -357,7 +356,7 @@ def find_with_value(d: Mapping[KT, VT], value: VT, default=None) -> KT:
     return default
 
 
-def findall_with_value(d: Mapping[KT, VT], value: VT) -> list[KT]:
+def findall_with_value(d: Mapping[KT, VT], value: VT) -> List[KT]:
     """딕셔너리에서 키에 대응하는 값이 value인 키들을 찾는다.
 
     Parameters
@@ -382,7 +381,7 @@ def findall_with_value(d: Mapping[KT, VT], value: VT) -> list[KT]:
 
 
 def swap_key_and_value(d: Mapping[KT, VT],
-                       duplicate_handler: Literal['strict', 'first', 'last'] = 'first') -> dict[VT, KT]:
+                       duplicate_handler: Literal['strict', 'first', 'last'] = 'first') -> Dict[VT, KT]:
     """딕셔너리의 키와 값을 서로 뒤바꾼다.
 
     Parameters
@@ -413,7 +412,7 @@ def swap_key_and_value(d: Mapping[KT, VT],
       ...
     KeyError: duplicated key
     """
-    grouped: defaultdict[VT, list[KT]] = defaultdict(list)
+    grouped: DefaultDict[VT, List[KT]] = defaultdict(list)
     for k, v in d.items():
         grouped[v].append(k)
 
@@ -428,7 +427,7 @@ def swap_key_and_value(d: Mapping[KT, VT],
         return {v: k[0] for (v, k) in grouped.items()}
 
 
-def chain_dict(d1: Mapping[KT, VT], d2: Mapping[VT, VT2], default=None) -> dict[KT, VT2]:
+def chain_dict(d1: Mapping[KT, VT], d2: Mapping[VT, VT2], default=None) -> Dict[KT, VT2]:
     """딕셔너리 d1의 값을 딕셔너리 d2의 키로 매핑해서, 딕셔너리 d1과 d2를 연결한 딕셔너리를 반환한다.
 
     Parameters

@@ -1,4 +1,5 @@
 import math
+from typing import List
 
 
 def get_digit(num: int, loc: int, *, base: int = 10, copysign=True) -> int:
@@ -38,7 +39,7 @@ def get_digit(num: int, loc: int, *, base: int = 10, copysign=True) -> int:
     return sign * ((abs(num) % base ** (loc + 1)) // base ** loc)
 
 
-def base_encode(num: int, base: int, use_big_endian=True, copysign=True) -> list[int]:
+def base_encode(num: int, base: int, use_big_endian=True, copysign=True) -> List[int]:
     r"""숫자 ``num``\을 ``base`` 진법을 사용해서 리스트 형태로 반환한다.
 
     Parameters

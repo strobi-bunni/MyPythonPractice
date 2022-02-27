@@ -1,10 +1,10 @@
 import re
-from typing import Optional, Sequence, Union
+from typing import Dict, List, Optional, Sequence, Union
 
 T_JSON_Primitive = Union[str, bool, None, int, float]
 T_JSON_Types = Union[T_JSON_Primitive, 'T_JSON_Container']
-T_JSON_List = list[T_JSON_Types]
-T_JSON_Object = dict[str, T_JSON_Types]
+T_JSON_List = List[T_JSON_Types]
+T_JSON_Object = Dict[str, T_JSON_Types]
 T_JSON_Container = Union[T_JSON_List, T_JSON_Object]
 
 
@@ -272,7 +272,7 @@ def delete_json_tree_item(data: T_JSON_Container, *keys: Union[str, int], strict
 
 
 def tokenize_json_path(s: str):
-    return_tokens: list[Union[NewListItemSingleton, int, str]] = []
+    return_tokens: List[Union[NewListItemSingleton, int, str]] = []
     if not s:
         return return_tokens
     parts = s.split(JSON_OBJECT_SEP)

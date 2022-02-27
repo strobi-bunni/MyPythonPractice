@@ -1,8 +1,7 @@
 import os
-from collections.abc import Callable, Iterator
 from itertools import chain, filterfalse
 from pathlib import Path
-from typing import Any, Optional, Union
+from typing import Any, Callable, Iterator, List, Optional, Tuple, Union
 
 from ..iterable_tools.custom_itertools import common_starts
 
@@ -172,11 +171,11 @@ def common_parent(*paths: T_Pathifyable, resolve: bool = False) -> Path:
       ...
     ValueError: Paths don't have the same drive
     """
-    paths: list[Path] = [Path(path) for path in paths]
+    paths: List[Path] = [Path(path) for path in paths]
     if resolve:
         paths = [p.resolve() for p in paths]
-    paths_parts: list[tuple[str, ...]] = [p.parts for p in paths]
-    common_parts: list[str] = list(common_starts(*paths_parts))
+    paths_parts: List[Tuple[str, ...]] = [p.parts for p in paths]
+    common_parts: List[str] = list(common_starts(*paths_parts))
 
     if not common_parts:
         raise ValueError("Paths don't have the same drive")

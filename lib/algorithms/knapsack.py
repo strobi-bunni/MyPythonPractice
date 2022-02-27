@@ -1,32 +1,30 @@
 # Original code from:
 # https://www.rosettacode.org/wiki/Knapsack_problem/0-1#Recursive_dynamic_programming_algorithm
 # Python3에 호환되도록 바꿨으며, 함수로 만들어서 쉽게 사용할 수 있도록 함
-from collections import namedtuple
-from collections.abc import Iterable, Iterator
-from typing import Optional, TypeVar, Union
+from typing import Dict, Iterable, Iterator, List, NamedTuple, Optional, Tuple, TypeVar, Union
 
 from ..iterable_tools.itertools_recipe import powerset
 
 T = TypeVar('T')
 
 
-class KnapsackItem(namedtuple):
+class KnapsackItem(NamedTuple):
     # 아이템 정보를 담은 튜플
     name: T
     weight: int
     value: int
 
 
-def get_total_value(items: list[KnapsackItem], max_weight: int) -> int:
+def get_total_value(items: List[KnapsackItem], max_weight: int) -> int:
     return sum(x.value for x in items) if sum(x.weight for x in items) <= max_weight else 0
 
 
-def get_total_weight(items: list[KnapsackItem]) -> int:
+def get_total_weight(items: List[KnapsackItem]) -> int:
     return sum(x.weight for x in items)
 
 
-def _solve(items: list[KnapsackItem], max_weight: int,
-           cache_dict: dict[tuple[tuple[KnapsackItem, ...], int], list[KnapsackItem]]) -> list[KnapsackItem]:
+def _solve(items: List[KnapsackItem], max_weight: int,
+           cache_dict: Dict[Tuple[Tuple[KnapsackItem, ...], int], List[KnapsackItem]]) -> List[KnapsackItem]:
     # 종료 조건
     if not items:
         return []
@@ -34,8 +32,8 @@ def _solve(items: list[KnapsackItem], max_weight: int,
     if (tuple(items), max_weight) not in cache_dict:
         head, *tail = items
         # 재귀적으로 실행한다.
-        include: list[KnapsackItem] = [head, *_solve(tail, max_weight - head.weight, cache_dict)]
-        dont_include: list[KnapsackItem] = _solve(tail, max_weight, cache_dict)
+        include: List[KnapsackItem] = [head, *_solve(tail, max_weight - head.weight, cache_dict)]
+        dont_include: List[KnapsackItem] = _solve(tail, max_weight, cache_dict)
         if get_total_value(include, max_weight) > get_total_value(dont_include, max_weight):
             answer = include
         else:
@@ -45,8 +43,8 @@ def _solve(items: list[KnapsackItem], max_weight: int,
     return cache_dict[(tuple(items), max_weight)]
 
 
-def solve_knapsack_0or1(items: Iterable[Union[tuple[T, int, Optional[int]], tuple[T, int]]],
-                        max_weight: int) -> tuple[list[KnapsackItem], int, int]:
+def solve_knapsack_0or1(items: Iterable[Union[Tuple[T, int, Optional[int]], Tuple[T, int]]],
+                        max_weight: int) -> Tuple[List[KnapsackItem], int, int]:
     """0-1 가방 문제를 푼다.
 
     Parameters
@@ -71,8 +69,8 @@ def solve_knapsack_0or1(items: Iterable[Union[tuple[T, int, Optional[int]], tupl
     total_value : int
         총 가치
     """
-    _knapsack_items: list[KnapsackItem] = []
-    _cache: dict[tuple[tuple[KnapsackItem, ...], int], list[KnapsackItem]] = {}
+    _knapsack_items: List[KnapsackItem] = []
+    _cache: Dict[Tuple[Tuple[KnapsackItem, ...], int], List[KnapsackItem]] = {}
     # 아이템 변환
     for _item in items:
         if isinstance(_item, KnapsackItem):
@@ -94,8 +92,8 @@ def solve_knapsack_0or1(items: Iterable[Union[tuple[T, int, Optional[int]], tupl
     return _solution, _total_weight, _total_value
 
 
-def solve_knapsack_0or1_brute(items: Iterable[Union[tuple[T, int, Optional[int]], tuple[T, int]]],
-                              max_weight: int) -> tuple[list[KnapsackItem], int, int]:
+def solve_knapsack_0or1_brute(items: Iterable[Union[Tuple[T, int, Optional[int]], Tuple[T, int]]],
+                              max_weight: int) -> Tuple[List[KnapsackItem], int, int]:
     """0-1 가방 Brute-Force 방식으로 푼다.
 
     Parameters
@@ -117,8 +115,8 @@ def solve_knapsack_0or1_brute(items: Iterable[Union[tuple[T, int, Optional[int]]
     total_value : int
         총 가치
     """
-    _knapsack_items: list[KnapsackItem] = []
-    _cache: dict[tuple[tuple[KnapsackItem, ...], int], list[KnapsackItem]] = {}
+    _knapsack_items: List[KnapsackItem] = []
+    _cache: Dict[Tuple[Tuple[KnapsackItem, ...], int], List[KnapsackItem]] = {}
     # 아이템 변환
     for _item in items:
         if len(_item) == 2:
@@ -138,7 +136,7 @@ def solve_knapsack_0or1_brute(items: Iterable[Union[tuple[T, int, Optional[int]]
 
 
 def get_optimal_knapsacks(items: Iterable[KnapsackItem], target_weight: int,
-                          buffer_weight: int) -> Iterator[tuple[list[KnapsackItem], int, int]]:
+                          buffer_weight: int) -> Iterator[Tuple[List[KnapsackItem], int, int]]:
     """0-1 가방 문제 알고리즘을 사용해서 여러 개의 항목들을 target_weight에 맞춰서 여러 개의 가방에 꽉꽉 채워담는
     최적의 방식을 구한다.
 
@@ -171,9 +169,9 @@ def get_optimal_knapsacks(items: Iterable[KnapsackItem], target_weight: int,
     _target_size = target_weight
     _buffer_size = buffer_weight
 
-    pack: list[KnapsackItem] = []  # noqa # 가방 문제로 선정된 항목들
-    temp_pack: list[KnapsackItem] = []  # 임시로 _target_size만큼 뽑힌 항목들
-    prev_pack: list[KnapsackItem] = []  # 이전 수행에서 Yield되지 못한 항목들
+    pack: List[KnapsackItem] = []  # noqa # 가방 문제로 선정된 항목들
+    temp_pack: List[KnapsackItem] = []  # 임시로 _target_size만큼 뽑힌 항목들
+    prev_pack: List[KnapsackItem] = []  # 이전 수행에서 Yield되지 못한 항목들
     pack_weight: int = 0  # noqa
     temp_pack_weight: int = 0
     prev_pack_weight: int = 0  # noqa
@@ -196,7 +194,7 @@ def get_optimal_knapsacks(items: Iterable[KnapsackItem], target_weight: int,
 
         # temp_pack.sort(key=lambda p: p.stat().st_size, reverse=False)
         # '0-1 가방 문제' 알고리즘을 사용해서 최적의 용량만큼 묶는다.
-        temp_pack_for_knapsack: list[KnapsackItem] = temp_pack.copy()
+        temp_pack_for_knapsack: List[KnapsackItem] = temp_pack.copy()
         pack_for_knapsack, temp_pack_weight, _ = solve_knapsack_0or1(temp_pack_for_knapsack, _target_size)
         pack = pack_for_knapsack.copy()
 

@@ -1,6 +1,6 @@
 import datetime
 import re
-from typing import Literal, Optional
+from typing import Dict, Literal, Optional
 
 iso8601_datetime_regex = re.compile(
     r'^(?P<date>(?P<year>\d{4})-(?P<month>\d{2})-(?P<day>\d{2}))'  # yyyy-mm-dd
@@ -215,7 +215,7 @@ def timedelta_isoformat(td: datetime.timedelta,
 
     label = label[upper_index:lower_index]
     timedelta_parts = timedelta_parts[upper_index:lower_index]
-    timedelta_dict: dict[str, int] = dict(zip(label, timedelta_parts))
+    timedelta_dict: Dict[str, int] = dict(zip(label, timedelta_parts))
 
     # 문자열로 변환
     days_part = f'{timedelta_dict["days"]}D' if 'days' in timedelta_dict else ''
