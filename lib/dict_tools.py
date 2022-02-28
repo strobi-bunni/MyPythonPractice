@@ -1,6 +1,7 @@
 from collections import defaultdict
 from itertools import groupby
-from typing import Callable, DefaultDict, Dict, List, Literal, Mapping, Optional, Tuple, TypeVar, overload
+from typing import Callable, DefaultDict, Dict, Iterable, Iterator, List, Literal, Mapping, Optional, Tuple, TypeVar, \
+    overload
 
 KT = TypeVar('KT')
 VT = TypeVar('VT')
@@ -454,6 +455,38 @@ def chain_dict(d1: Mapping[KT, VT], d2: Mapping[VT, VT2], default=None) -> Dict[
     return {k: d2.get(v, default) for (k, v) in d1.items()}
 
 
-__all__ = ['chain_dict', 'dict_gets', 'dict_merge', 'dict_rename_key', 'dict_rename_key_with_mapping',
-           'find_with_value', 'findall_with_value', 'full_outer_join', 'group_dict', 'inner_join', 'left_join',
-           'right_join', 'swap_key_and_value']
+def dict_items_flatten(d: Mapping[KT, Iterable[VT]]) -> Iterator[Tuple[KT, VT]]:
+    """딕셔너리의 값이 이터러블로 되어 있을 때, 값의 이터러블을 풀어서 (키, 각각의 값)을 산출한다.
+
+    Parameters
+    ----------
+    d : dict
+        딕셔너리, 값은 이터러블이다.
+
+    Yields
+    ------
+    k : Any
+        딕셔너리 키
+    v : Any
+        딕셔너리 값 이터러블의 각각의 값
+
+    Examples
+    --------
+    >>> a = {'a': [1, 2, 3], 'b': [3, 4, 5]}
+    >>> for item in dict_items_flatten(a):
+    ...     print(item)
+    ('a', 1)
+    ('a', 2)
+    ('a', 3)
+    ('b', 3)
+    ('b', 4)
+    ('b', 5)
+    """
+    for k, vs in d.items():
+        for v in vs:
+            yield k, v
+
+
+__all__ = ['chain_dict', 'dict_gets', 'dict_items_flatten', 'dict_merge', 'dict_rename_key',
+           'dict_rename_key_with_mapping', 'find_with_value', 'findall_with_value', 'full_outer_join', 'group_dict',
+           'inner_join', 'left_join', 'right_join', 'swap_key_and_value']
