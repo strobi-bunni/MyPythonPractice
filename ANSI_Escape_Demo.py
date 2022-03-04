@@ -1,3 +1,31 @@
+r"""
+다음 코드는 `ANSI 이스케이프 시퀀스`_\를 사용해서 글자에 효과를 넣는 방법에 대해서 설명한다.
+
+.. _`ANSI 이스케이프 시퀀스` : https://en.wikipedia.org/wiki/ANSI_escape_code
+
+글자에 효과를 주기 위한 ANSI 이스케이프 시퀀스는 다음과 같다. 다음 시퀀스를 입력하면 이후에 입력되는 글자에는 효과가 적용된다.
+여기서 *ESC*\는 이스케이프 문자(U+0027, \\x1f 혹은 \\033)이다.
+
+*ESC* ``[`` *Code* ``m``
+
+예를 들어 ``\x1f[1mhello``\를 출력하면 **hello**\가 굵은 글씨로 출력된다.
+
+-----
+
+*Code*\가 38 혹은 48일 경우에는 `256색`_ 혹은 24비트 색상을 지정할 수 있다.
+
+.. _`256색` : https://en.wikipedia.org/wiki/ANSI_escape_code#8-bit
+
+256색:
+
+- 글자 색 지정 : *ESC* ``[38;5;`` *ColorCode* ``;m``
+- 배경 색 지정 : *ESC* ``[48;5;`` *ColorCode* ``;m``
+
+24비트 색:
+
+- 글자 색 지정 : *ESC* ``[38;2;`` *Red* ``;`` *Green* ``;`` *Blue* ``;m``
+- 배경 색 지정 : *ESC* ``[48;2;`` *Red* ``;`` *Green* ``;`` *Blue* ``;m``
+"""
 from textwrap import dedent
 
 code_mapping = [

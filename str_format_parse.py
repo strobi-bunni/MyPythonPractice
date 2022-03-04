@@ -1,8 +1,7 @@
-"""
-This code parses the format specifier used in the str.format method.
+r"""
+This code parses the `format specifier`_ used in the str.format method.
 
-Reference
-https://docs.python.org/3/library/string.html#format-specification-mini-language
+.. _`format specifier` : https://docs.python.org/3/library/string.html#format-specification-mini-language
 """
 import re
 from textwrap import dedent

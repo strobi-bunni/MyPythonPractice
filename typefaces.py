@@ -1,5 +1,13 @@
 """
 다음 코드는 유니코드의 수학 글꼴 글자들을 출력한다.
+
+유니코드의 수학 글꼴 글자들은 2개의 영역에 저장되어 있다.
+
+- U+2100 - U+214F `Letterlike Symbols`_ : 자주 사용되는 수학 글꼴 글자들을 저장했다.
+- U+1D400 - U+1D7FF `Mathematical Alphanumeric Symbols`_ : 모든 수학 글꼴 글자들이 저장되어 있다.
+
+.. _`Letterlike Symbols` : https://www.unicode.org/charts/PDF/U2100.pdf
+.. _`Mathematical Alphanumeric Symbols` : https://www.unicode.org/charts/PDF/U1D400.pdf
 """
 # 반각 문자
 from typing import Dict, List, Tuple
