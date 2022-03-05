@@ -15,7 +15,7 @@ def _identity(x: T) -> T:
     return x
 
 
-def group_dict(d: Mapping[KT, VT], key: Callable[[VT], T] = None) -> Dict[T, Dict[KT, VT]]:
+def group_value(d: Mapping[KT, VT], key: Callable[[VT], T] = None) -> Dict[T, Dict[KT, VT]]:
     """딕셔너리의 값을 키를 사용해서 묶는다
 
     Parameters
@@ -35,7 +35,7 @@ def group_dict(d: Mapping[KT, VT], key: Callable[[VT], T] = None) -> Dict[T, Dic
     Examples
     --------
     >>> d1 = {1: 'a', 2: 'b', 3: 'a', 4: 'c', 5: 'b'}
-    >>> for d_key, d_value, v in group_dict(d1).items():
+    >>> for d_key, d_value, v in group_value(d1).items():
     ...     print(f'{{{d_key}: {d_value}}}')
     {'a': {1: 'a', 3: 'a'}}
     {'b': {2: 'b', 5: 'b'}}
@@ -44,7 +44,7 @@ def group_dict(d: Mapping[KT, VT], key: Callable[[VT], T] = None) -> Dict[T, Dic
     ...         'horse', 'sheep', 'monkey', 'rooster', 'dog', 'pig']
     >>> d2 = dict(enumerate(data))
     >>> # 문자열의 길이대로 키를 묶는다.
-    >>> for d_key, d_value in group_dict(d2, key=len).items():
+    >>> for d_key, d_value in group_value(d2, key=len).items():
     ...     print(f'{{{d_key}: {d_value}}}')
     {2: {1: 'ox'}}
     {3: {0: 'rat', 10: 'dog', 11: 'pig'}}
@@ -58,7 +58,7 @@ def group_dict(d: Mapping[KT, VT], key: Callable[[VT], T] = None) -> Dict[T, Dic
     return {k: dict(g) for (k, g) in groupby(items, key=lambda x: key(x[1]))}
 
 
-def dict_merge(d1: Mapping[KT, VT], d2: Mapping[KT, VT], merge_method: Callable[[VT, VT], VT] = None) -> Dict[KT, VT]:
+def merge_dict(d1: Mapping[KT, VT], d2: Mapping[KT, VT], merge_method: Callable[[VT, VT], VT] = None) -> Dict[KT, VT]:
     r"""딕셔너리를 합친다. merge_method에는 같은 키의 값을 합칠 함수를 정의한다.
     만약 merge_method가 정의되어 있지 않다면 d1의 값을 d2로 덮어씌우도록 동작한다.
     이는 Python 3.9에서 추가된 ``d1 | d2`` 문법과 같다.
@@ -82,7 +82,7 @@ def dict_merge(d1: Mapping[KT, VT], d2: Mapping[KT, VT], merge_method: Callable[
     --------
     >>> dict1 = {'a': [1, 2], 'b': [3, 4, 5]}
     >>> dict2 = {'b': [3, 4, 5, 6], 'c': [6, 7, 8]}
-    >>> dict_merge(dict1, dict2, (lambda x, y: x + y))
+    >>> merge_dict(dict1, dict2, (lambda x, y: x + y))
     {'a': [1, 2], 'b': [3, 4, 5, 3, 4, 5, 6], 'c': [6, 7, 8]}
     """
     if merge_method is None:
@@ -98,14 +98,14 @@ def dict_merge(d1: Mapping[KT, VT], d2: Mapping[KT, VT], merge_method: Callable[
 
 
 @overload
-def dict_rename_key(target_dict: Mapping[KT, VT], oldkey: KT, newkey: KT) -> Dict[KT, VT]: ...
+def rename_key(target_dict: Mapping[KT, VT], oldkey: KT, newkey: KT) -> Dict[KT, VT]: ...
 
 
 @overload
-def dict_rename_key(d: Mapping[KT, VT], **kwargs) -> Dict[KT, VT]: ...
+def rename_key(d: Mapping[KT, VT], **kwargs) -> Dict[KT, VT]: ...
 
 
-def dict_rename_key(target_dict: Mapping[KT, VT], oldkey: KT = None, newkey: KT = None, **kwargs) -> Dict[KT, VT]:
+def rename_key(target_dict: Mapping[KT, VT], oldkey: KT = None, newkey: KT = None, **kwargs) -> Dict[KT, VT]:
     r"""딕셔너리의 oldkey에 해당되는 키를 newkey로 바꾼다.
 
     혹은 kwargs에 oldkey1=newkey1 식으로 지정할 수도 있다.
@@ -129,9 +129,9 @@ def dict_rename_key(target_dict: Mapping[KT, VT], oldkey: KT = None, newkey: KT 
     Examples
     --------
     >>> d = {'a': 1, 'b': 2, 'c': 3}
-    >>> dict_rename_key(target_dict, 'a', 'd')
+    >>> rename_key(target_dict, 'a', 'd')
     {'d': 1, 'b': 2, 'c': 3}
-    >>> dict_rename_key(target_dict, b='d', c='e')
+    >>> rename_key(target_dict, b='d', c='e')
     {'a': 1, 'd': 2, 'e': 3}
     """
     if (oldkey is None) ^ (newkey is None):
@@ -141,10 +141,10 @@ def dict_rename_key(target_dict: Mapping[KT, VT], oldkey: KT = None, newkey: KT 
     else:
         rename_mapping: Dict[KT, KT] = kwargs
 
-    return dict_rename_key_with_mapping(target_dict, rename_mapping)
+    return rename_key_with_mapping(target_dict, rename_mapping)
 
 
-def dict_rename_key_with_mapping(target_dict: Mapping[KT, VT], rename_mapping: Mapping[KT, KT]) -> Dict[KT, VT]:
+def rename_key_with_mapping(target_dict: Mapping[KT, VT], rename_mapping: Mapping[KT, KT]) -> Dict[KT, VT]:
     r"""딕셔너리의 키를 주어진 {oldkey: newkey} 매핑에 따라 바꾼다.
 
     Parameters
@@ -162,7 +162,7 @@ def dict_rename_key_with_mapping(target_dict: Mapping[KT, VT], rename_mapping: M
     Examples
     --------
     >>> d = {'a': 1, 'b': 2, 'c': 3}
-    >>> dict_rename_key(target_dict, {'b': 'd', 'c':'e'})
+    >>> rename_key(target_dict, {'b': 'd', 'c':'e'})
     {'a': 1, 'd': 2, 'e': 3}
     """
     return {(rename_mapping[k] if k in rename_mapping else k): v for (k, v) in target_dict.items()}
@@ -455,7 +455,7 @@ def chain_dict(d1: Mapping[KT, VT], d2: Mapping[VT, VT2], default=None) -> Dict[
     return {k: d2.get(v, default) for (k, v) in d1.items()}
 
 
-def dict_items_flatten(d: Mapping[KT, Iterable[VT]]) -> Iterator[Tuple[KT, VT]]:
+def flatten_items(d: Mapping[KT, Iterable[VT]]) -> Iterator[Tuple[KT, VT]]:
     """딕셔너리의 값이 이터러블로 되어 있을 때, 값의 이터러블을 풀어서 (키, 각각의 값)을 산출한다.
 
     Parameters
@@ -473,7 +473,7 @@ def dict_items_flatten(d: Mapping[KT, Iterable[VT]]) -> Iterator[Tuple[KT, VT]]:
     Examples
     --------
     >>> a = {'a': [1, 2, 3], 'b': [3, 4, 5]}
-    >>> for item in dict_items_flatten(a):
+    >>> for item in flatten_items(a):
     ...     print(item)
     ('a', 1)
     ('a', 2)
@@ -487,6 +487,6 @@ def dict_items_flatten(d: Mapping[KT, Iterable[VT]]) -> Iterator[Tuple[KT, VT]]:
             yield k, v
 
 
-__all__ = ['chain_dict', 'dict_gets', 'dict_items_flatten', 'dict_merge', 'dict_rename_key',
-           'dict_rename_key_with_mapping', 'find_with_value', 'findall_with_value', 'full_outer_join', 'group_dict',
-           'inner_join', 'left_join', 'right_join', 'swap_key_and_value']
+__all__ = ['chain_dict', 'dict_gets', 'find_with_value', 'findall_with_value', 'flatten_items', 'full_outer_join',
+           'group_value', 'inner_join', 'left_join', 'merge_dict', 'rename_key', 'rename_key_with_mapping',
+           'right_join', 'swap_key_and_value']
