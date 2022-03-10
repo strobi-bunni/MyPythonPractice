@@ -20,7 +20,7 @@ def group_value(d: Mapping[KT, VT], key: Callable[[VT], T] = None) -> Dict[T, Di
 
     Parameters
     ----------
-    d: dict
+    d: Mapping
         대상 딕셔너리
     key: Callable object : optional
         딕셔너리의 값을 받을 수 있는 함수. 반드시 Hashable한 값을 반환해야 한다. 기본값은 항등함수이다.
@@ -219,14 +219,14 @@ def left_join(d1: Mapping[KT, VT], d2: Mapping[KT, VT2]) -> Dict[KT, Tuple[VT, O
 
     Parameters
     ----------
-    d1 : Dict
+    d1 : Mapping
         키의 원본이 되는 딕셔너리
-    d2 : Dict
+    d2 : Mapping
         병합할 대상 딕셔너리
 
     Returns
     -------
-    new_d : Dict
+    new_d : dict
         병합된 딕셔너리
 
     Examples
@@ -248,14 +248,14 @@ def right_join(d1: Mapping[KT, VT], d2: Mapping[KT, VT2]) -> Dict[KT, Tuple[Opti
 
     Parameters
     ----------
-    d1 : Dict
+    d1 : Mapping
         병합할 대상 딕셔너리
-    d2 : Dict
+    d2 : Mapping
         키의 원본이 되는 딕셔너리
 
     Returns
     -------
-    new_d : Dict
+    new_d : dict
         병합된 딕셔너리
 
     Examples
@@ -277,14 +277,14 @@ def full_outer_join(d1: Mapping[KT, VT], d2: Mapping[KT, VT2]) -> Dict[KT, Tuple
 
     Parameters
     ----------
-    d1 : Dict
+    d1 : Mapping
         키의 원본이 되는 딕셔너리
-    d2 : Dict
+    d2 : Mapping
         병합할 대상 딕셔너리
 
     Returns
     -------
-    new_d : Dict
+    new_d : dict
         병합된 딕셔너리
 
     Examples
@@ -308,14 +308,14 @@ def inner_join(d1: Mapping[KT, VT], d2: Mapping[KT, VT2]) -> Dict[KT, Tuple[VT, 
 
     Parameters
     ----------
-    d1 : Dict
+    d1 : Mapping
         첫 번째 딕셔너리
-    d2 : Dict
+    d2 : Mapping
         두 번째 딕셔너리
 
     Returns
     -------
-    new_d : Dict
+    new_d : dict
         병합된 딕셔너리
 
     Examples
@@ -333,7 +333,7 @@ def find_with_value(d: Mapping[KT, VT], value: VT, default=None) -> KT:
 
     Parameters
     ----------
-    d : Dict
+    d : Mapping
         대상 딕셔너리
     value : Any
         찾을 값
@@ -362,7 +362,7 @@ def findall_with_value(d: Mapping[KT, VT], value: VT) -> List[KT]:
 
     Parameters
     ----------
-    d : Dict
+    d : Mapping
         대상 딕셔너리
     value : Any
         찾을 값
@@ -387,7 +387,7 @@ def swap_key_and_value(d: Mapping[KT, VT],
 
     Parameters
     ----------
-    d : dict
+    d : Mapping
         대상 딕셔너리
     duplicate_handler : {'strict', 'first', 'last'}
         중복된 값이 있을 때 처리법. 기본값은 first이다.
@@ -433,9 +433,9 @@ def chain_dict(d1: Mapping[KT, VT], d2: Mapping[VT, VT2], default=None) -> Dict[
 
     Parameters
     ----------
-    d1 : dict
+    d1 : Mapping
         첫 번째 딕셔너리
-    d2 : dict
+    d2 : Mapping
         두 번째 딕셔너리
     default : Any
         d1의 값을 d2에서 찾지 못했을 때, d2의 값으로 대신 반환할 값
@@ -460,7 +460,7 @@ def flatten_items(d: Mapping[KT, Iterable[VT]]) -> Iterator[Tuple[KT, VT]]:
 
     Parameters
     ----------
-    d : dict
+    d : Mapping
         딕셔너리, 값은 이터러블이다.
 
     Yields
