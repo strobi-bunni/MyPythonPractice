@@ -6,6 +6,7 @@ JSON 파일들을 "그 자리에서" 리포맷팅하는 코드
 import argparse
 import glob
 import json
+import sys
 from itertools import chain
 from os import PathLike
 from pathlib import Path
@@ -84,10 +85,11 @@ if __name__ == '__main__':
 
         if reformat_json(json_file, **json_format_option) == JOB_DONE_SUCCESSFUL:
             if args.verbose:
-                print(f'{json_file!s} is formatted successfully')
+                print(f'{json_file!s} is formatted successfully', file=sys.stderr)
             num_of_formatted_json_files += 1
 
     if args.verbose:
         print('Successful: {s} / Failed: {f} / Total: {t}'.format(s=num_of_formatted_json_files,
                                                                   f=num_of_json_files - num_of_formatted_json_files,
-                                                                  t=num_of_json_files))
+                                                                  t=num_of_json_files),
+              file=sys.stderr)
