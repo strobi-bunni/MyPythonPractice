@@ -30,7 +30,7 @@ from textwrap import dedent
 
 code_mapping = [
     (0, 'Reset All'), (1, 'Bold'), (2, 'Faint'), (3, 'Italic'), (4, 'Underline'), (5, 'Slow Blink'), (6, 'Rapid Blink'),
-    (7, 'Invert'), (8, 'Hide'), (9, 'Crossed Out'), (21, 'Double Underline/Bold Off'), (22, 'Normal Color'),
+    (7, 'Invert'), (8, 'Hide'), (9, 'Crossed Out'), (21, 'Double Underline/Bold Off'), (22, 'Neither bold nor faint'),
     (23, 'Italic Off'), (24, 'Underline Off'), (25, 'Blink Off'), (27, 'Invert Off'), (28, 'Hide Off'),
     (29, 'Crossed Out Off'), (30, 'Foreground Black'), (31, 'Foreground Red'), (32, 'Foreground Green'),
     (33, 'Foreground Yellow'), (34, 'Foreground Blue'), (35, 'Foreground Magenta'), (36, 'Foreground Cyan'),
