@@ -24,17 +24,11 @@ from typing import Iterator, List, Literal
 T_NormalizeMode = Literal['NFC', 'NFD', 'NFKC', 'NFKD']
 
 
-def normalized_name(filename: str, mode: T_NormalizeMode = 'NFC') -> str:
-    """NFC로 정규화한 파일 이름
-    """
-    return unicodedata.normalize(mode, filename)
-
-
 def rename_to_normalized(path: PathLike, mode: T_NormalizeMode = 'NFC') -> Path:
     """정규화된 파일 이름으로 이름 바꾸기
     """
     path = Path(path)
-    return path.rename(path.with_name(normalized_name(path.name, mode=mode)))
+    return path.rename(path.with_name(unicodedata.normalize(mode, path.name)))
 
 
 def traverse_subpaths_dfs_post(path: PathLike) -> Iterator[Path]:
