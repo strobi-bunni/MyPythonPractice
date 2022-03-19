@@ -72,8 +72,8 @@ if __name__ == '__main__':
     sort_keys = args.sort_keys
     json_format_option = {'ensure_ascii': ensure_ascii, 'sort_keys': sort_keys, 'indent': indent}
     if args.compact:
-        json_format_option = {'ensure_ascii': ensure_ascii, 'sort_keys': sort_keys,
-                              'indent': None, 'separators': (',', ':')}
+        json_format_option['indent'] = None
+        json_format_option['separators'] = (',', ':')
 
     json_files: Iterator[Path] = chain.from_iterable(find_files_with_glob(p) for p in args.path)
 

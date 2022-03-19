@@ -65,7 +65,9 @@ regex_drive_letter = re.compile(r'^([A-Z])(?::\\?)?$', re.I)
 
 
 def normalize_drive_letter(letter: str, trailing_backslash=True) -> str:
-    r"""``C``, ``C:`` 와 같은 드라이브 문자 형식을 ``C:\\`` 와 같은 형식으로 바꾼다.
+    r"""``r'C'``, ``r'C:'``, ``r'C:\'`` 와 같은 드라이브 문자 형식을 통일된 형식으로 바꾼다.
+
+    trailing_backslash = True일 경우 ``r'C:\'``형식으로 바꾸고, False일 경우 ``r'C:'`` 형식으로 바꾼다.
     """
     if matches := regex_drive_letter.match(letter):
         suffix = ':\\' if trailing_backslash else ':'
