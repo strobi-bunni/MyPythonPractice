@@ -5,7 +5,7 @@ from typing import Dict, Iterable, Iterator, List, NamedTuple, Optional, Tuple, 
 
 from ..iterable_tools.itertools_recipe import powerset
 
-T = TypeVar('T')
+T = TypeVar("T")
 
 
 class KnapsackItem(NamedTuple):
@@ -23,8 +23,11 @@ def get_total_weight(items: List[KnapsackItem]) -> int:
     return sum(x.weight for x in items)
 
 
-def _solve(items: List[KnapsackItem], max_weight: int,
-           cache_dict: Dict[Tuple[Tuple[KnapsackItem, ...], int], List[KnapsackItem]]) -> List[KnapsackItem]:
+def _solve(
+    items: List[KnapsackItem],
+    max_weight: int,
+    cache_dict: Dict[Tuple[Tuple[KnapsackItem, ...], int], List[KnapsackItem]],
+) -> List[KnapsackItem]:
     # 종료 조건
     if not items:
         return []
@@ -43,8 +46,9 @@ def _solve(items: List[KnapsackItem], max_weight: int,
     return cache_dict[(tuple(items), max_weight)]
 
 
-def solve_knapsack_0or1(items: Iterable[Union[Tuple[T, int, Optional[int]], Tuple[T, int]]],
-                        max_weight: int) -> Tuple[List[KnapsackItem], int, int]:
+def solve_knapsack_0or1(
+    items: Iterable[Union[Tuple[T, int, Optional[int]], Tuple[T, int]]], max_weight: int
+) -> Tuple[List[KnapsackItem], int, int]:
     """0-1 가방 문제를 푼다.
 
     Parameters
@@ -92,8 +96,9 @@ def solve_knapsack_0or1(items: Iterable[Union[Tuple[T, int, Optional[int]], Tupl
     return _solution, _total_weight, _total_value
 
 
-def solve_knapsack_0or1_brute(items: Iterable[Union[Tuple[T, int, Optional[int]], Tuple[T, int]]],
-                              max_weight: int) -> Tuple[List[KnapsackItem], int, int]:
+def solve_knapsack_0or1_brute(
+    items: Iterable[Union[Tuple[T, int, Optional[int]], Tuple[T, int]]], max_weight: int
+) -> Tuple[List[KnapsackItem], int, int]:
     """0-1 가방 Brute-Force 방식으로 푼다.
 
     Parameters
@@ -127,16 +132,20 @@ def solve_knapsack_0or1_brute(items: Iterable[Union[Tuple[T, int, Optional[int]]
             name, weight, value = _item[0], _item[1], _item[1] if _item[2] is None else _item[2]
         _knapsack_items.append(KnapsackItem(name, weight, value))
 
-    solution = list(max((comb for comb in powerset(_knapsack_items)
-                         if sum(item.weight for item in comb) <= max_weight),
-                        key=lambda cb: sum(item.value for item in cb)))
+    solution = list(
+        max(
+            (comb for comb in powerset(_knapsack_items) if sum(item.weight for item in comb) <= max_weight),
+            key=lambda cb: sum(item.value for item in cb),
+        )
+    )
     total_weight = sum(item.weight for item in solution)
     total_value = sum(item.weight for item in solution)
     return solution, total_weight, total_value
 
 
-def get_optimal_knapsacks(items: Iterable[KnapsackItem], target_weight: int,
-                          buffer_weight: int) -> Iterator[Tuple[List[KnapsackItem], int, int]]:
+def get_optimal_knapsacks(
+    items: Iterable[KnapsackItem], target_weight: int, buffer_weight: int
+) -> Iterator[Tuple[List[KnapsackItem], int, int]]:
     """0-1 가방 문제 알고리즘을 사용해서 여러 개의 항목들을 target_weight에 맞춰서 여러 개의 가방에 꽉꽉 채워담는
     최적의 방식을 구한다.
 

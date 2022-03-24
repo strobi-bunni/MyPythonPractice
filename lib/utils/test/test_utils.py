@@ -27,5 +27,5 @@ class TestUtils(unittest.TestCase):
         self.assertEqual(coalesce(None, 1, 2, 3, pred=is_not_null), 1)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

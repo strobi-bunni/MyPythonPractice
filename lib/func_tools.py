@@ -4,7 +4,7 @@ from collections.abc import Callable
 from functools import reduce, wraps
 from typing import Any, TypeVar
 
-T = TypeVar('T')
+T = TypeVar("T")
 
 
 def identity(x: T) -> T:
@@ -61,7 +61,7 @@ def multi_func(func: Callable[[T], T], n: int) -> Callable[[T], T]:
     [1, 2, 4, 8, 16]
     """
     if n < 0:
-        raise ValueError('n must be non-negative')
+        raise ValueError("n must be non-negative")
     if n == 0:
         return lambda x: x
     else:
@@ -92,10 +92,12 @@ def deprecated(since=None, remove=None, instead=None):
     def decorator(func):
         @wraps(func)
         def decorated_func(*args, **kwargs):
-            warning_message = f"'{func.__name__}' is deprecated" + \
-                              (f' since {since}' if since else '') + \
-                              (f', and will be removed at {remove}' if remove else '') + \
-                              (f'. Use {instead} instead.' if instead else '.')
+            warning_message = (
+                f"'{func.__name__}' is deprecated"
+                + (f" since {since}" if since else "")
+                + (f", and will be removed at {remove}" if remove else "")
+                + (f". Use {instead} instead." if instead else ".")
+            )
             warnings.warn(warning_message, DeprecationWarning)
             return func(*args, **kwargs)
 
@@ -233,4 +235,4 @@ def null_safety(argname: str, fallback_value: Any = None):
     return decorator
 
 
-__all__ = ['compose', 'deprecated', 'identity', 'invert_bool', 'is_equal', 'multi_func', 'null_safety']
+__all__ = ["compose", "deprecated", "identity", "invert_bool", "is_equal", "multi_func", "null_safety"]

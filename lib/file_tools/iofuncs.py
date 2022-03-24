@@ -6,11 +6,13 @@ T_Pathifyable = Union[str, PathLike]
 
 
 @overload
-def rename(path: T_Pathifyable, new_file_nameonly: str) -> Path: ...
+def rename(path: T_Pathifyable, new_file_nameonly: str) -> Path:
+    ...
 
 
 @overload
-def rename(path: T_Pathifyable, new_file_nameonly: str, new_file_ext: str) -> Path: ...
+def rename(path: T_Pathifyable, new_file_nameonly: str, new_file_ext: str) -> Path:
+    ...
 
 
 def rename(path: T_Pathifyable, new_file_nameonly: str, new_file_ext: Optional[str] = None) -> Path:
@@ -63,13 +65,13 @@ def dummy_copytree(path: T_Pathifyable, dest_path: T_Pathifyable) -> None:
 
     # path 오류 처리
     if not path.exists():
-        raise FileNotFoundError(f'{path} cannot found.')
+        raise FileNotFoundError(f"{path} cannot found.")
     if not path.is_dir():
-        raise NotADirectoryError(f'{path} is not a directory.')
+        raise NotADirectoryError(f"{path} is not a directory.")
 
     dest_path.mkdir(parents=True, exist_ok=True)
 
-    for subpath in path.glob('**/*'):
+    for subpath in path.glob("**/*"):
         relative_subpath = subpath.relative_to(path)
         if subpath.is_dir():
             (dest_path / relative_subpath).mkdir(parents=True, exist_ok=True)
@@ -77,4 +79,4 @@ def dummy_copytree(path: T_Pathifyable, dest_path: T_Pathifyable) -> None:
             (dest_path / relative_subpath).touch(exist_ok=True)
 
 
-__all__ = ['dummy_copytree', 'rename']
+__all__ = ["dummy_copytree", "rename"]

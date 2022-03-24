@@ -4,19 +4,21 @@ from typing import Union, overload
 
 T_Pathifyable = Union[str, PathLike]
 HASH_BLOCK_SIZE = 65536
-FILESIZE_UNITS_DECIMAL = ["B", "KB", "MB", "GB", "TB", "PB", "EB", 'ZB', 'YB']
-FILESIZE_UNITS_BINARY = ["B", "KiB", "MiB", "GiB", "TiB", "PiB", "EiB", 'ZiB', 'YiB']
+FILESIZE_UNITS_DECIMAL = ["B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"]
+FILESIZE_UNITS_BINARY = ["B", "KiB", "MiB", "GiB", "TiB", "PiB", "EiB", "ZiB", "YiB"]
 
 
 @overload
-def get_file_hash(path: T_Pathifyable) -> bytes: ...
+def get_file_hash(path: T_Pathifyable) -> bytes:
+    ...
 
 
 @overload
-def get_file_hash(path: T_Pathifyable, algorithm: str, **kwargs) -> bytes: ...
+def get_file_hash(path: T_Pathifyable, algorithm: str, **kwargs) -> bytes:
+    ...
 
 
-def get_file_hash(path: T_Pathifyable, algorithm: str = 'sha256', **kwargs) -> bytes:
+def get_file_hash(path: T_Pathifyable, algorithm: str = "sha256", **kwargs) -> bytes:
     """파일의 해시를 계산한다.
 
     Parameters
@@ -34,7 +36,7 @@ def get_file_hash(path: T_Pathifyable, algorithm: str = 'sha256', **kwargs) -> b
         계산된 파일의 해시
     """
     hash_obj = hashlib.new(algorithm, **kwargs)
-    with open(path, 'rb') as f:
+    with open(path, "rb") as f:
         while True:
             buffer = f.read(HASH_BLOCK_SIZE)
             if not buffer:
@@ -82,6 +84,6 @@ def repr_file_size(size: int, *, binary: bool = True, decimal: int = 1) -> str:
         exp += 1
 
     if exp == 0:
-        return '{size} {unit_symbol}'.format(size=size, unit_symbol=units[exp])
+        return "{size} {unit_symbol}".format(size=size, unit_symbol=units[exp])
     else:
-        return '{size:.{decimal}f} {unit_symbol}'.format(decimal=decimal, size=size, unit_symbol=units[exp])
+        return "{size:.{decimal}f} {unit_symbol}".format(decimal=decimal, size=size, unit_symbol=units[exp])

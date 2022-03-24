@@ -4,8 +4,8 @@ from typing import Any, Callable, Iterable, Iterator, List, Literal, Sequence, T
 from .itertools_recipe import all_equal, consume, partition
 from ..func_tools import deprecated, identity, invert_bool
 
-T = TypeVar('T')
-V = TypeVar('V')
+T = TypeVar("T")
+V = TypeVar("V")
 
 
 def slice_items(iterable: Iterable[T], n: int) -> Iterator[Iterator[T]]:
@@ -34,7 +34,7 @@ def slice_items(iterable: Iterable[T], n: int) -> Iterator[Iterator[T]]:
     [(0, 1, 2, 3), (4, 5, 6, 7), (8, 9)]
     """
     if n <= 0:
-        raise ValueError('n must be positive value')
+        raise ValueError("n must be positive value")
     for _, group in itertools.groupby(enumerate(iterable), key=lambda x: x[0] // n):
         yield (x[1] for x in group)
 
@@ -98,7 +98,7 @@ def common_starts(*iterables: Iterable[T]) -> Iterator[T]:
     [0, 1, 2, 3]
     """
     if not iterables:
-        raise ValueError('At least one iterable should given.')
+        raise ValueError("At least one iterable should given.")
     return (x[0] for x in itertools.takewhile(all_equal, zip(*iterables)))
 
 
@@ -220,7 +220,7 @@ def skipper(pred: Callable[[T, T], bool], iterable: Iterable[T]) -> Iterator[T]:
             break
 
 
-@deprecated(instead='itertools.islice(iterable, n, None, start_index)')
+@deprecated(instead="itertools.islice(iterable, n, None, start_index)")
 def every_nth(iterable: Iterable[T], n: int, start_index: int = 0):
     r"""이터러블의 매 ``n``번째 값을 산출한다.
 
@@ -237,7 +237,7 @@ def every_nth(iterable: Iterable[T], n: int, start_index: int = 0):
     ------
     items : Any type
         매 n번째 값
-        
+
     Exceptions
     ----------
     ValueError
@@ -253,9 +253,9 @@ def every_nth(iterable: Iterable[T], n: int, start_index: int = 0):
     [10, 13, 16, 19]
     """
     if n <= 0:
-        raise ValueError('n must be positive value.')
+        raise ValueError("n must be positive value.")
     if start_index < 0:
-        raise ValueError('start_index must be non-negative value')
+        raise ValueError("start_index must be non-negative value")
 
     it = iter(iterable)
     # 처음 start_index개 항목 스킵
@@ -326,13 +326,13 @@ def pairs(iterable: Iterable[T]) -> Iterator[List[Union[Tuple[T, T], Tuple[T]]]]
     # Handling odd number of items(recursive)
     if len(items) % 2:
         for i in range(len(items) - 1, -1, -1):
-            last_items = items[0:i] + items[i + 1:]
+            last_items = items[0:i] + items[i + 1 :]
             for group in pairs(last_items):
                 yield group + [(items[i],)]
     # Handling even number of items(recursive)
     else:
         for i in range(1, len(items)):
-            last_items = items[1:i] + items[i + 1:]
+            last_items = items[1:i] + items[i + 1 :]
             for group in pairs(last_items):
                 yield [(items[0], items[i])] + group
 
@@ -468,7 +468,7 @@ def index_pred(items: Sequence[T], pred: Callable[[T], Any] = bool, fallback_val
     elif fallback_value:
         return fallback_value
     else:
-        raise ValueError('First truthy value not found')
+        raise ValueError("First truthy value not found")
 
 
 def lstrip(iterable: Iterable[T], pred: Callable[[T], Any] = bool) -> Iterator[T]:
@@ -553,8 +553,9 @@ def strip(iterable: Iterable[T], pred: Callable[[T], Any] = bool) -> Iterator[T]
     return lstrip(rstrip(iterable, pred), pred)  # noqa # lstrip의 반환타입이 Iterable[T]이므로 억제시켜도 된다
 
 
-def group_by_interval(iterable: Iterable[T], interval_size, offset: T = 0,
-                      include_empty_index=False) -> Iterator[Tuple[T, List[T]]]:
+def group_by_interval(
+    iterable: Iterable[T], interval_size, offset: T = 0, include_empty_index=False
+) -> Iterator[Tuple[T, List[T]]]:
     r"""항목들을 구간에 맞춰서 분류한다.
 
     각 항목들이 구간 ``[interval * n + offset, interval * (n + 1) + offset)`` (``n``\는 정수) 안에 포함된다고 할 때
@@ -619,8 +620,9 @@ def group_by_interval(iterable: Iterable[T], interval_size, offset: T = 0,
         return iter([])
 
     # itertools.groupby를 사용해서 그룹으로 나눈다.
-    groups: Iterator[Tuple[int, Iterator[T]]] = itertools.groupby(sorted_items,
-                                                                  key=lambda x: (x - offset) // interval_size)
+    groups: Iterator[Tuple[int, Iterator[T]]] = itertools.groupby(
+        sorted_items, key=lambda x: (x - offset) // interval_size
+    )
 
     # iterable의 각 항목들에 해당되는 인덱스의 최솟값과 최댓값을 구한다.
     minimum_index: int = int((sorted_items[0] - offset) // interval_size)
@@ -635,8 +637,13 @@ def group_by_interval(iterable: Iterable[T], interval_size, offset: T = 0,
         yield index * interval_size + offset, list(group)
 
 
-def sort_by_specific_order(items: Iterable[T], orders: Sequence[V], key: Callable[[T], V] = None, reverse: bool = False,
-                           if_not_found: Literal['strict', 'ignore', 'before', 'after'] = 'strict') -> List[T]:
+def sort_by_specific_order(
+    items: Iterable[T],
+    orders: Sequence[V],
+    key: Callable[[T], V] = None,
+    reverse: bool = False,
+    if_not_found: Literal["strict", "ignore", "before", "after"] = "strict",
+) -> List[T]:
     r"""항목들을 정해진 순서에 맞춰서 정렬한다.
 
     항목들의 순서가 월(``['Jan', 'Feb', 'Mar', ...]``) 혹은 직급(``['사장', '부장', '과장', ...]``) 과 같이
@@ -690,19 +697,20 @@ def sort_by_specific_order(items: Iterable[T], orders: Sequence[V], key: Callabl
     items_not_in, items_in = partition(lambda x: key(x) in orders, items)
     items_not_in = list(items_not_in)
 
-    if if_not_found == 'strict' and items_not_in:
-        raise IndexError(f'Invalid item: {items_not_in[0]}')
+    if if_not_found == "strict" and items_not_in:
+        raise IndexError(f"Invalid item: {items_not_in[0]}")
     sorted_items = sorted(items_in, key=lambda x: orders.index(key(x)), reverse=reverse)
-    if if_not_found == 'ignore':
+    if if_not_found == "ignore":
         return sorted_items
-    elif if_not_found == 'before':
+    elif if_not_found == "before":
         return items_not_in + sorted_items
     else:
         return sorted_items + items_not_in
 
 
-def iterable_with_callback(iterable: Iterable[T], callback: Callable[[int, T], None],
-                           call_at: Literal['before', 'after'] = 'before') -> Iterator[T]:
+def iterable_with_callback(
+    iterable: Iterable[T], callback: Callable[[int, T], None], call_at: Literal["before", "after"] = "before"
+) -> Iterator[T]:
     """이터러블의 값들을 그대로 Pass-through해서 산출하고, 산출된 값에 대해서 callback 함수를 실행한다.
 
     Parameters
@@ -746,13 +754,29 @@ def iterable_with_callback(iterable: Iterable[T], callback: Callable[[int, T], N
     9
     """
     for i, item in enumerate(iterable):
-        if call_at == 'before':
+        if call_at == "before":
             callback(i, item)
         yield item
-        if call_at == 'after':
+        if call_at == "after":
             callback(i, item)
 
 
-__all__ = ['common_starts', 'dowhile', 'every_nth', 'get_duplicate_items', 'get_sorted_order', 'group_by_interval',
-           'index_pred', 'iterable_with_callback', 'iterate', 'lstrip', 'multi_sorted', 'pairs', 'rstrip', 'skipper',
-           'slice_items', 'sort_by_specific_order', 'strip']
+__all__ = [
+    "common_starts",
+    "dowhile",
+    "every_nth",
+    "get_duplicate_items",
+    "get_sorted_order",
+    "group_by_interval",
+    "index_pred",
+    "iterable_with_callback",
+    "iterate",
+    "lstrip",
+    "multi_sorted",
+    "pairs",
+    "rstrip",
+    "skipper",
+    "slice_items",
+    "sort_by_specific_order",
+    "strip",
+]

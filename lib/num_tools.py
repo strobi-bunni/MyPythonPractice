@@ -32,11 +32,11 @@ def get_digit(num: int, loc: int, *, base: int = 10, copysign=True) -> int:
     '0xcd'
     """
     if loc < 0:
-        raise ValueError('`loc` must be non-negative value.')
+        raise ValueError("`loc` must be non-negative value.")
     if base <= 0:
-        raise ValueError('`base` must be positive value.')
+        raise ValueError("`base` must be positive value.")
     sign = -1 if ((num < 0) and copysign) else 1
-    return sign * ((abs(num) % base ** (loc + 1)) // base ** loc)
+    return sign * ((abs(num) % base ** (loc + 1)) // base**loc)
 
 
 def base_encode(num: int, base: int, use_big_endian=True, copysign=True) -> List[int]:
@@ -84,7 +84,7 @@ def base_encode(num: int, base: int, use_big_endian=True, copysign=True) -> List
     [1, 2, 3, 4, 5]
     """
     if base <= 0:
-        raise ValueError('`base` must be positive value.')
+        raise ValueError("`base` must be positive value.")
 
     if num == 0:
         return [0]

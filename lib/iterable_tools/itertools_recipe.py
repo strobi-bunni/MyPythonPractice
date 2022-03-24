@@ -9,10 +9,10 @@ import itertools
 import operator
 import random
 from numbers import Number
-from typing import Any, Callable, Iterable, Iterator, List, Optional, Tuple, TypeVar, Union
+from typing import Any, Callable, Iterable, Iterator, List, Optional, Tuple, Type, TypeVar, Union
 
-T = TypeVar('T')
-T_Other = TypeVar('T_Other')  # 대체 T
+T = TypeVar("T")
+T_Other = TypeVar("T_Other")  # 대체 T
 
 
 def all_equal(iterable: Iterable[T]) -> bool:
@@ -163,8 +163,8 @@ def grouper(iterable: Iterable[T], n: int, fillvalue: T_Other = None) -> Iterabl
     return itertools.zip_longest(*args, fillvalue=fillvalue)
 
 
-def iter_except(func: Callable[[], T], exception: type(Exception), first=None) -> Iterator[T]:
-    """ Call a function repeatedly until an exception is raised.
+def iter_except(func: Callable[[], T], exception: Type[Exception], first=None) -> Iterator[T]:
+    """Call a function repeatedly until an exception is raised.
 
     Converts a call-until-exception interface to an iterator interface.
     Like builtins.iter(func, sentinel) but uses an exception instead
@@ -334,7 +334,30 @@ def unique_justseen(iterable: Iterable[T], key: Callable[[T], Any] = None) -> It
     return map(next, map(operator.itemgetter(1), itertools.groupby(iterable, key)))
 
 
-__all__ = ['all_equal', 'consume', 'dotproduct', 'first_true', 'flatten', 'grouper', 'iter_except', 'ncycles', 'nth',
-           'padnone', 'pairwise', 'partition', 'powerset', 'quantify', 'random_combination',
-           'random_combination_with_replacement', 'random_permutation', 'random_product', 'repeatfunc', 'roundrobin',
-           'tabulate', 'tail', 'take', 'unique_everseen', 'unique_justseen']
+__all__ = [
+    "all_equal",
+    "consume",
+    "dotproduct",
+    "first_true",
+    "flatten",
+    "grouper",
+    "iter_except",
+    "ncycles",
+    "nth",
+    "padnone",
+    "pairwise",
+    "partition",
+    "powerset",
+    "quantify",
+    "random_combination",
+    "random_combination_with_replacement",
+    "random_permutation",
+    "random_product",
+    "repeatfunc",
+    "roundrobin",
+    "tabulate",
+    "tail",
+    "take",
+    "unique_everseen",
+    "unique_justseen",
+]

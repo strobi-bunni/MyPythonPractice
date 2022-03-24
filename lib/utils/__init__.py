@@ -1,6 +1,6 @@
 from typing import Any, Callable, Optional, TypeVar
 
-T = TypeVar('T')
+T = TypeVar("T")
 
 
 def coalesce(*items: T, pred: Callable[[T], Any] = bool) -> Optional[T]:
@@ -26,4 +26,4 @@ def coalesce(*items: T, pred: Callable[[T], Any] = bool) -> Optional[T]:
     return returns
 
 
-__all__ = ['coalesce']
+__all__ = ["coalesce"]

@@ -24,13 +24,14 @@ def get_dir_size(path: T_Pathifyable) -> int:
     """
     path = Path(path)
     if not path.is_dir():
-        raise ValueError(f'{path} is not a directory.')
+        raise ValueError(f"{path} is not a directory.")
 
-    return sum(p.stat().st_size for p in path.glob('**/*'))
+    return sum(p.stat().st_size for p in path.glob("**/*"))
 
 
-def path_walker(path: T_Pathifyable, *, dir_first: bool = True,
-                sort_keys: Callable[[Path], Any] = None, reverse: bool = False) -> T_PathIter:
+def path_walker(
+    path: T_Pathifyable, *, dir_first: bool = True, sort_keys: Callable[[Path], Any] = None, reverse: bool = False
+) -> T_PathIter:
     """path 아래의 모든 폴더와 파일을 산출하는 이터레이터
 
     Parameters
@@ -63,8 +64,9 @@ def path_walker(path: T_Pathifyable, *, dir_first: bool = True,
             paths_list: T_PathIter = chain(folders_list, files_list)
         else:
             # 정렬함
-            paths_list: T_PathIter = chain(sorted(folders_list, key=sort_keys, reverse=reverse),
-                                           sorted(files_list, key=sort_keys, reverse=reverse))
+            paths_list: T_PathIter = chain(
+                sorted(folders_list, key=sort_keys, reverse=reverse), sorted(files_list, key=sort_keys, reverse=reverse)
+            )
     else:
         # 파일/폴더 여부에 관계없이 배열
         items_list: T_PathIter = (p for p in path.iterdir() if p.is_file() or p.is_dir())
@@ -76,9 +78,10 @@ def path_walker(path: T_Pathifyable, *, dir_first: bool = True,
             paths_list: T_PathIter = sorted(items_list, key=sort_keys, reverse=reverse)
 
     # 재귀적으로 실행
-    items = chain.from_iterable(([p] if p.is_file()
-                                 else (
-        path_walker(p, dir_first=dir_first, sort_keys=sort_keys, reverse=reverse))) for p in paths_list)
+    items = chain.from_iterable(
+        ([p] if p.is_file() else (path_walker(p, dir_first=dir_first, sort_keys=sort_keys, reverse=reverse)))
+        for p in paths_list
+    )
     return chain([path], items)
 
 
@@ -210,4 +213,4 @@ def is_empty_folder(path: T_Pathifyable) -> bool:
     return not list(not_folders) and all(is_empty_folder(p) for p in folders)
 
 
-__all__ = ['common_parent', 'get_dir_size', 'is_empty_folder', 'path_walker', 'relative_level']
+__all__ = ["common_parent", "get_dir_size", "is_empty_folder", "path_walker", "relative_level"]

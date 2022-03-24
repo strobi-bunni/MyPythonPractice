@@ -7,6 +7,7 @@ class Win32FileAttribute(IntFlag):
     Reference:
     https://docs.microsoft.com/en-us/windows/win32/fileio/file-attribute-constants
     """
+
     READONLY = 0x1
     HIDDEN = 0x2
     SYSTEM = 0x4

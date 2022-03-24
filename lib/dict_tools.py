@@ -1,17 +1,28 @@
 from collections import defaultdict
 from itertools import groupby
-from typing import Callable, DefaultDict, Dict, Iterable, Iterator, List, Literal, Mapping, Optional, Tuple, TypeVar, \
-    overload
+from typing import (
+    Callable,
+    DefaultDict,
+    Dict,
+    Iterable,
+    Iterator,
+    List,
+    Literal,
+    Mapping,
+    Optional,
+    Tuple,
+    TypeVar,
+    overload,
+)
 
-KT = TypeVar('KT')
-VT = TypeVar('VT')
-T = TypeVar('T')
-VT2 = TypeVar('VT2')
+KT = TypeVar("KT")
+VT = TypeVar("VT")
+T = TypeVar("T")
+VT2 = TypeVar("VT2")
 
 
 def _identity(x: T) -> T:
-    """항등 함수
-    """
+    """항등 함수"""
     return x
 
 
@@ -86,7 +97,7 @@ def merge_dict(d1: Mapping[KT, VT], d2: Mapping[KT, VT], merge_method: Callable[
     {'a': [1, 2], 'b': [3, 4, 5, 3, 4, 5, 6], 'c': [6, 7, 8]}
     """
     if merge_method is None:
-        merge_method = (lambda x, y: y)
+        merge_method = lambda x, y: y
 
     d1_copy: Dict[KT, VT] = dict(d1)
     for d2_key, d2_value in d2.items():
@@ -98,11 +109,13 @@ def merge_dict(d1: Mapping[KT, VT], d2: Mapping[KT, VT], merge_method: Callable[
 
 
 @overload
-def rename_key(target_dict: Mapping[KT, VT], oldkey: KT, newkey: KT) -> Dict[KT, VT]: ...
+def rename_key(target_dict: Mapping[KT, VT], oldkey: KT, newkey: KT) -> Dict[KT, VT]:
+    ...
 
 
 @overload
-def rename_key(d: Mapping[KT, VT], **kwargs) -> Dict[KT, VT]: ...
+def rename_key(d: Mapping[KT, VT], **kwargs) -> Dict[KT, VT]:
+    ...
 
 
 def rename_key(target_dict: Mapping[KT, VT], oldkey: KT = None, newkey: KT = None, **kwargs) -> Dict[KT, VT]:
@@ -135,7 +148,7 @@ def rename_key(target_dict: Mapping[KT, VT], oldkey: KT = None, newkey: KT = Non
     {'a': 1, 'd': 2, 'e': 3}
     """
     if (oldkey is None) ^ (newkey is None):
-        raise ValueError('Both oldkey and newkey should be null, or not null.')
+        raise ValueError("Both oldkey and newkey should be null, or not null.")
     elif oldkey is not None:
         rename_mapping: Dict[KT, KT] = {oldkey: newkey}
     else:
@@ -381,8 +394,9 @@ def findall_with_value(d: Mapping[KT, VT], value: VT) -> List[KT]:
     return [k for (k, v) in d.items() if v == value]
 
 
-def swap_key_and_value(d: Mapping[KT, VT],
-                       duplicate_handler: Literal['strict', 'first', 'last'] = 'first') -> Dict[VT, KT]:
+def swap_key_and_value(
+    d: Mapping[KT, VT], duplicate_handler: Literal["strict", "first", "last"] = "first"
+) -> Dict[VT, KT]:
     """딕셔너리의 키와 값을 서로 뒤바꾼다.
 
     Parameters
@@ -417,13 +431,13 @@ def swap_key_and_value(d: Mapping[KT, VT],
     for k, v in d.items():
         grouped[v].append(k)
 
-    if duplicate_handler == 'first':
+    if duplicate_handler == "first":
         return {v: k[0] for (v, k) in grouped.items()}
-    elif duplicate_handler == 'last':
+    elif duplicate_handler == "last":
         return {v: k[-1] for (v, k) in grouped.items()}
     # duplicate_handler == 'strict'
     elif any((len(k) >= 2) for k in grouped.values()):
-        raise KeyError('duplicated key')
+        raise KeyError("duplicated key")
     else:
         return {v: k[0] for (v, k) in grouped.items()}
 
@@ -487,6 +501,19 @@ def flatten_items(d: Mapping[KT, Iterable[VT]]) -> Iterator[Tuple[KT, VT]]:
             yield k, v
 
 
-__all__ = ['chain_dict', 'dict_gets', 'find_with_value', 'findall_with_value', 'flatten_items', 'full_outer_join',
-           'group_value', 'inner_join', 'left_join', 'merge_dict', 'rename_key', 'rename_key_with_mapping',
-           'right_join', 'swap_key_and_value']
+__all__ = [
+    "chain_dict",
+    "dict_gets",
+    "find_with_value",
+    "findall_with_value",
+    "flatten_items",
+    "full_outer_join",
+    "group_value",
+    "inner_join",
+    "left_join",
+    "merge_dict",
+    "rename_key",
+    "rename_key_with_mapping",
+    "right_join",
+    "swap_key_and_value",
+]

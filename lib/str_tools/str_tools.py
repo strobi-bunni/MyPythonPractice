@@ -37,9 +37,9 @@ def find_prefix(prefix: str, s: str, flags=re.M, *, include_prefix=False) -> Lis
     prefix_pattern = re.escape(prefix)
 
     if include_prefix:
-        regex = re.compile('^{}.*$'.format(prefix_pattern), flags)
+        regex = re.compile("^{}.*$".format(prefix_pattern), flags)
     else:
-        regex = re.compile('(?<=^{}).*$'.format(prefix_pattern), flags)
+        regex = re.compile("(?<=^{}).*$".format(prefix_pattern), flags)
     return regex.findall(s)
 
 
@@ -89,9 +89,9 @@ def findall(string: AnyStr, substr: AnyStr, *, overlap=False) -> Iterator[int]:
     >>> #    3 5 7 9
     """
     if type(string) != type(substr):
-        raise TypeError('string and substr have different types.')
+        raise TypeError("string and substr have different types.")
     if not substr:
-        raise ValueError('substr is empty.')
+        raise ValueError("substr is empty.")
 
     current_pos = 0
     while True:
@@ -104,7 +104,7 @@ def findall(string: AnyStr, substr: AnyStr, *, overlap=False) -> Iterator[int]:
             current_pos = location + next_step
 
 
-def convert_newline(s: AnyStr, mode: Literal['cr', 'lf', 'crlf'] = 'lf') -> AnyStr:
+def convert_newline(s: AnyStr, mode: Literal["cr", "lf", "crlf"] = "lf") -> AnyStr:
     r"""
     새 줄 문자를 통일된 형식으로 바꾼다.
 
@@ -140,46 +140,52 @@ def convert_newline(s: AnyStr, mode: Literal['cr', 'lf', 'crlf'] = 'lf') -> AnyS
     >>> convert_newline(b'abcde\rfghij\r\nklmno\npqrst')
     b'abcde\nfghij\nklmno\npqrst'
     """
-    if mode not in ['cr', 'lf', 'crlf']:
-        raise ValueError('`Mode` must be \'cr\', \'lf\' or \'crlf\'')
+    if mode not in ["cr", "lf", "crlf"]:
+        raise ValueError("`Mode` must be 'cr', 'lf' or 'crlf'")
 
     is_str = isinstance(s, str)
     b = s.encode() if is_str else s
 
-    new_b = b.replace(b'\r\n', b'\n').replace(b'\r', b'\n')
-    if mode == 'cr':
-        new_b = new_b.replace(b'\n', b'\r')
-    elif mode == 'crlf':
-        new_b = new_b.replace(b'\n', b'\r\n')
+    new_b = b.replace(b"\r\n", b"\n").replace(b"\r", b"\n")
+    if mode == "cr":
+        new_b = new_b.replace(b"\n", b"\r")
+    elif mode == "crlf":
+        new_b = new_b.replace(b"\n", b"\r\n")
 
     return new_b.decode() if is_str else new_b
 
 
 @overload
-def get_str_hash(s: bytes, **kwargs) -> bytes: ...
+def get_str_hash(s: bytes, **kwargs) -> bytes:
+    ...
 
 
 @overload
-def get_str_hash(s: bytes, algorithm: str, **kwargs) -> bytes: ...
+def get_str_hash(s: bytes, algorithm: str, **kwargs) -> bytes:
+    ...
 
 
 @overload
-def get_str_hash(s: str, **kwargs) -> bytes: ...
+def get_str_hash(s: str, **kwargs) -> bytes:
+    ...
 
 
 @overload
-def get_str_hash(s: str, algorithm: str, **kwargs) -> bytes: ...
+def get_str_hash(s: str, algorithm: str, **kwargs) -> bytes:
+    ...
 
 
 @overload
-def get_str_hash(s: str, algorithm: str, encoding: str, **kwargs) -> bytes: ...
+def get_str_hash(s: str, algorithm: str, encoding: str, **kwargs) -> bytes:
+    ...
 
 
 @overload
-def get_str_hash(s: str, algorithm: str, encoding: str, errors: str, **kwargs) -> bytes: ...
+def get_str_hash(s: str, algorithm: str, encoding: str, errors: str, **kwargs) -> bytes:
+    ...
 
 
-def get_str_hash(s: Union[str, bytes], algorithm: str = 'sha256', encoding='utf-8', errors='strict', **kwargs) -> bytes:
+def get_str_hash(s: Union[str, bytes], algorithm: str = "sha256", encoding="utf-8", errors="strict", **kwargs) -> bytes:
     r"""문자열의 해시 값을 구한다.
 
     Parameters
@@ -245,7 +251,7 @@ def get_unicode_repr(s: str) -> str:
     >>> get_unicode_repr('ABC')
     'U+0041 U+0042 U+0043'
     """
-    return ' '.join(f'U+{ord(c):04X}' for c in s)
+    return " ".join(f"U+{ord(c):04X}" for c in s)
 
 
 def get_str_width(s: str, east_asian=False) -> int:
@@ -284,10 +290,15 @@ def get_str_width(s: str, east_asian=False) -> int:
     width = 0
     for c in s:
         east_asian_width_code = unicodedata.east_asian_width(c)
-        char_width = 1 if east_asian_width_code in ['H', 'Na', 'N'] \
-            else 2 if east_asian_width_code in ['W', 'F'] \
-            else 2 if east_asian \
+        char_width = (
+            1
+            if east_asian_width_code in ["H", "Na", "N"]
+            else 2
+            if east_asian_width_code in ["W", "F"]
+            else 2
+            if east_asian
             else 1
+        )
         width += char_width
     return width
 
@@ -318,11 +329,11 @@ def apart_prefix(s: AnyStr, prefix: AnyStr) -> Tuple[AnyStr, AnyStr]:
     ('', 'Hello World')
     """
     if prefix and s.startswith(prefix):
-        return prefix, s[len(prefix):]
+        return prefix, s[len(prefix) :]
     elif isinstance(s, str):
-        return '', s
+        return "", s
     else:
-        return b'', s
+        return b"", s
 
 
 def apart_suffix(s: AnyStr, suffix: AnyStr) -> Tuple[AnyStr, AnyStr]:
@@ -352,12 +363,20 @@ def apart_suffix(s: AnyStr, suffix: AnyStr) -> Tuple[AnyStr, AnyStr]:
     """
     # len(suffix) == 0이면 if suffix and... 부분을 안 붙였을 때 s[:-0] == ''가 되므로 테스트 케이스가 실패한다.
     if suffix and s.endswith(suffix):
-        return s[:-len(suffix)], suffix
+        return s[: -len(suffix)], suffix
     elif isinstance(s, str):
-        return s, ''
+        return s, ""
     else:
-        return s, b''
+        return s, b""
 
 
-__all__ = ['apart_prefix', 'apart_suffix', 'convert_newline', 'find_prefix', 'findall', 'get_str_hash', 'get_str_width',
-           'get_unicode_repr']
+__all__ = [
+    "apart_prefix",
+    "apart_suffix",
+    "convert_newline",
+    "find_prefix",
+    "findall",
+    "get_str_hash",
+    "get_str_width",
+    "get_unicode_repr",
+]

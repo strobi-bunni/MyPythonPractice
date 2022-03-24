@@ -1,11 +1,11 @@
 from enum import IntEnum
 from typing import Tuple, Union
 
-CODE_TEMPLATE = '\x1b[{0}m'
-CODE_FGCOLOR_256_TEMPLATE = '\x1b[38;5;{0}m'
-CODE_FGCOLOR_24BIT_TEMPLATE = '\x1b[38;2;{0};{1};{2}m'
-CODE_BGCOLOR_256_TEMPLATE = '\x1b[48;5;{0}m'
-CODE_BGCOLOR_24BIT_TEMPLATE = '\x1b[48;2;{0};{1};{2}m'
+CODE_TEMPLATE = "\x1b[{0}m"
+CODE_FGCOLOR_256_TEMPLATE = "\x1b[38;5;{0}m"
+CODE_FGCOLOR_24BIT_TEMPLATE = "\x1b[38;2;{0};{1};{2}m"
+CODE_BGCOLOR_256_TEMPLATE = "\x1b[48;5;{0}m"
+CODE_BGCOLOR_24BIT_TEMPLATE = "\x1b[48;2;{0};{1};{2}m"
 
 CODE_RESET = 0
 CODE_BOLD = 1
@@ -62,16 +62,16 @@ def _fgcolor_code(value: int = None, *values: int) -> str:
             # 256-color
             return CODE_FGCOLOR_256_TEMPLATE.format(value)
         else:
-            raise ValueError('Color value must be an integer greater than 0 and less than 256.')
+            raise ValueError("Color value must be an integer greater than 0 and less than 256.")
     elif len(values) == 2:
         rgb_codes = (value, *values)
         if any((x < 0 or x >= 256) for x in rgb_codes):
-            raise ValueError('Color value must be an integer greater than 0 and less than 256.')
+            raise ValueError("Color value must be an integer greater than 0 and less than 256.")
         else:
             # 24-bit color
             return CODE_FGCOLOR_24BIT_TEMPLATE.format(*rgb_codes)
     else:
-        raise ValueError('Input value must be one(16color or 256color) or three(24-bit color) integers.')
+        raise ValueError("Input value must be one(16color or 256color) or three(24-bit color) integers.")
 
 
 def _bgcolor_code(value: int = None, *values: int) -> str:
@@ -89,20 +89,21 @@ def _bgcolor_code(value: int = None, *values: int) -> str:
             # 256-color
             return CODE_BGCOLOR_256_TEMPLATE.format(value)
         else:
-            raise ValueError('Color value must be an integer greater than 0 and less than 256.')
+            raise ValueError("Color value must be an integer greater than 0 and less than 256.")
     elif len(values) == 2:
         rgb_codes = (value, *values)
         if any((x < 0 or x >= 256) for x in rgb_codes):
-            raise ValueError('Color value must be an integer greater than 0 and less than 256.')
+            raise ValueError("Color value must be an integer greater than 0 and less than 256.")
         else:
             # 24-bit color
             return CODE_BGCOLOR_24BIT_TEMPLATE.format(*rgb_codes)
     else:
-        raise ValueError('Input value must be one(16color or 256color) or three(24-bit color) integers.')
+        raise ValueError("Input value must be one(16color or 256color) or three(24-bit color) integers.")
 
 
-def set_fgcolor(text: str = '', color: Union[int, Tuple[int, int, int]] = None, *, reset=False,
-                reset_color=False) -> str:
+def set_fgcolor(
+    text: str = "", color: Union[int, Tuple[int, int, int]] = None, *, reset=False, reset_color=False
+) -> str:
     """글자의 색을 설정한다. 경우에 따라서 동시에 출력할 수 있다.
 
     Parameters
@@ -146,14 +147,19 @@ def set_fgcolor(text: str = '', color: Union[int, Tuple[int, int, int]] = None, 
         color_code = _fgcolor_code(color)
     else:
         color_code = _fgcolor_code(*color)
-    reset_code = CODE_TEMPLATE.format(CODE_RESET) if reset \
-        else CODE_TEMPLATE.format(CODE_RESET_FOREGROUND_COLOR) if reset_color \
-        else ''
+    reset_code = (
+        CODE_TEMPLATE.format(CODE_RESET)
+        if reset
+        else CODE_TEMPLATE.format(CODE_RESET_FOREGROUND_COLOR)
+        if reset_color
+        else ""
+    )
     return color_code + text + reset_code
 
 
-def set_bgcolor(text: str = '', color: Union[int, Tuple[int, int, int]] = None, *, reset=False,
-                reset_color=False) -> str:
+def set_bgcolor(
+    text: str = "", color: Union[int, Tuple[int, int, int]] = None, *, reset=False, reset_color=False
+) -> str:
     """글자 배경의 색을 설정한다. 경우에 따라서 동시에 출력할 수 있다.
 
     Parameters
@@ -197,7 +203,11 @@ def set_bgcolor(text: str = '', color: Union[int, Tuple[int, int, int]] = None, 
         color_code = _bgcolor_code(color)
     else:
         color_code = _bgcolor_code(*color)
-    reset_code = CODE_TEMPLATE.format(CODE_RESET) if reset \
-        else CODE_TEMPLATE.format(CODE_RESET_BACKGROUND_COLOR) if reset_color \
-        else ''
+    reset_code = (
+        CODE_TEMPLATE.format(CODE_RESET)
+        if reset
+        else CODE_TEMPLATE.format(CODE_RESET_BACKGROUND_COLOR)
+        if reset_color
+        else ""
+    )
     return color_code + text + reset_code

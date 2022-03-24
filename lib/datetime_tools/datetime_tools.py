@@ -1,13 +1,12 @@
 import datetime
 from typing import Literal, Optional, Union
 
-UTC = datetime.timezone(datetime.timedelta(hours=0), name='UTC')
+UTC = datetime.timezone(datetime.timedelta(hours=0), name="UTC")
 UNIX_TIME_EPOCH = datetime.datetime(1970, 1, 1, 0, 0, 0, 0, tzinfo=UTC)
 
 
 def _convert_to_local_time(t: datetime.datetime) -> datetime.datetime:
-    """시간을 로컬 시간대로 변경
-    """
+    """시간을 로컬 시간대로 변경"""
     return datetime.datetime(t.year, t.month, t.day, t.hour, t.minute, t.second, t.microsecond)
 
 
@@ -38,10 +37,10 @@ def convert_timestamp_to_datetime(ts: Union[int, float], tz: Optional[datetime.t
         return local_time.astimezone(tz)
 
 
-T_Timespec = Literal['microseconds', 'milliseconds', 'seconds', 'minutes']
+T_Timespec = Literal["microseconds", "milliseconds", "seconds", "minutes"]
 
 
-def truncate_datetime(dt: datetime.datetime, timespec: T_Timespec = 'seconds') -> datetime.datetime:
+def truncate_datetime(dt: datetime.datetime, timespec: T_Timespec = "seconds") -> datetime.datetime:
     """시각 dt를 대상 timespec 정밀도까지 표현하며, 그보다 작은 단위는 0으로 나타낸다.
 
     Parameters
@@ -58,12 +57,13 @@ def truncate_datetime(dt: datetime.datetime, timespec: T_Timespec = 'seconds') -
     """
     date_parts = ((_date := dt.date()).year, _date.month, _date.day)
 
-    if timespec == 'microseconds':
+    if timespec == "microseconds":
         return dt
-    elif timespec == 'milliseconds':
-        return datetime.datetime(*date_parts, dt.hour, dt.minute, dt.second, dt.microsecond // 1000 * 1000,
-                                 tzinfo=dt.tzinfo)
-    elif timespec == 'seconds':
+    elif timespec == "milliseconds":
+        return datetime.datetime(
+            *date_parts, dt.hour, dt.minute, dt.second, dt.microsecond // 1000 * 1000, tzinfo=dt.tzinfo
+        )
+    elif timespec == "seconds":
         return datetime.datetime(*date_parts, dt.hour, dt.minute, dt.second, tzinfo=dt.tzinfo)
     else:
         return datetime.datetime(*date_parts, dt.hour, dt.minute, tzinfo=dt.tzinfo)
