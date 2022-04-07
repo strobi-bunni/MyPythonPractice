@@ -2,6 +2,7 @@ r"""
 다음 코드는 Windows 시스템 상의 파티션의 리스트를 구한다.
 """
 import ctypes
+import os
 import re
 import shutil
 from ctypes.wintypes import DWORD, LPCWSTR, LPDWORD, LPWSTR
@@ -93,8 +94,20 @@ def get_drive_letters() -> List[str]:
 
 
 def get_drive_type(letter: str) -> DriveType:
-    """드라이브 타입을 구한다.
+    r"""드라이브 타입을 구한다.
 
+    Parameters
+    ----------
+    letter : str
+        드라이브 문자. ``r'C'``, ``r'C:'``, ``r'C:\'`` 형식 중 아무거나 써도 된다.
+
+    Returns
+    -------
+    drive_type : DriveType
+        드라이브 타입을 나타내는 열거형
+
+    Notes
+    -----
     이 함수는 WinAPI의 `GetDriveTypeW`_ 함수의 래핑 함수이다.
 
     .. _GetDriveTypeW : https://docs.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-getdrivetypew
@@ -103,8 +116,20 @@ def get_drive_type(letter: str) -> DriveType:
 
 
 def get_drive_info(letter: str) -> DriveInfo:
-    """드라이브 정보를 구한다.
+    r"""윈도우 드라이브 정보를 구한다.
 
+    Parameters
+    ----------
+    letter : str
+        드라이브 문자. ``r'C'``, ``r'C:'``, ``r'C:\'`` 형식 중 아무거나 써도 된다.
+
+    Returns
+    -------
+    info : DriveInfo
+        드라이브 정보
+
+    Notes
+    -----
     이 함수는 WinAPI의 `GetVolumeInformationW`_ 함수의 래핑 함수이다.
 
     .. _`GetVolumeInformationW` : https://docs.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-getvolumeinformationw
@@ -126,8 +151,35 @@ def get_drive_info(letter: str) -> DriveInfo:
                      FileSystemFlags(lp_file_system_flags.contents.value), lp_file_system_name_buffer.value)
 
 
-def format_percent_to_bar(ratio: float, width: int = 78, fillchar: str = '@', emptychar: str = '.') -> str:
-    """0 이상 1 이하의 비율 ratio을 바로 표시한다.
+def format_percent_to_bar(ratio: float, width: int = 79, fillchar: str = '@', emptychar: str = '.') -> str:
+    r"""0 이상 1 이하의 비율 ratio을 막대로 표시한다.
+
+    Parameters
+    ----------
+    ratio : number-like
+        표시할 비율. 0 이상 1 이하로 제한된다.
+    width : int
+        바의 길이. 기본값은 터미널 최대 폭보다 1 작아서 줄바꿈을 일으키지 않는 최대 크기인 79로 설정했다.
+    fillchar : str
+        채울 문자.
+    emptychar : str
+        비어 있는 공간을 표시하기 위한 문자
+
+    Returns
+    -------
+    bar : str
+        막대로 표시한 비율
+
+    Examples
+    --------
+    >>> for r in [0.0, 0.5, 0.3, 0.8, 0.6, 1.0]:
+    ...     print(format_percent_to_bar(r, 10, fillchar='#', emptychar='-'))
+    ----------
+    #####-----
+    ###-------
+    ########--
+    ######----
+    ##########
     """
     # ratio를 0 이상 1 이하로 제한한다.
     ratio = 1.0 if ratio > 1 else 0.0 if ratio < 0 else ratio
@@ -138,6 +190,15 @@ def format_percent_to_bar(ratio: float, width: int = 78, fillchar: str = '@', em
 
 
 if __name__ == '__main__':
+    # 터미널 크기를 구한다.
+    try:
+        terminal_width = os.get_terminal_size()[0]
+    # get_terminal_size가 실패할 경우 처리
+    except ValueError:  # bad file descriptor (in IDLE)
+        terminal_width = 80
+    except OSError:
+        terminal_width = 80
+
     for drive_letter in get_drive_letters():
         drive_type = get_drive_type(drive_letter)
         drive_info = get_drive_info(drive_letter)
@@ -153,6 +214,6 @@ if __name__ == '__main__':
                   f'{disk_usage.free / 1073741824:.1f} GiB free / '
                   f'{disk_usage.total / 1073741824:.1f} GiB total '
                   f'({use_ratio:.1%})')
-            print(f'[{format_percent_to_bar(use_ratio)}]')
+            print(f'[{format_percent_to_bar(use_ratio, width=terminal_width - 3)}]')
 
         print()
