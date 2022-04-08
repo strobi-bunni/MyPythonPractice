@@ -30,7 +30,7 @@ import sys
 from collections import Counter
 from filecmp import dircmp
 from pathlib import Path, PurePath
-from typing import Iterator, List, Literal, NamedTuple, Tuple, Union
+from typing import Iterator, List, NamedTuple, Tuple, Union
 
 # 비교 결과를 나타내기 위한 기호
 RESULT_SAME = '='  # 같은 대상
@@ -40,6 +40,8 @@ RESULT_DIFF = '!'  # 서로 다름(src != dst)
 RESULT_NEWER = '<'  # dst의 파일이 최신임(src.mtime < dst_mtime)
 RESULT_OLDER = '>'  # src의 파일이 최신임(src.mtime > dst_mtime)
 RESULT_UNDEFINED = '@'  # 알 수 없음
+
+HEADER_PREFIX = '#'
 
 # 경로의 타입을 나타내기 위한 기호
 PATHTYPE_DIRECTORY = 'D'
@@ -51,20 +53,15 @@ PATHTYPE_CHARDEV = 'C'
 PATHTYPE_FIFO = 'I'
 PATHTYPE_SOCKET = 'S'
 
-T_ItemTypes = Literal['directory', 'file', 'mount', 'symlink', 'blockdev', 'chardev', 'fifo', 'socket']
-T_CompareResultTypes = Literal['same', 'created', 'deleted', 'diff', 'newer', 'older', 'undefined']
-item_type_abbrev = {'directory': 'D', 'file': 'F', 'mount': 'M', 'symlink': 'L',
-                    'blockdev': 'B', 'chardev': 'C', 'fifo': 'I', 'socket': 'S'}
-compare_result_abbrev = {'same': '=', 'created': '+', 'deleted': '-', 'diff': '!',
-                         'newer': '<', 'older': '>', 'undefined': '@'}
-item_type_sort_order = {PATHTYPE_DIRECTORY: 1, PATHTYPE_FILE: 2, PATHTYPE_MOUNT: 2, PATHTYPE_SYMLINK: 2,
-                        PATHTYPE_BLOCKDEV: 2, PATHTYPE_CHARDEV: 2, PATHTYPE_FIFO: 2, PATHTYPE_SOCKET: 2}
-item_type_group_id = {'directory': 1, 'file': 0, 'mount': 3, 'symlink': 2,
-                      'blockdev': 3, 'chardev': 3, 'fifo': 3, 'socket': 3}
-
-compare_result_color_code = {'same': '\033[39m', 'created': '\033[92m', 'deleted': '\033[91m',
-                             'diff': '\033[95m', 'newer': '\033[96m', 'older': '\033[93m',
-                             'undefined': '\033[90m'}
+PATHTYPE_SORT_ORDER = {PATHTYPE_DIRECTORY: 1, PATHTYPE_FILE: 2, PATHTYPE_MOUNT: 2, PATHTYPE_SYMLINK: 2,
+                       PATHTYPE_BLOCKDEV: 2, PATHTYPE_CHARDEV: 2, PATHTYPE_FIFO: 2, PATHTYPE_SOCKET: 2}
+PATHTYPE_GROUP_ID = {PATHTYPE_DIRECTORY: 1, PATHTYPE_FILE: 0, PATHTYPE_MOUNT: 3, PATHTYPE_SYMLINK: 2,
+                     PATHTYPE_BLOCKDEV: 3, PATHTYPE_CHARDEV: 3, PATHTYPE_FIFO: 3, PATHTYPE_SOCKET: 3}
+RESULT_FULL_NAMES = {RESULT_SAME: 'Same', RESULT_CREATED: 'Created', RESULT_DELETED: 'Deleted', RESULT_NEWER: 'Newer',
+                     RESULT_OLDER: 'Older', RESULT_DIFF: 'Diff', RESULT_UNDEFINED: 'Undefined'}
+COLORED_OUTPUT_CODE_MAPPING = {RESULT_SAME: '\033[39m', RESULT_CREATED: '\033[92m', RESULT_DELETED: '\033[91m',
+                               RESULT_DIFF: '\033[95m', RESULT_NEWER: '\033[96m', RESULT_OLDER: '\033[93m',
+                               RESULT_UNDEFINED: '\033[90m', HEADER_PREFIX: '\033[1m'}
 
 
 class CompareResult(NamedTuple):
@@ -223,7 +220,7 @@ def sort_key_for_directory_first(x: CompareResult) -> List[Tuple[int, str]]:
     - 첫 번째 값은 폴더이면 1, 폴더가 아니면 2의 값을 가진다. 따라서 사전 순으로 정렬할 때 폴더가 위에 온다.
     - 두 번째 값은 대상의 이름이다. 따라서 같은 폴더거나, 같은 파일이면 이름대로 위에 온다.
     """
-    return [(item_type_sort_order[_result.item_type], _result.path.name) for _result in expand_parents_of_result(x)]
+    return [(PATHTYPE_SORT_ORDER[_result.item_type], _result.path.name) for _result in expand_parents_of_result(x)]
 
 
 def path_to_string(path: Union[Path, PurePath], override_is_dir=False) -> str:
@@ -240,22 +237,27 @@ def path_to_string(path: Union[Path, PurePath], override_is_dir=False) -> str:
     return p
 
 
-def print_summary(res: List[CompareResult], colored=False, file=sys.stdout):
-    cnt = Counter((r.compare_result, item_type_group_id[r.item_type]) for r in res)
-    for compare_result in ['same', 'created', 'deleted', 'newer', 'older', 'diff', 'undefined']:
-        color_code_prefix = compare_result_color_code[compare_result] if colored else ''
-        color_code_suffix = '\033[0m' if colored else ''
-        print(f'{color_code_prefix}[{compare_result_abbrev[compare_result]}]{compare_result:<10}'
-              f'{cnt[(compare_result, 0)]:>6d} Files | {cnt[(compare_result, 1)]:>5d} Folders | '
-              f'{cnt[(compare_result, 2)]:>3d} Symlinks | {cnt[(compare_result, 3)]:>3d} Others{color_code_suffix}',
-              file=file)
+def colored_output(x: str) -> str:
+    for prefix, color_code in COLORED_OUTPUT_CODE_MAPPING.items():
+        if x.startswith(prefix):
+            return color_code + x + '\033[0m'
+    return x
+
+
+def yield_summary_row(res: List[CompareResult]):
+    cnt = Counter((r.compare_result, PATHTYPE_GROUP_ID[r.item_type]) for r in res)
+    for compare_result in [RESULT_SAME, RESULT_CREATED, RESULT_DELETED, RESULT_NEWER,
+                           RESULT_OLDER, RESULT_DIFF, RESULT_UNDEFINED]:
+        yield (f'{compare_result} {RESULT_FULL_NAMES[compare_result]:<10} '
+               f'{cnt[(compare_result, 0)]:>6d}{PATHTYPE_FILE} / {cnt[(compare_result, 1)]:>5d}{PATHTYPE_DIRECTORY} / '
+               f'{cnt[(compare_result, 2)]:>3d}{PATHTYPE_SYMLINK} / {cnt[(compare_result, 3)]:>3d}Others')
 
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('source', metavar='SOURCE_DIR', type=str, help='원본 폴더')
     parser.add_argument('dest', metavar='DEST_DIR', type=str, help='대상 폴더')
-    # parser.add_argument('-c', '--color', action='store_true', dest='color', help='색상으로 표시합니다.')
+    parser.add_argument('-c', '--color', action='store_true', dest='color', help='색상으로 표시합니다.')
     parser.add_argument('-s', '--summary', action='store_true', dest='summary', help='요약을 출력합니다.')
     parser.add_argument('-f', '--filter', dest='filter_syntax', type=str, default='+-!<>@',
                         help='대상 결과만을 보여줍니다.\n= + - ! < > @ 중 하나 이상을 조합합니다.')
@@ -265,15 +267,26 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     src_dir, dst_dir = Path(args.source), Path(args.dest)
-    print(f'#Source: {path_to_string(src_dir)}', file=args.output_file)
-    print(f'#Dest:   {path_to_string(dst_dir)}', file=args.output_file)
-    print(file=args.output_file)
+    header_src = f'#Source: {path_to_string(src_dir)}'
+    if args.color:
+        header_src = colored_output(header_src)
+    header_dst = f'#Dest:   {path_to_string(dst_dir)}'
+    if args.color:
+        header_dst = colored_output(header_dst)
+    print(f'{header_src}\n{header_dst}\n', file=args.output_file)
 
     result = sorted(compare_dir(src_dir, dst_dir), key=sort_key_for_directory_first)
     for i in result:
         if i.compare_result in args.filter_syntax:
-            print(i, file=args.output_file)
+            if args.color:
+                result_text = colored_output(str(i))
+            else:
+                result_text = str(i)
+            print(result_text, file=args.output_file)
 
     if args.summary:
         print(file=args.output_file)
-        print_summary(result, colored=False, file=args.output_file)
+        for summary_text in yield_summary_row(result):
+            if args.color:
+                summary_text = colored_output(summary_text)
+            print(summary_text, file=args.output_file)
