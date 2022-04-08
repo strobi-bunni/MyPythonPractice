@@ -9,7 +9,7 @@ from collections import defaultdict
 from itertools import chain
 from os import PathLike
 from pathlib import Path
-from typing import Dict, List, TextIO
+from typing import Dict, Iterable, List, Mapping, TextIO
 
 HASH_BLOCK_SIZE = 65536
 
@@ -65,7 +65,7 @@ def find_duplicate(*paths: PathLike, algorithm='md5') -> Dict[bytes, List[Path]]
     return {k: v for k, v in hashs.items() if len(v) >= 2}
 
 
-def format_output(out: Dict[bytes, List[Path]], file: TextIO = sys.stdout) -> None:
+def format_output(out: Mapping[bytes, Iterable[Path]], file: TextIO = sys.stdout) -> None:
     for k, v in out.items():
         print(f'Duplicate file for hash {k.hex()}', file=file)
         print('\n'.join(str(x) for x in v), file=file)

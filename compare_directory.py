@@ -30,7 +30,7 @@ import sys
 from collections import Counter
 from filecmp import dircmp
 from pathlib import Path, PurePath
-from typing import Iterator, List, NamedTuple, Tuple, Union
+from typing import Iterable, Iterator, List, NamedTuple, Tuple, Union
 
 # 비교 결과를 나타내기 위한 기호
 RESULT_SAME = '='  # 같은 대상
@@ -244,7 +244,7 @@ def colored_output(x: str) -> str:
     return x
 
 
-def yield_summary_row(res: List[CompareResult]):
+def yield_summary_row(res: Iterable[CompareResult]) -> Iterator[str]:
     cnt = Counter((r.compare_result, PATHTYPE_GROUP_ID[r.item_type]) for r in res)
     for compare_result in [RESULT_SAME, RESULT_CREATED, RESULT_DELETED, RESULT_NEWER,
                            RESULT_OLDER, RESULT_DIFF, RESULT_UNDEFINED]:
@@ -258,6 +258,8 @@ if __name__ == '__main__':
     parser.add_argument('source', metavar='SOURCE_DIR', type=str, help='원본 폴더')
     parser.add_argument('dest', metavar='DEST_DIR', type=str, help='대상 폴더')
     parser.add_argument('-c', '--color', action='store_true', dest='color', help='색상으로 표시합니다.')
+    parser.add_argument('-d', '--directory-first', action='store_true', dest='dir_first',
+                        help='폴더를 먼저 표시할 지 여부')
     parser.add_argument('-s', '--summary', action='store_true', dest='summary', help='요약을 출력합니다.')
     parser.add_argument('-f', '--filter', dest='filter_syntax', type=str, default='+-!<>@',
                         help='대상 결과만을 보여줍니다.\n= + - ! < > @ 중 하나 이상을 조합합니다.')
@@ -275,7 +277,11 @@ if __name__ == '__main__':
         header_dst = colored_output(header_dst)
     print(f'{header_src}\n{header_dst}\n', file=args.output_file)
 
-    result = sorted(compare_dir(src_dir, dst_dir), key=sort_key_for_directory_first)
+    if args.dir_first:
+        result = sorted(compare_dir(src_dir, dst_dir), key=sort_key_for_directory_first)
+    else:
+        result = sorted(compare_dir(src_dir, dst_dir))
+
     for i in result:
         if i.compare_result in args.filter_syntax:
             if args.color:
