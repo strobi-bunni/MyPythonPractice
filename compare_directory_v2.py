@@ -53,14 +53,27 @@ class CompareResult(NamedTuple):
     item_type: T_ItemTypes
     compare_result: T_CompareResultTypes
 
+    def __str__(self):
+        return f'{compare_result_abbrev[self.compare_result]}{item_type_abbrev[self.item_type]}  ' \
+               f'{path_to_string(self.path, override_is_dir=(self.item_type == "directory"))}'
 
-def count_diff_files(src: Path, dst: Path, working_dir: PurePath = PurePath('.')) -> Iterator[CompareResult]:
+
+def compare_dir(src: Path, dst: Path, working_dir: PurePath = PurePath('.')) -> Iterator[CompareResult]:
     """두 폴더 src와 dst의 내용을 비교해서 그 결과를 result 글로벌 변수에 저장한다.
 
-    :param src: 원본 경로
-    :param dst: 대상 경로
-    :param working_dir: 반환된 결과를 저장할 때 기본이 되는 상대 경로(기본값은 '.')
-    :return:
+    Parameters
+    ----------
+    src : pathlib.Path
+        원본 경로
+    dst : pathlib.Path
+        대상 경로
+    working_dir : pathlib.PurePath
+        반환된 결과를 저장할 때 기본이 되는 상대 경로(기본값은 '.')
+
+    Yields
+    ------
+    cmp : CompareResult
+        각각의 항목에 대해서 비교한 결과
     """
     dcmp = dircmp(src, dst)
     # 이름과 내용이 같은 파일들을 처리한다.
@@ -83,7 +96,7 @@ def count_diff_files(src: Path, dst: Path, working_dir: PurePath = PurePath('.')
     for name in dcmp.common_dirs:
         yield CompareResult(working_dir / name, 'directory', 'same')
         # 안의 내용물을 재귀적으로 계산한다.
-        yield from count_diff_files(src / name, dst / name, working_dir / name)
+        yield from compare_dir(src / name, dst / name, working_dir / name)
 
     # src에만 있는 항목들을 찾아서 deleted로 저장한다.
     for name in dcmp.left_only:
@@ -130,8 +143,15 @@ def mark_as_created_recursive(path: Path, working_dir=PurePath('.')) -> Iterator
 def get_type(p: Path) -> T_ItemTypes:
     """경로 p의 유형을 구한다.
 
-    :param p:
-    :return:
+    Parameters
+    ----------
+    p : pathlib.Path
+        대상 경로
+
+    Returns
+    -------
+    type_ : {'directory', 'file', 'mount', 'symlink', 'blockdev', 'chardev', 'fifo', 'socket'}
+        경로의 유형
     """
     if p.is_file():
         return 'file'  # noqa
@@ -161,6 +181,16 @@ def get_result_abbrev(x: CompareResult) -> str:
 
 
 def expand_parents_of_result(x: CompareResult) -> List[CompareResult]:
+    r"""비교 결과 x의 부모 디렉토리를 전개한다.
+    예를 들어 x가 ``+F  /path/to/file.txt``\라면 다음과 같은 식으로 전개한다.
+
+    ::
+
+        @D  /
+        @D  /path/
+        @D  /path/to/
+        +f  /path/to/file.txt
+    """
     return_list: List[CompareResult] = []
     for parent_path in reversed(x.path.parents):
         return_list.append(CompareResult(path=parent_path, item_type='directory', compare_result='undefined'))
@@ -168,11 +198,26 @@ def expand_parents_of_result(x: CompareResult) -> List[CompareResult]:
     return return_list
 
 
-def sort_result_key(x: CompareResult) -> List[Tuple[int, str]]:
+def sort_key_for_directory_first(x: CompareResult) -> List[Tuple[int, str]]:
+    r"""폴더가 위에 오도록 정렬하기 위한 키 함수이다.
+    
+    이 함수는 리스트를 반환하며, 정렬을 시행할 경우 각각의 리스트들은 사전 순서대로 정렬한다.
+    
+    리스트의 각각의 값은 폴더가 우선시되도록 정렬하기 위한 튜플이며, 그 튜플의 값은 다음과 같다.
+
+    - 첫 번째 값은 폴더이면 1, 폴더가 아니면 2의 값을 가진다. 따라서 사전 순으로 정렬할 때 폴더가 위에 온다.
+    - 두 번째 값은 대상의 이름이다. 따라서 같은 폴더거나, 같은 파일이면 이름대로 위에 온다.
+    """
     return [(item_type_sort_order[_result.item_type], _result.path.name) for _result in expand_parents_of_result(x)]
 
 
 def path_to_string(path: Union[Path, PurePath], override_is_dir=False) -> str:
+    """경로를 문자열로 변경한다.
+
+    Path.as_posix()과는 다른 점은 폴더일 때는 뒤에 슬래시가 붙는다는 점이다.
+
+    override_is_dir는 is_dir()를 쓸 수 없을 때 폴더임을 나타내기 위한 값이다.
+    """
     p = path.as_posix()
     is_dir = (isinstance(path, Path) and path.is_dir()) or (isinstance(path, PurePath) and override_is_dir)
     if is_dir:
@@ -232,7 +277,7 @@ if __name__ == '__main__':
     print_header(src_dir, dst_dir, colored=args.color, file=args.output_file)
     print(file=args.output_file)
 
-    result = sorted(count_diff_files(src_dir, dst_dir), key=sort_result_key)
+    result = sorted(compare_dir(src_dir, dst_dir), key=sort_key_for_directory_first)
 
     filter_pred = get_filter_pred(args.filter_syntax)
     for i in result:
