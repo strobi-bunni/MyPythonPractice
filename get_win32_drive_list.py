@@ -7,9 +7,8 @@ import re
 import shutil
 from ctypes.wintypes import DWORD, LPCWSTR, LPDWORD, LPWSTR
 from enum import IntEnum, IntFlag
+from string import ascii_uppercase
 from typing import List, NamedTuple
-
-ALL_DRIVE_LETTERS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
 
 
 class DriveType(IntEnum):
@@ -90,7 +89,7 @@ def get_drive_letters() -> List[str]:
     drive_list_bitmask = ctypes.windll.kernel32.GetLogicalDrives()
     # drive_list_bitmask는 현재 컴퓨터에 설치된 드라이브 리스트의 비트 마스크
     # {0x1: 'A:\\', 0x2: 'B:\\', 0x4: 'C:\\', 0x8: 'D:\\', ...}
-    return [ALL_DRIVE_LETTERS[i] for i in range(26) if drive_list_bitmask & (1 << i)]
+    return [ascii_uppercase[i] for i in range(26) if drive_list_bitmask & (1 << i)]
 
 
 def get_drive_type(letter: str) -> DriveType:
@@ -193,10 +192,7 @@ if __name__ == '__main__':
     # 터미널 크기를 구한다.
     try:
         terminal_width = os.get_terminal_size()[0]
-    # get_terminal_size가 실패할 경우 처리
-    except ValueError:  # bad file descriptor (in IDLE)
-        terminal_width = 80
-    except OSError:
+    except (ValueError, OSError):  # get_terminal_size가 실패할 경우(예: bad file descriptor (in IDLE))
         terminal_width = 80
 
     for drive_letter in get_drive_letters():
