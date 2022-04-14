@@ -62,6 +62,8 @@ RESULT_FULL_NAMES = {RESULT_SAME: 'Same', RESULT_CREATED: 'Created', RESULT_DELE
 COLORED_OUTPUT_CODE_MAPPING = {RESULT_SAME: '\033[39m', RESULT_CREATED: '\033[92m', RESULT_DELETED: '\033[91m',
                                RESULT_DIFFER: '\033[95m', RESULT_NEWER: '\033[96m', RESULT_OLDER: '\033[93m',
                                RESULT_UNDEFINED: '\033[90m', HEADER_PREFIX: '\033[1m'}
+RESULT_ALPHABETIC_SYMBOLS = {'s': RESULT_SAME, 'c': RESULT_CREATED, 'd': RESULT_DELETED, 'i': RESULT_DIFFER,
+                             'n': RESULT_NEWER, 'o': RESULT_OLDER, 'u': RESULT_UNDEFINED}
 
 
 class CompareResult(NamedTuple):
@@ -253,6 +255,17 @@ def yield_summary_row(res: Iterable[CompareResult]) -> Iterator[str]:
                f'{cnt[(compare_result, 2)]:>3d}{PATHTYPE_SYMLINK} / {cnt[(compare_result, 3)]:>3d}Others')
 
 
+def parse_filter_syntax(filter_syntax: str) -> str:
+    """필터 문자열을 해석하기 위한 중간 함수
+    """
+    filter_syntax = filter_syntax.lower()
+    if filter_syntax == 'all':
+        return (RESULT_SAME + RESULT_CREATED + RESULT_DELETED + RESULT_OLDER + RESULT_NEWER +
+                RESULT_DIFFER + RESULT_UNDEFINED)
+
+    return ''.join(RESULT_ALPHABETIC_SYMBOLS.get(c, c) for c in filter_syntax)
+
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('orig', metavar='ORIG_DIR', type=str, help='비교의 대상이 될 원본 폴더')
@@ -264,7 +277,7 @@ if __name__ == '__main__':
                         help='폴더를 먼저 표시할 지 여부')
     parser.add_argument('-s', '--summary', action='store_true', dest='summary', help='요약을 출력합니다.')
     parser.add_argument('-f', '--filter', dest='filter_syntax', type=str, default='+-!<>@',
-                        help='대상 결과만을 보여줍니다.\n= + - ! < > @ 중 하나 이상을 조합합니다.')
+                        help='대상 결과만을 보여줍니다.\n= + - ! < > @(혹은 S C D I N O U)\n중 하나 이상을 조합합니다.')
     parser.add_argument('-o', '--output', dest='output_file', type=argparse.FileType('w', encoding='utf-8'),
                         default=sys.stdout, help='출력할 파일')
 
@@ -291,7 +304,7 @@ if __name__ == '__main__':
 
     # 결과 출력
     for i in result:
-        if i.compare_result in args.filter_syntax:
+        if i.compare_result in parse_filter_syntax(args.filter_syntax):
             if args.color:
                 result_text = colored_output(str(i))
             else:
