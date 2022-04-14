@@ -36,9 +36,9 @@ from typing import Iterable, Iterator, List, NamedTuple, Tuple, Union
 RESULT_SAME = '='  # 같은 대상
 RESULT_CREATED = '+'  # 생성됨
 RESULT_DELETED = '-'  # 삭제됨
-RESULT_DIFF = '!'  # 서로 다름(src != dst)
-RESULT_NEWER = '<'  # dst의 파일이 최신임(src.mtime < dst_mtime)
-RESULT_OLDER = '>'  # src의 파일이 최신임(src.mtime > dst_mtime)
+RESULT_DIFFER = '!'  # 날짜는 같지만 서로 다름(orig != diff)
+RESULT_NEWER = '<'  # diff의 파일이 최신임(orig.mtime < diff.mtime)
+RESULT_OLDER = '>'  # orig의 파일이 최신임(orig.mtime > diff.mtime)
 RESULT_UNDEFINED = '@'  # 알 수 없음
 
 HEADER_PREFIX = '#'
@@ -58,14 +58,14 @@ PATHTYPE_SORT_ORDER = {PATHTYPE_DIRECTORY: 1, PATHTYPE_FILE: 2, PATHTYPE_MOUNT: 
 PATHTYPE_GROUP_ID = {PATHTYPE_DIRECTORY: 1, PATHTYPE_FILE: 0, PATHTYPE_MOUNT: 3, PATHTYPE_SYMLINK: 2,
                      PATHTYPE_BLOCKDEV: 3, PATHTYPE_CHARDEV: 3, PATHTYPE_FIFO: 3, PATHTYPE_SOCKET: 3}
 RESULT_FULL_NAMES = {RESULT_SAME: 'Same', RESULT_CREATED: 'Created', RESULT_DELETED: 'Deleted', RESULT_NEWER: 'Newer',
-                     RESULT_OLDER: 'Older', RESULT_DIFF: 'Diff', RESULT_UNDEFINED: 'Undefined'}
+                     RESULT_OLDER: 'Older', RESULT_DIFFER: 'Differ', RESULT_UNDEFINED: 'Undefined'}
 COLORED_OUTPUT_CODE_MAPPING = {RESULT_SAME: '\033[39m', RESULT_CREATED: '\033[92m', RESULT_DELETED: '\033[91m',
-                               RESULT_DIFF: '\033[95m', RESULT_NEWER: '\033[96m', RESULT_OLDER: '\033[93m',
+                               RESULT_DIFFER: '\033[95m', RESULT_NEWER: '\033[96m', RESULT_OLDER: '\033[93m',
                                RESULT_UNDEFINED: '\033[90m', HEADER_PREFIX: '\033[1m'}
 
 
 class CompareResult(NamedTuple):
-    path: PurePath  # src, dst에 대한 상대 경로
+    path: PurePath  # orig, diff에 대한 상대 경로
     item_type: str  # PATHTYPE_*
     compare_result: str  # RESULT_*
 
@@ -78,14 +78,14 @@ class CompareResult(NamedTuple):
         return path_to_string(self.path) < path_to_string(other.path)
 
 
-def compare_dir(src: Path, dst: Path, working_dir: PurePath = PurePath('.')) -> Iterator[CompareResult]:
-    """두 폴더 src와 dst의 내용을 비교해서 그 결과를 result 글로벌 변수에 저장한다.
+def compare_dir(orig: Path, diff: Path, working_dir: PurePath = PurePath('.')) -> Iterator[CompareResult]:
+    """두 폴더 orig와 diff의 내용을 비교해서 그 결과를 result 글로벌 변수에 저장한다.
 
     Parameters
     ----------
-    src : pathlib.Path
+    orig : pathlib.Path
         원본 경로
-    dst : pathlib.Path
+    diff : pathlib.Path
         대상 경로
     working_dir : pathlib.PurePath
         반환된 결과를 저장할 때 기본이 되는 상대 경로(기본값은 '.')
@@ -95,59 +95,59 @@ def compare_dir(src: Path, dst: Path, working_dir: PurePath = PurePath('.')) -> 
     cmp : CompareResult
         각각의 항목에 대해서 비교한 결과
     """
-    dcmp = dircmp(src, dst)
+    dcmp = dircmp(orig, diff)
     # 이름과 내용이 같은 파일들을 처리한다.
     for name in dcmp.same_files:
-        src_item = src / name
-        yield CompareResult(working_dir / name, get_type(src_item), RESULT_SAME)
+        orig_item = orig / name
+        yield CompareResult(working_dir / name, get_type(orig_item), RESULT_SAME)
 
     # 이름은 같지만 내용이 다른 파일들을 처리한다.
     for name in dcmp.diff_files:
-        src_item = src / name
-        dst_item = dst / name
+        orig_item = orig / name
+        diff_item = diff / name
 
         # 파일의 수정 시각을 비교해서 newer 혹은 older를 판단한다.
-        compare_result_type = RESULT_NEWER if src_item.stat().st_mtime < dst_item.stat().st_mtime \
-            else RESULT_OLDER if src_item.stat().st_mtime > dst_item.stat().st_mtime \
-            else RESULT_DIFF
-        yield CompareResult(working_dir / name, get_type(src_item), compare_result_type)  # noqa
+        compare_result_type = RESULT_NEWER if orig_item.stat().st_mtime < diff_item.stat().st_mtime \
+            else RESULT_OLDER if orig_item.stat().st_mtime > diff_item.stat().st_mtime \
+            else RESULT_DIFFER
+        yield CompareResult(working_dir / name, get_type(orig_item), compare_result_type)  # noqa
 
     # 동일한 폴더를 찾는다.(폴더의 이름이 동일한지의 여부, 안의 내용은 상관없다.)
     for name in dcmp.common_dirs:
         yield CompareResult(working_dir / name, PATHTYPE_DIRECTORY, RESULT_SAME)
         # 안의 내용물을 재귀적으로 계산한다.
-        yield from compare_dir(src / name, dst / name, working_dir / name)
+        yield from compare_dir(orig / name, diff / name, working_dir / name)
 
     # src에만 있는 항목들을 찾아서 deleted로 저장한다.
     for name in dcmp.left_only:
-        yield CompareResult(working_dir / name, get_type(src / name), RESULT_DELETED)
+        yield CompareResult(working_dir / name, get_type(orig / name), RESULT_DELETED)
 
         # 만약에 폴더라면 안의 내용들을 전부 deleted로 간주한다.
-        if (src / name).is_dir():
-            yield from mark_as_deleted_recursive((src / name), working_dir / name)
+        if (orig / name).is_dir():
+            yield from mark_as_deleted_recursive((orig / name), working_dir / name)
 
     # dst에만 있는 항목들을 찾아서 created로 저장한다.
     for name in dcmp.right_only:
-        yield CompareResult(working_dir / name, get_type(dst / name), RESULT_CREATED)
+        yield CompareResult(working_dir / name, get_type(diff / name), RESULT_CREATED)
         # 만약에 폴더라면 안의 내용들을 전부 created로 간주한다.
-        if (dst / name).is_dir():
-            yield from mark_as_created_recursive((dst / name), working_dir / name)
+        if (diff / name).is_dir():
+            yield from mark_as_created_recursive((diff / name), working_dir / name)
 
     # 형식이 다르거나 비교할 수 없는 항목들을 찾는다.
     for name in dcmp.common_funny:
-        src_type = get_type(src / name)
-        dst_type = get_type(dst / name)
+        orig_type = get_type(orig / name)
+        diff_type = get_type(diff / name)
         # 만약에 타입이 다르다면 src의 항목들을 deleted로, dst의 항목들을 created로 간주한다.
-        if src_type != dst_type:
-            yield CompareResult(working_dir / name, src_type, RESULT_DELETED)
-            yield CompareResult(working_dir / name, dst_type, RESULT_CREATED)
-            if src_type == PATHTYPE_DIRECTORY:
-                yield from mark_as_deleted_recursive((src / name), working_dir / name)
-            if dst_type == PATHTYPE_DIRECTORY:
-                yield from mark_as_created_recursive((dst / name), working_dir / name)
+        if orig_type != diff_type:
+            yield CompareResult(working_dir / name, orig_type, RESULT_DELETED)
+            yield CompareResult(working_dir / name, diff_type, RESULT_CREATED)
+            if orig_type == PATHTYPE_DIRECTORY:
+                yield from mark_as_deleted_recursive((orig / name), working_dir / name)
+            if diff_type == PATHTYPE_DIRECTORY:
+                yield from mark_as_created_recursive((diff / name), working_dir / name)
         # 만약 타입이 같다면 비교할 수 없다고 간주한다.
         else:
-            yield CompareResult(working_dir / name, src_type, RESULT_UNDEFINED)
+            yield CompareResult(working_dir / name, orig_type, RESULT_UNDEFINED)
 
 
 def mark_as_deleted_recursive(path: Path, working_dir=PurePath('.')) -> Iterator[CompareResult]:
@@ -247,7 +247,7 @@ def colored_output(x: str) -> str:
 def yield_summary_row(res: Iterable[CompareResult]) -> Iterator[str]:
     cnt = Counter((r.compare_result, PATHTYPE_GROUP_ID[r.item_type]) for r in res)
     for compare_result in [RESULT_SAME, RESULT_CREATED, RESULT_DELETED, RESULT_NEWER,
-                           RESULT_OLDER, RESULT_DIFF, RESULT_UNDEFINED]:
+                           RESULT_OLDER, RESULT_DIFFER, RESULT_UNDEFINED]:
         yield (f'{compare_result} {RESULT_FULL_NAMES[compare_result]:<10} '
                f'{cnt[(compare_result, 0)]:>6d}{PATHTYPE_FILE} / {cnt[(compare_result, 1)]:>5d}{PATHTYPE_DIRECTORY} / '
                f'{cnt[(compare_result, 2)]:>3d}{PATHTYPE_SYMLINK} / {cnt[(compare_result, 3)]:>3d}Others')
@@ -255,8 +255,10 @@ def yield_summary_row(res: Iterable[CompareResult]) -> Iterator[str]:
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('source', metavar='SOURCE_DIR', type=str, help='원본 폴더')
-    parser.add_argument('dest', metavar='DEST_DIR', type=str, help='대상 폴더')
+    parser.add_argument('orig', metavar='ORIG_DIR', type=str, help='비교의 대상이 될 원본 폴더')
+    parser.add_argument('diff', metavar='DIFF_DIR', type=str, help='변경 내용이 있는 대상 폴더')
+    parser.add_argument('-r', '--reverse', action='store_true', dest='reverse',
+                        help='원본 폴더와 대상 폴더를 뒤바꿉니다.')
     parser.add_argument('-c', '--color', action='store_true', dest='color', help='색상으로 표시합니다.')
     parser.add_argument('-d', '--directory-first', action='store_true', dest='dir_first',
                         help='폴더를 먼저 표시할 지 여부')
@@ -268,20 +270,26 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
 
-    src_dir, dst_dir = Path(args.source), Path(args.dest)
-    header_src = f'#Source: {path_to_string(src_dir)}'
+    # 원본 폴더와 대상 폴더 설정
+    orig_dir, diff_dir = Path(args.orig), Path(args.diff)
+    if args.reverse:
+        orig_dir, diff_dir = diff_dir, orig_dir
+
+    # 헤더 출력
+    header_src = f'#ORIG: {path_to_string(orig_dir)}'
     if args.color:
         header_src = colored_output(header_src)
-    header_dst = f'#Dest:   {path_to_string(dst_dir)}'
+    header_tgt = f'#DIFF: {path_to_string(diff_dir)}'
     if args.color:
-        header_dst = colored_output(header_dst)
-    print(f'{header_src}\n{header_dst}\n', file=args.output_file)
+        header_tgt = colored_output(header_tgt)
+    print(f'{header_src}\n{header_tgt}\n', file=args.output_file)
 
     if args.dir_first:
-        result = sorted(compare_dir(src_dir, dst_dir), key=sort_key_for_directory_first)
+        result = sorted(compare_dir(orig_dir, diff_dir), key=sort_key_for_directory_first)
     else:
-        result = sorted(compare_dir(src_dir, dst_dir))
+        result = sorted(compare_dir(orig_dir, diff_dir))
 
+    # 결과 출력
     for i in result:
         if i.compare_result in args.filter_syntax:
             if args.color:
@@ -290,6 +298,7 @@ if __name__ == '__main__':
                 result_text = str(i)
             print(result_text, file=args.output_file)
 
+    # 요약본 출력
     if args.summary:
         print(file=args.output_file)
         for summary_text in yield_summary_row(result):
