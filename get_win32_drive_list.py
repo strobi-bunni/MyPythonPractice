@@ -150,6 +150,22 @@ def get_drive_info(letter: str) -> DriveInfo:
                      FileSystemFlags(lp_file_system_flags.contents.value), lp_file_system_name_buffer.value)
 
 
+def simplified_filesystem_flag(flag: FileSystemFlags) -> str:
+    """플래그를 약어로 표시한다.
+
+    참고 : 공식적인 약어는 아니다
+    """
+    flag_abbrs = ['C', 'PN', 'U', 'ACL', 'CO', 'Q', 'SP', 'RP', 'ISCO', 'OID', 'ENC', 'NS', 'RO', 'WO', 'TR', 'HL',
+                  'XA', 'OPENID', 'USN', 'BR', 'DAX']  # 플래그 약어
+    strs = []
+    for abbr, value in zip(flag_abbrs, sorted((x.value for x in FileSystemFlags.__members__.values()))):
+        if flag & value:
+            strs.append(abbr)
+        else:
+            strs.append(''.join(' ' for _ in abbr))  # 같은 크기의 공백으로 대체
+    return f"Flags: {' '.join(strs)}".strip()
+
+
 def format_percent_to_bar(ratio: float, width: int = 79, fillchar: str = '@', emptychar: str = '.') -> str:
     r"""0 이상 1 이하의 비율 ratio을 막대로 표시한다.
 
@@ -194,7 +210,8 @@ def print_drive_info(letter: str) -> None:
     drive_type = get_drive_type(letter)
     drive_info = get_drive_info(letter)
     print(f'{drive_info.drive_label} ({normalize_drive_letter(letter, trailing_backslash=False)})\n'
-          f'{drive_type.name}, {drive_info.filesystem_name}')
+          f'{drive_type.name}, {drive_info.filesystem_name}\n'
+          f'{simplified_filesystem_flag(drive_info.filesystem_flags)}')
     try:
         disk_usage = shutil.disk_usage(letter + ':')
     except OSError:
