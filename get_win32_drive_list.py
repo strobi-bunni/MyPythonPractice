@@ -188,6 +188,26 @@ def format_percent_to_bar(ratio: float, width: int = 79, fillchar: str = '@', em
     return '{0:{emptychar}<{width}}'.format(bar, emptychar=emptychar, width=width)
 
 
+def print_drive_info(letter: str) -> None:
+    """드라이브 정보를 보기 쉽게 출력한다.
+    """
+    drive_type = get_drive_type(letter)
+    drive_info = get_drive_info(letter)
+    print(f'{drive_info.drive_label} ({normalize_drive_letter(letter, trailing_backslash=False)})\n'
+          f'{drive_type.name}, {drive_info.filesystem_name}')
+    try:
+        disk_usage = shutil.disk_usage(letter + ':')
+    except OSError:
+        print('Drive not available')
+    else:
+        use_ratio = disk_usage.used / disk_usage.total
+        print(f'{disk_usage.used / 1073741824:.1f} GiB used / '
+              f'{disk_usage.free / 1073741824:.1f} GiB free / '
+              f'{disk_usage.total / 1073741824:.1f} GiB total '
+              f'({use_ratio:.1%})')
+        print(f'[{format_percent_to_bar(use_ratio, width=terminal_width - 3)}]')
+
+
 if __name__ == '__main__':
     # 터미널 크기를 구한다.
     try:
@@ -196,20 +216,5 @@ if __name__ == '__main__':
         terminal_width = 80
 
     for drive_letter in get_drive_letters():
-        drive_type = get_drive_type(drive_letter)
-        drive_info = get_drive_info(drive_letter)
-        print(f'{drive_info.drive_label} ({normalize_drive_letter(drive_letter, trailing_backslash=False)})\n'
-              f'{drive_type.name}, {drive_info.filesystem_name}')
-        try:
-            disk_usage = shutil.disk_usage(drive_letter + ':')
-        except OSError:
-            print('Drive not available')
-        else:
-            use_ratio = disk_usage.used / disk_usage.total
-            print(f'{disk_usage.used / 1073741824:.1f} GiB used / '
-                  f'{disk_usage.free / 1073741824:.1f} GiB free / '
-                  f'{disk_usage.total / 1073741824:.1f} GiB total '
-                  f'({use_ratio:.1%})')
-            print(f'[{format_percent_to_bar(use_ratio, width=terminal_width - 3)}]')
-
+        print_drive_info(drive_letter)
         print()
