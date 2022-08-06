@@ -4,7 +4,7 @@ from itertools import repeat
 from typing import Iterator, List, Literal, NamedTuple, Optional, Union
 
 marker_abbr = {'equal': '  ', 'insert': '+ ', 'delete': '- ', 'replace': '@ '}
-marker_color_code = {'equal': '\033[39m', 'insert': '\033[92m', 'delete': '\033[91m', 'replace': '\033[93m'}
+marker_color_code = {'equal': '\x1b[39m', 'insert': '\x1b[92m', 'delete': '\x1b[91m', 'replace': '\x1b[93m'}
 
 
 def int_str_length(i: int) -> int:
@@ -83,7 +83,7 @@ def format_differ_group_header(gh: DifferGroupHeader, source_length: int, dest_l
     else:
         margin = ''
     if colored:
-        return f'\n{margin}\033[93m{gh}\033[0m'
+        return f'\n{margin}\x1b[93m{gh}\x1b[0m'
     else:
         return f'\n{margin}{gh}'
 
@@ -95,7 +95,7 @@ def format_differ_line(d: DifferLine, source_length: int, dest_length: int, colo
         if d.dest_line_no else ' ' * int_str_length(dest_length)
     marker = marker_abbr[d.marker]
     color_code_starts = marker_color_code[d.marker] if colored else ''
-    color_code_ends = '\033[0m' if colored else ''
+    color_code_ends = '\x1b[0m' if colored else ''
 
     if show_line_no:
         return f'{color_code_starts} {source_line_no_str} {dest_line_no_str} {marker}{d.string}{color_code_ends}'

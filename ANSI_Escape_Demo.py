@@ -4,7 +4,7 @@ r"""
 .. _`ANSI 이스케이프 시퀀스` : https://en.wikipedia.org/wiki/ANSI_escape_code
 
 글자에 효과를 주기 위한 ANSI 이스케이프 시퀀스는 다음과 같다. 다음 시퀀스를 입력하면 이후에 입력되는 글자에는 효과가 적용된다.
-여기서 *ESC*\는 이스케이프 문자(U+0027, \\x1f 혹은 \\033)이다.
+여기서 *ESC*\는 이스케이프 문자(U+001B, \\x1b 혹은 \\033)이다.
 
 *ESC* ``[`` *Code* ``m``
 
@@ -47,10 +47,10 @@ code_mapping = [
 
 if __name__ == '__main__':
     print(dedent("""
-          How to use ANSI escape code: print('\\033[\033[1m\033[93m<CODE>\033[0mmTEXT')
-          Example: '\\033[44mHello\\033[0m\\033[93mWorld\\033[0m' -> \033[44mHello\033[0m\033[93mWorld\033[0m
+          How to use ANSI escape code: print('\\x1b[\x1b[1m\x1b[93m<CODE>\x1b[0mmTEXT')
+          Example: '\\x1b[44mHello\\x1b[0m\\x1b[93mWorld\\x1b[0m' -> \x1b[44mHello\x1b[0m\x1b[93mWorld\x1b[0m
            
           Code    Description                   Example
           --------------------------------------------------------------------"""))
     for i, s in code_mapping:
-        print(f'{i:<8}{s:<30}\033[{i}m{s}\033[0m')
+        print(f'{i:<8}{s:<30}\x1b[{i}m{s}\x1b[0m')

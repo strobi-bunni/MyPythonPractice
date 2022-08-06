@@ -59,9 +59,9 @@ PATHTYPE_GROUP_ID = {PATHTYPE_DIRECTORY: 1, PATHTYPE_FILE: 0, PATHTYPE_MOUNT: 3,
                      PATHTYPE_BLOCKDEV: 3, PATHTYPE_CHARDEV: 3, PATHTYPE_FIFO: 3, PATHTYPE_SOCKET: 3}
 RESULT_FULL_NAMES = {RESULT_SAME: 'Same', RESULT_CREATED: 'Created', RESULT_DELETED: 'Deleted', RESULT_NEWER: 'Newer',
                      RESULT_OLDER: 'Older', RESULT_DIFFER: 'Differ', RESULT_UNDEFINED: 'Undefined'}
-COLORED_OUTPUT_CODE_MAPPING = {RESULT_SAME: '\033[39m', RESULT_CREATED: '\033[92m', RESULT_DELETED: '\033[91m',
-                               RESULT_DIFFER: '\033[95m', RESULT_NEWER: '\033[96m', RESULT_OLDER: '\033[93m',
-                               RESULT_UNDEFINED: '\033[90m', HEADER_PREFIX: '\033[1m'}
+COLORED_OUTPUT_CODE_MAPPING = {RESULT_SAME: '\x1b[39m', RESULT_CREATED: '\x1b[92m', RESULT_DELETED: '\x1b[91m',
+                               RESULT_DIFFER: '\x1b[95m', RESULT_NEWER: '\x1b[96m', RESULT_OLDER: '\x1b[93m',
+                               RESULT_UNDEFINED: '\x1b[90m', HEADER_PREFIX: '\x1b[1m'}
 RESULT_ALPHABETIC_SYMBOLS = {'s': RESULT_SAME, 'c': RESULT_CREATED, 'd': RESULT_DELETED, 'i': RESULT_DIFFER,
                              'n': RESULT_NEWER, 'o': RESULT_OLDER, 'u': RESULT_UNDEFINED}
 
@@ -242,7 +242,7 @@ def path_to_string(path: Union[Path, PurePath], override_is_dir=False) -> str:
 def colored_output(x: str) -> str:
     for prefix, color_code in COLORED_OUTPUT_CODE_MAPPING.items():
         if x.startswith(prefix):
-            return color_code + x + '\033[0m'
+            return color_code + x + '\x1b[0m'
     return x
 
 
