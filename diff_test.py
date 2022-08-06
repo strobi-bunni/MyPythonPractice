@@ -21,7 +21,7 @@ def int_str_length(i: int) -> int:
 def int_right_align(i: int, length: int) -> str:
     """정수를 오른쪽 정렬한다.
     """
-    return '{{:>{}}}'.format(length).format(i)
+    return '{i:>{length}}'.format(i=i, length=length)
 
 
 class DifferGroupHeader(NamedTuple):
