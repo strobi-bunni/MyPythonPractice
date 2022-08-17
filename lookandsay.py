@@ -23,14 +23,14 @@ Look-and-say sequence는 :math:`a(1) = 1`\부터 시작해서 다음과 같이 �
 
 see more information : https://en.wikipedia.org/wiki/Look-and-say_sequence
 """
-
 from itertools import groupby
+from typing import Iterator
 
 
-def lookandsay_gen(x0):
+def lookandsay_gen(x0: str) -> Iterator[str]:
     while True:
         yield x0
-        x0 = ''.join(str(len(list(j))) + i for i, j in groupby(x0))
+        x0 = ''.join(f'{len(list(j))}{i}' for i, j in groupby(x0))  # type: i: str; j: Iterator[str]
 
 
 las = lookandsay_gen('1')

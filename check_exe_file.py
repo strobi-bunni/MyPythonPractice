@@ -1,3 +1,8 @@
+"""
+이 스크립트는 Windows용 exe 파일의 PE 헤더를 읽어서 대상 아키텍처를 확인한다.
+
+참고 문서: https://docs.microsoft.com/en-us/windows/win32/debug/pe-format#machine-types
+"""
 import argparse
 
 parser = argparse.ArgumentParser()
