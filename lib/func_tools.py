@@ -193,7 +193,7 @@ def null_safety(argname: str, fallback_value: Any = None):
         @null_safety('items', None)  # 이쪽이 우선순위가 높음
         @null_safety('x', -1)
         def get_index(items: List[T], x: T) -> int:
-            return a.index(item)
+            return items.index(x)
 
         print(get_index([1, 2, 3, 4], 2))   # 1
         print(get_index(None, 1))   # None
@@ -209,7 +209,7 @@ def null_safety(argname: str, fallback_value: Any = None):
         @null_safety('fallback', -999)   # fallback의 기본값이 None이므로 적용 안됨
         def get_index(items: List[T], x: T, fallback=None) -> int:
             if x in items:
-                return a.index(item)
+                return items.index(x)
             else:
                 return fallback
 
