@@ -16,6 +16,7 @@ if __name__ == '__main__':
 
     for line in output.decode(terminal_encoding).split(terminal_newline_char):
         print(line)
+    pipe.close()
 
     # 2. 더 쉬운 방법
     # encoding 키워드 인자를 지정하면 터미널 줄바꿈(Windows 기준 '\r\n')을 사용하지 않고
