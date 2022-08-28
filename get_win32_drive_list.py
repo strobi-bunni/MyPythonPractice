@@ -134,12 +134,12 @@ def get_drive_info(letter: str) -> DriveInfo:
     .. _`GetVolumeInformationW` : https://docs.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-getvolumeinformationw
     """
     lp_root_path_name = LPCWSTR(normalize_drive_letter(letter))
-    lp_volume_name_buffer = LPWSTR('')
+    lp_volume_name_buffer = LPWSTR('\x00' * 255)
     n_volume_name_size = DWORD(256)
     lp_volume_serial_number = LPDWORD(ctypes.c_ulong(0))
     lp_maximum_component_length = LPDWORD(ctypes.c_ulong(0))
     lp_file_system_flags = LPDWORD(ctypes.c_ulong(0))
-    lp_file_system_name_buffer = LPWSTR('')
+    lp_file_system_name_buffer = LPWSTR('\x00' * 255)
     n_file_system_name_size = DWORD(256)
 
     ctypes.windll.kernel32.GetVolumeInformationW(
