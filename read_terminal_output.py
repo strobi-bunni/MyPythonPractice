@@ -11,12 +11,11 @@ if __name__ == '__main__':
     command = 'dir'  # 실행할 명령어
 
     # 1. Popen 클래스 사용
-    pipe = Popen(command.split(), shell=True, stdout=PIPE).stdout
-    output = pipe.read()
+    with Popen(command.split(), shell=True, stdout=PIPE).stdout as pipe:
+        output = pipe.read()
 
-    for line in output.decode(terminal_encoding).split(terminal_newline_char):
-        print(line)
-    pipe.close()
+        for line in output.decode(terminal_encoding).split(terminal_newline_char):
+            print(line)
 
     # 2. 더 쉬운 방법
     # encoding 키워드 인자를 지정하면 터미널 줄바꿈(Windows 기준 '\r\n')을 사용하지 않고
