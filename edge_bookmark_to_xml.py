@@ -29,5 +29,7 @@ if __name__ == '__main__':
         insert_data_in_elem(item, root)
 
     xmlstr = parseString(tostring(root)).toprettyxml(encoding='utf-8')
-    with open('./sandbox/bookmark_backup.xml', 'wb') as wf:
+    output_file_path = Path('out/bookmark_backup.xml')
+    output_file_path.parent.mkdir(parents=True, exist_ok=True)
+    with open(output_file_path, 'wb') as wf:
         wf.write(xmlstr)

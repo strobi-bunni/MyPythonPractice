@@ -3,6 +3,7 @@ Creates Pascal's Triangle SVG file with built-in xml module.
 """
 import math
 from numbers import Real
+from pathlib import Path
 from typing import Any, Optional
 from xml.dom.minidom import parseString
 from xml.etree.ElementTree import Element, SubElement, tostring
@@ -64,5 +65,7 @@ if __name__ == '__main__':
                      math.comb(row, col),
                      {'class': 'number'})
 
-    with open('sandbox/output.svg', 'wb') as f:
+    output_file_path = Path('out/output.svg')
+    output_file_path.parent.mkdir(parents=True, exist_ok=True)
+    with open(output_file_path, 'wb') as f:
         f.write(parseString(tostring(root)).toprettyxml(encoding='utf-8'))

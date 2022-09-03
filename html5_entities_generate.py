@@ -3,8 +3,11 @@
 """
 import html.entities
 import unicodedata
+from pathlib import Path
 
-f = open('html5_entities.md', 'w', encoding='utf-8')
+output_file_path = Path('out/html5_entities.md')
+output_file_path.parent.mkdir(parents=True, exist_ok=True)
+f = open(output_file_path, 'w', encoding='utf-8')
 
 
 def get_unicode_code_of_str(s: str) -> str:

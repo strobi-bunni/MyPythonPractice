@@ -29,7 +29,9 @@ if __name__ == '__main__':
         insert_data_in_elem(item, root)
 
     xmlstr: str = tostring(root, encoding='utf-8', method='html').decode()
-    with open('./bookmark_backup.html', 'w', encoding='utf') as wf:
+    output_file_path = Path('out/bookmark_backup.html')
+    output_file_path.parent.mkdir(parents=True, exist_ok=True)
+    with open(output_file_path, 'w', encoding='utf-8') as wf:
         wf.write('''
         <!DOCTYPE html>
         <head>
