@@ -32,20 +32,19 @@ if __name__ == '__main__':
     output_file_path = Path('out/bookmark_backup.html')
     output_file_path.parent.mkdir(parents=True, exist_ok=True)
     with open(output_file_path, 'w', encoding='utf-8') as wf:
-        wf.write('''
+        wf.write(f'''
         <!DOCTYPE html>
+        <html>
         <head>
             <title>Bookmark list</title>
             <meta charset="utf-8" />
             <style>
-        ''')
-        wf.write(Path('./res/bookmark_backup.css').read_text(encoding='utf-8'))
-        wf.write('''
+            {Path("./res/bookmark_backup.css").read_text(encoding="utf-8")}
             </style>
         </head>
         <body>
+            {xmlstr}
+            <script>
+            {Path("./res/bookmark_backup.js").read_text(encoding="utf-8")}
+        </script></body></html>
         ''')
-        wf.write(xmlstr)
-        wf.write('<script>')
-        wf.write(Path('./res/bookmark_backup.js').read_text(encoding='utf-8'))
-        wf.write('</script></body></html>')
