@@ -31,20 +31,19 @@ if __name__ == '__main__':
     xmlstr: str = tostring(root, encoding='utf-8', method='html').decode()
     output_file_path = Path('out/bookmark_backup.html')
     output_file_path.parent.mkdir(parents=True, exist_ok=True)
-    with open(output_file_path, 'w', encoding='utf-8') as wf:
-        wf.write(f'''
-        <!DOCTYPE html>
-        <html>
-        <head>
-            <title>Bookmark list</title>
-            <meta charset="utf-8" />
-            <style>
-            {Path("./res/bookmark_backup.css").read_text(encoding="utf-8")}
-            </style>
-        </head>
-        <body>
-            {xmlstr}
-            <script>
-            {Path("./res/bookmark_backup.js").read_text(encoding="utf-8")}
-        </script></body></html>
-        ''')
+    output_file_path.write_text(f'''
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <title>Bookmark list</title>
+        <meta charset="utf-8" />
+        <style>
+        {Path("./res/bookmark_backup.css").read_text(encoding="utf-8")}
+        </style>
+    </head>
+    <body>
+        {xmlstr}
+        <script>
+        {Path("./res/bookmark_backup.js").read_text(encoding="utf-8")}
+    </script></body></html>
+    ''', encoding='utf-8')

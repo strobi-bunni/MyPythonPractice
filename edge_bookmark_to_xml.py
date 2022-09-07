@@ -31,5 +31,4 @@ if __name__ == '__main__':
     xmlstr = parseString(tostring(root)).toprettyxml(encoding='utf-8')
     output_file_path = Path('out/bookmark_backup.xml')
     output_file_path.parent.mkdir(parents=True, exist_ok=True)
-    with open(output_file_path, 'wb') as wf:
-        wf.write(xmlstr)
+    output_file_path.write_bytes(xmlstr)
