@@ -215,15 +215,13 @@ def dict_gets(d: Mapping[KT, VT], *keys: KT, default: VT = None) -> VT:
     >>> my_dict.get('b', my_dict.get('c', my_dict.get('d', 10)))
     2
     """
-    value = default
     for key in keys:
         if key in d:
-            value = d[key]
-            break
-    return value
+            return d[key]
+    return default
 
 
-def left_join(d1: Mapping[KT, VT], d2: Mapping[KT, VT2]) -> Dict[KT, Tuple[VT, Optional[VT2]]]:
+def left_join(d1: Mapping[KT, VT], d2: Mapping[KT, VT2], default=None) -> Dict[KT, Tuple[VT, Optional[VT2]]]:
     r"""{d1의 키: (d1의 값, d1의 키에 매칭되는 d2의 값)} 딕셔너리를 제작한다.
 
     만약에 d1의 키에 매칭되는 d2의 값이 없다면 해당 값은 None으로 대체된다.
@@ -236,6 +234,8 @@ def left_join(d1: Mapping[KT, VT], d2: Mapping[KT, VT2]) -> Dict[KT, Tuple[VT, O
         키의 원본이 되는 딕셔너리
     d2 : Mapping
         병합할 대상 딕셔너리
+    default : Any
+        d1의 키가 d2에 없을 때 d2의 값 대신 사용할 값
 
     Returns
     -------
@@ -249,10 +249,10 @@ def left_join(d1: Mapping[KT, VT], d2: Mapping[KT, VT2]) -> Dict[KT, Tuple[VT, O
     >>> left_join(a, b))
     {'a': (1, None), 'b': (2, None), 'c': (3, 10), 'd': (4, 20)}
     """
-    return {k: (v, d2.get(k)) for (k, v) in d1.items()}
+    return {k: (v, d2.get(k, default)) for (k, v) in d1.items()}
 
 
-def right_join(d1: Mapping[KT, VT], d2: Mapping[KT, VT2]) -> Dict[KT, Tuple[Optional[VT], VT2]]:
+def right_join(d1: Mapping[KT, VT], d2: Mapping[KT, VT2], default=None) -> Dict[KT, Tuple[Optional[VT], VT2]]:
     r"""{d2의 키: (d1의 값, d2의 키에 매칭되는 d1의 값)} 딕셔너리를 제작한다.
 
     만약에 d2의 키에 매칭되는 d1의 값이 없다면 해당 값은 None으로 대체된다.
@@ -265,6 +265,8 @@ def right_join(d1: Mapping[KT, VT], d2: Mapping[KT, VT2]) -> Dict[KT, Tuple[Opti
         병합할 대상 딕셔너리
     d2 : Mapping
         키의 원본이 되는 딕셔너리
+    default : Any
+        d2의 키가 d1에 없을 때 d1의 값 대신 사용할 값
 
     Returns
     -------
@@ -278,10 +280,12 @@ def right_join(d1: Mapping[KT, VT], d2: Mapping[KT, VT2]) -> Dict[KT, Tuple[Opti
     >>> right_join(a, b))
     {'c': (3, 10), 'd': (4, 20), 'e': (None, 30), 'f': (None, 40)}
     """
-    return {k: (d1.get(k), v2) for (k, v2) in d2.items()}
+    return {k: (d1.get(k, default), v2) for (k, v2) in d2.items()}
 
 
-def full_outer_join(d1: Mapping[KT, VT], d2: Mapping[KT, VT2]) -> Dict[KT, Tuple[Optional[VT], Optional[VT2]]]:
+def full_outer_join(
+    d1: Mapping[KT, VT], d2: Mapping[KT, VT2], default=None
+) -> Dict[KT, Tuple[Optional[VT], Optional[VT2]]]:
     """{d1 및 d2의 키: (매칭되는 d1의 값, 매칭되는 d2의 값)} 딕셔너리를 제작한다.
 
     만약에 d1의 키에 매칭되는 d2의 값이 없거나, d2의 키에 매칭되는 d1의 값이 해당 값이 없다면 해당 값은 None으로 대체된다.
@@ -294,6 +298,8 @@ def full_outer_join(d1: Mapping[KT, VT], d2: Mapping[KT, VT2]) -> Dict[KT, Tuple
         키의 원본이 되는 딕셔너리
     d2 : Mapping
         병합할 대상 딕셔너리
+    default : Any
+        d1의 키가 d2에 없거나, d2의 키가 d1에 없을 때 해당 딕셔너리의 값 대신 사용할 값
 
     Returns
     -------
@@ -307,10 +313,10 @@ def full_outer_join(d1: Mapping[KT, VT], d2: Mapping[KT, VT2]) -> Dict[KT, Tuple
     >>> full_outer_join(a, b)
     {'a': (1, None), 'b': (2, None), 'c': (3, 10), 'd': (4, 20), 'e': (None, 30), 'f': (None, 40)}
     """
-    d = left_join(d1, d2)
+    d = left_join(d1, d2, default=default)
     for k, v in d2.items():
         if k not in d:
-            d[k] = (None, v)
+            d[k] = (default, v)
     return d
 
 
