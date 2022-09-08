@@ -7,7 +7,7 @@ UNIX_TIME_EPOCH = datetime.datetime(1970, 1, 1, 0, 0, 0, 0, tzinfo=UTC)
 
 def _convert_to_local_time(t: datetime.datetime) -> datetime.datetime:
     """시간을 로컬 시간대로 변경"""
-    return datetime.datetime(t.year, t.month, t.day, t.hour, t.minute, t.second, t.microsecond)
+    return t.replace(tzinfo=None)
 
 
 def convert_timestamp_to_datetime(ts: Union[int, float], tz: Optional[datetime.timezone] = UTC) -> datetime.datetime:
@@ -37,7 +37,7 @@ def convert_timestamp_to_datetime(ts: Union[int, float], tz: Optional[datetime.t
         return local_time.astimezone(tz)
 
 
-T_Timespec = Literal["microseconds", "milliseconds", "seconds", "minutes"]
+T_Timespec = Literal["microseconds", "milliseconds", "seconds", "minutes", "hours"]
 
 
 def truncate_datetime(dt: datetime.datetime, timespec: T_Timespec = "seconds") -> datetime.datetime:
@@ -47,7 +47,7 @@ def truncate_datetime(dt: datetime.datetime, timespec: T_Timespec = "seconds") -
     ----------
     dt : datetime.datetime
         datetime 객체
-    timespec : {'microseconds', 'milliseconds', 'seconds', 'minutes'}
+    timespec : {'microseconds', 'milliseconds', 'seconds', 'minutes', 'hours'}
         시각 정밀도
 
     Returns
@@ -55,15 +55,15 @@ def truncate_datetime(dt: datetime.datetime, timespec: T_Timespec = "seconds") -
     truncated_dt : datetime.datetime
         잘라낸 시각
     """
-    date_parts = ((_date := dt.date()).year, _date.month, _date.day)
-
     if timespec == "microseconds":
         return dt
     elif timespec == "milliseconds":
-        return datetime.datetime(
-            *date_parts, dt.hour, dt.minute, dt.second, dt.microsecond // 1000 * 1000, tzinfo=dt.tzinfo
-        )
+        return dt.replace(microsecond=dt.microsecond // 1000 * 1000)
     elif timespec == "seconds":
-        return datetime.datetime(*date_parts, dt.hour, dt.minute, dt.second, tzinfo=dt.tzinfo)
+        return dt.replace(microsecond=0)
+    elif timespec == "minutes":
+        return dt.replace(second=0, microsecond=0)
+    elif timespec == "hours":
+        return dt.replace(minute=0, second=0, microsecond=0)
     else:
-        return datetime.datetime(*date_parts, dt.hour, dt.minute, tzinfo=dt.tzinfo)
+        raise ValueError('Invalid timespec')

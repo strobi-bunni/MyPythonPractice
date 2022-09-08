@@ -224,7 +224,7 @@ def dict_gets(d: Mapping[KT, VT], *keys: KT, default: VT = None) -> VT:
 def left_join(d1: Mapping[KT, VT], d2: Mapping[KT, VT2], default=None) -> Dict[KT, Tuple[VT, Optional[VT2]]]:
     r"""{d1의 키: (d1의 값, d1의 키에 매칭되는 d2의 값)} 딕셔너리를 제작한다.
 
-    만약에 d1의 키에 매칭되는 d2의 값이 없다면 해당 값은 None으로 대체된다.
+    만약에 d1의 키에 매칭되는 d2의 값이 없다면 해당 값은 default로 대체된다.
 
     이는 SQL의 LEFT JOIN 키워드와 유사하다.
 
@@ -255,7 +255,7 @@ def left_join(d1: Mapping[KT, VT], d2: Mapping[KT, VT2], default=None) -> Dict[K
 def right_join(d1: Mapping[KT, VT], d2: Mapping[KT, VT2], default=None) -> Dict[KT, Tuple[Optional[VT], VT2]]:
     r"""{d2의 키: (d1의 값, d2의 키에 매칭되는 d1의 값)} 딕셔너리를 제작한다.
 
-    만약에 d2의 키에 매칭되는 d1의 값이 없다면 해당 값은 None으로 대체된다.
+    만약에 d2의 키에 매칭되는 d1의 값이 없다면 해당 값은 default로 대체된다.
 
     이는 SQL의 RIGHT JOIN 키워드와 유사하다.
 
@@ -288,7 +288,7 @@ def full_outer_join(
 ) -> Dict[KT, Tuple[Optional[VT], Optional[VT2]]]:
     """{d1 및 d2의 키: (매칭되는 d1의 값, 매칭되는 d2의 값)} 딕셔너리를 제작한다.
 
-    만약에 d1의 키에 매칭되는 d2의 값이 없거나, d2의 키에 매칭되는 d1의 값이 해당 값이 없다면 해당 값은 None으로 대체된다.
+    만약에 d1의 키에 매칭되는 d2의 값이 없거나, d2의 키에 매칭되는 d1의 값이 해당 값이 없다면 해당 값은 default로 대체된다.
 
     이는 SQL의 FULL OUTER JOIN 키워드와 유사하다.
 
