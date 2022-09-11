@@ -19,16 +19,16 @@ r"""
 import argparse
 import re
 import sys
-from typing import AnyStr, Literal
+from typing import Literal
 
 
-def convert_newline(s: AnyStr, mode: Literal["cr", "lf", "crlf"] = "lf") -> AnyStr:
+def convert_newline(s: str, mode: Literal["cr", "lf", "crlf"] = "lf") -> str:
     r"""
     새 줄 문자를 통일된 형식으로 바꾼다.
 
     Parameters
     ----------
-    s : str or bytes
+    s : str
         변환할 문자열
     mode : {'cr', 'lf', 'crlf'}
         변환할 새 줄 문자. 기본값은 'lf'이다.
@@ -43,7 +43,7 @@ def convert_newline(s: AnyStr, mode: Literal["cr", "lf", "crlf"] = "lf") -> AnyS
 
     Returns
     -------
-    new_s : str or bytes
+    new_s : str
         줄바꿈 문자가 변환된 새 문자
 
     Exceptions
@@ -55,22 +55,17 @@ def convert_newline(s: AnyStr, mode: Literal["cr", "lf", "crlf"] = "lf") -> AnyS
     --------
     >>> convert_newline('abcde\rfghij\r\nklmno\npqrst')
     'abcde\nfghij\nklmno\npqrst'
-    >>> convert_newline(b'abcde\rfghij\r\nklmno\npqrst')
-    b'abcde\nfghij\nklmno\npqrst'
     """
     if mode not in ["cr", "lf", "crlf"]:
         raise ValueError("`Mode` must be 'cr', 'lf' or 'crlf'")
 
-    is_str = isinstance(s, str)
-    b = s.encode() if is_str else s
-
-    new_b = b.replace(b"\r\n", b"\n").replace(b"\r", b"\n")
+    new_s = s.replace("\r\n", "\n").replace("\r", "\n")
     if mode == "cr":
-        new_b = new_b.replace(b"\n", b"\r")
+        new_s = new_s.replace("\n", "\r")
     elif mode == "crlf":
-        new_b = new_b.replace(b"\n", b"\r\n")
+        new_s = new_s.replace("\n", "\r\n")
 
-    return new_b.decode() if is_str else new_b
+    return new_s
 
 
 if __name__ == '__main__':
@@ -79,6 +74,7 @@ if __name__ == '__main__':
     parser.add_argument('-e', '--encoding', help='인코딩', type=str, default='utf-8')
     parser.add_argument('-n', '--newline', help='개행 문자', type=str,
                         choices=['cr', 'lf', 'crlf', 'auto'], default='auto')
+    parser.add_argument('-v', '--verbose', help='자세한 설명을 출력할지 여부', action='store_true')
     args = parser.parse_args()
 
     if (input_file := args.input) is sys.stdin:
@@ -119,5 +115,14 @@ if __name__ == '__main__':
             number_of_words += len(words)
             number_of_valid_chars += sum(len(w) for w in words)
 
-    print(f'{filename} | {size_of_file}S {number_of_lines}L {number_of_valid_lines}N '
-          f'{number_of_words}W {number_of_chars}C {number_of_valid_chars}V')
+    if args.verbose:
+        print(f'{filename}\n'
+              f'{size_of_file} bytes\n'
+              f'{number_of_lines} lines\n'
+              f'{number_of_valid_lines} valid(meaningful) lines\n'
+              f'{number_of_words} words\n'
+              f'{number_of_chars} characters\n'
+              f'{number_of_valid_chars} valid(meaningful) characters')
+    else:
+        print(f'{filename} | {size_of_file}S {number_of_lines}L {number_of_valid_lines}N '
+              f'{number_of_words}W {number_of_chars}C {number_of_valid_chars}V')

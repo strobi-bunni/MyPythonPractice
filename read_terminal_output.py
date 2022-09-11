@@ -11,14 +11,14 @@ if __name__ == '__main__':
     command = 'dir'  # 실행할 명령어
 
     # 1. Popen 클래스 사용
-    with Popen(command.split(), shell=True, stdout=PIPE).stdout as pipe:
+    with Popen(command, shell=True, stdout=PIPE).stdout as pipe:
         output = pipe.read()
 
-        for line in output.decode(terminal_encoding).split(terminal_newline_char):
-            print(line)
+        # 뒤의 replace 메서드는 터미널의 개행 문자(CRLF)를 일반 개행 문자(LF)로 바꾸기 위해서이다.
+        print(output.decode(terminal_encoding).replace(terminal_newline_char, '\n'))
 
     # 2. 더 쉬운 방법
     # encoding 키워드 인자를 지정하면 터미널 줄바꿈(Windows 기준 '\r\n')을 사용하지 않고
     # 일반 줄바꿈 '\n'을 사용한다.
-    run_stdout = run(command.split(), shell=True, capture_output=True, encoding=terminal_encoding).stdout
+    run_stdout = run(command, shell=True, capture_output=True, encoding=terminal_encoding).stdout
     print(run_stdout)
