@@ -46,7 +46,7 @@ if __name__ == '__main__':
                                   'xmlns': "http://www.w3.org/2000/svg"})
     style_tag = SubElement(root, 'style')
     style_tag.text = '''
-    text.number {font-size: 24px; text-anchor: middle; dominant-baseline: middle;}
+    text.number {font-size: 24px; text-anchor: middle; alignment-baseline: middle;}
     rect.block {stroke: black; stroke-width: 2; fill: white;}
     '''
     group_blocks = add_group(root, {'id': 'blocks'})
