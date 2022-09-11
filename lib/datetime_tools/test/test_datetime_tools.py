@@ -11,6 +11,7 @@ class TestDateTimeTools(unittest.TestCase):
         self.assertEqual(truncate_datetime(test_time, "milliseconds"), datetime.datetime(2021, 2, 3, 4, 5, 6, 123000))
         self.assertEqual(truncate_datetime(test_time, "seconds"), datetime.datetime(2021, 2, 3, 4, 5, 6))
         self.assertEqual(truncate_datetime(test_time, "minutes"), datetime.datetime(2021, 2, 3, 4, 5))
+        self.assertEqual(truncate_datetime(test_time, "hours"), datetime.datetime(2021, 2, 3, 4))
 
 
 if __name__ == "__main__":
