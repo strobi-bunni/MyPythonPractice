@@ -12,34 +12,42 @@ URL Analysis
 
 이 때 url은 반드시 "따옴표"로 감싸야 한다. 안 그러면 하나의 문자열로 인식하지 못할 수 있다.
 """
+import argparse
 import json
-import sys
 from urllib.parse import unquote, urlparse
 
-url = sys.argv[1]
-parse_result = urlparse(url)
 
-# 쿼리 문자열을 딕셔너리로 변환
-if query_string := parse_result.query:
-    queries = query_string.split('&')
-    query_partitions = [part.partition('=') for part in queries]
-else:
-    query_partitions = []
-query_dict = {x[0]: unquote(x[2]) for x in query_partitions}
+def parse_url(url: str) -> dict:
+    parse_result = urlparse(url)
 
-analysis_result = {
-    'url': url,
-    'scheme': parse_result.scheme or '',
-    'netloc': parse_result.netloc or '',
-    'netloc_details': {
-        'username': parse_result.username or '',
-        'password': parse_result.password or '',
-        'hostname': parse_result.hostname or '',
-        'port': parse_result.port or ''
-    },
-    'path': unquote(parse_result.path or ''),
-    'params': parse_result.params or '',
-    'query': query_dict,
-    'fragment': parse_result.fragment or ''
-}
-print(json.dumps(analysis_result, ensure_ascii=False, indent=4))
+    # 쿼리 문자열을 딕셔너리로 변환
+    if query_string := parse_result.query:
+        queries = query_string.split('&')
+        query_partitions = [part.partition('=') for part in queries]
+    else:
+        query_partitions = []
+    query_dict = {x[0]: unquote(x[2]) for x in query_partitions}
+
+    return {
+        'url': url,
+        'scheme': parse_result.scheme or '',
+        'netloc': parse_result.netloc or '',
+        'netloc_details': {
+            'username': parse_result.username or '',
+            'password': parse_result.password or '',
+            'hostname': parse_result.hostname or '',
+            'port': parse_result.port or ''
+        },
+        'path': unquote(parse_result.path or ''),
+        'params': parse_result.params or '',
+        'query': query_dict,
+        'fragment': parse_result.fragment or ''
+    }
+
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser()
+    parser.add_argument('url', type=str, help='분석할 URL')
+    args = parser.parse_args()
+
+    print(json.dumps(parse_url(args.url), ensure_ascii=False, indent=4))
