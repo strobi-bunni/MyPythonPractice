@@ -3,11 +3,14 @@ r"""
 ===========
 이 스크립트는 텍스트 파일 내의 글자수를 센다.
 
-출력 포맷
-
 ::
 
+    $ python char_count.py -i filename.txt
     filename.txt | 4031S 124L 101N 428W 3659C 1916V
+    $ echo filename.txt | python char_count.py
+    filename.txt | 4031S 124L 101N 428W 3659C 1916V
+
+``-v`` 옵션을 지정하지 않았을 시 출력 포맷은 다음과 같다:
 
 - S : 텍스트 파일의 길이(bytes)
 - L : 줄 갯수
@@ -15,6 +18,15 @@ r"""
 - W : 단어 갯수
 - C : 문자 갯수(개행 문자 포함)
 - V : 유효한 문자 갯수(화이트스페이스, 문장 부호 등 제외)
+
+NOTE: Windows 환경에서 stdin으로 내용을 보낼 때는 `UTF-8 모드`_\로 실행한다.
+
+::
+
+    C:\folder> type filename.txt | python.exe -X utf8 char_count.py
+    filename.txt | 4031S 124L 101N 428W 3659C 1916V
+
+.. _`UTF-8 모드`: https://docs.python.org/3/library/os.html#utf8-mode
 """
 import argparse
 import re

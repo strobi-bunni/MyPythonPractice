@@ -1,3 +1,8 @@
+r"""
+다음 스크립트는 간단한 텍스트 비교 프로그램이다.
+
+``diff(1)``\의 Unified Diff와는 약간 다른 형식을 출력한다.
+"""
 import argparse
 import difflib
 from itertools import repeat
