@@ -37,7 +37,7 @@ def convert_timestamp_to_datetime(ts: Union[int, float], tz: Optional[datetime.t
         return local_time.astimezone(tz)
 
 
-T_Timespec = Literal["microseconds", "milliseconds", "seconds", "minutes", "hours"]
+T_Timespec = Literal["microseconds", "milliseconds", "seconds", "minutes", "hours", "days"]
 
 
 def truncate_datetime(dt: datetime.datetime, timespec: T_Timespec = "seconds") -> datetime.datetime:
@@ -47,8 +47,8 @@ def truncate_datetime(dt: datetime.datetime, timespec: T_Timespec = "seconds") -
     ----------
     dt : datetime.datetime
         datetime 객체
-    timespec : {'microseconds', 'milliseconds', 'seconds', 'minutes', 'hours'}
-        시각 정밀도
+    timespec : {'microseconds', 'milliseconds', 'seconds', 'minutes', 'hours', 'days'}
+        시각 정밀도. 기본값은 'seconds'이다.
 
     Returns
     -------
@@ -65,5 +65,7 @@ def truncate_datetime(dt: datetime.datetime, timespec: T_Timespec = "seconds") -
         return dt.replace(second=0, microsecond=0)
     elif timespec == "hours":
         return dt.replace(minute=0, second=0, microsecond=0)
+    elif timespec == "days":
+        return dt.replace(hour=0, minute=0, second=0, microsecond=0)
     else:
         raise ValueError('Invalid timespec')
