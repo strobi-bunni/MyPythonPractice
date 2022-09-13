@@ -1,7 +1,6 @@
-from collections.abc import Container, Iterable, Iterator
 from datetime import datetime, timedelta
 from itertools import count
-from typing import Optional, Union
+from typing import Container, Iterable, Iterator, Optional, Union
 
 from .parse import timedelta_isoformat
 

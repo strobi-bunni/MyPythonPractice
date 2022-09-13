@@ -1,8 +1,10 @@
+from typing import Tuple
+
 print('Color Scheme Preview')
 print('--------------------')
 
 
-def color_code_convert(ccode: int) -> tuple[int, int]:
+def color_code_convert(ccode: int) -> Tuple[int, int]:
     if ccode < 8:
         _fg_code = ccode + 30
         _bg_code = ccode + 40

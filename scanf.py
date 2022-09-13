@@ -5,13 +5,14 @@ reference: https://docs.python.org/3/library/re.html#simulating-scanf
 """
 
 import re
+from typing import List, Tuple
 
 
-def scanf(pattern: str, s: str) -> tuple[...]:
+def scanf(pattern: str, s: str) -> Tuple[...]:
     # Split pattern string to tokens
     re_token_split = re.compile(r'(%(?:\d*c|[%deEfgiosuxX]))')
     tokens = re_token_split.split(pattern)
-    inferred_types: list[type] = []
+    inferred_types: List[type] = []
 
     # Convert the tokens to regex
     constructed_regex_pattern = ''

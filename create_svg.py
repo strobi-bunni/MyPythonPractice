@@ -4,13 +4,13 @@ Creates Pascal's Triangle SVG file with built-in xml module.
 import math
 from numbers import Real
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any, Dict, Optional
 from xml.dom.minidom import parseString
 from xml.etree.ElementTree import Element, SubElement, tostring
 
 
 def add_rect(parent: Element, x: Real, y: Real, width: Real, height: Real,
-             options: Optional[dict[str, Any]] = None) -> Element:
+             options: Optional[Dict[str, Any]] = None) -> Element:
     if options is None:
         options = {}
     options = {k: str(v) for (k, v) in options.items()}
@@ -18,7 +18,7 @@ def add_rect(parent: Element, x: Real, y: Real, width: Real, height: Real,
                       attrib={'x': str(x), 'y': str(y), 'width': str(width), 'height': str(height), **options})
 
 
-def add_group(parent: Element, options: Optional[dict[str, Any]] = None) -> Element:
+def add_group(parent: Element, options: Optional[Dict[str, Any]] = None) -> Element:
     if options is None:
         options = {}
     options = {k: str(v) for (k, v) in options.items()}
@@ -26,7 +26,7 @@ def add_group(parent: Element, options: Optional[dict[str, Any]] = None) -> Elem
 
 
 def add_text(parent: Element, x: Real, y: Real, text: Any,
-             options: Optional[dict[str, Any]] = None) -> Element:
+             options: Optional[Dict[str, Any]] = None) -> Element:
     if options is None:
         options = {}
     options = {k: str(v) for (k, v) in options.items()}

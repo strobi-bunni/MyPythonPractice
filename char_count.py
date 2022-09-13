@@ -19,7 +19,7 @@ r"""
 import argparse
 import re
 import sys
-from typing import Literal
+from typing import List, Literal
 
 
 def convert_newline(s: str, mode: Literal["cr", "lf", "crlf"] = "lf") -> str:
@@ -85,7 +85,7 @@ if __name__ == '__main__':
         filename = input_file.name
         data: bytes = input_file.read()
         size_of_file = len(data)
-        text = data.decode(args.encoding)
+        text: str = data.decode(args.encoding)
 
     number_of_chars = len(text)
 
@@ -100,7 +100,7 @@ if __name__ == '__main__':
             else '\r'
 
     # split text into lines
-    lines: list[str] = text_newline_converted.split(newline)
+    lines: List[str] = text_newline_converted.split(newline)
     number_of_lines = 0
     number_of_valid_lines = 0
     number_of_words = 0
@@ -111,7 +111,7 @@ if __name__ == '__main__':
         number_of_lines += 1
         if line and not line.isspace():
             number_of_valid_lines += 1
-            words: list[str] = re.findall(r'\b\w+\b', line)
+            words: List[str] = re.findall(r'\b\w+\b', line)
             number_of_words += len(words)
             number_of_valid_chars += sum(len(w) for w in words)
 
