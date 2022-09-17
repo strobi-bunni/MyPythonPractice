@@ -52,7 +52,7 @@ def find_duplicate(*paths: PathLike, algorithm='md5') -> Dict[bytes, List[Path]]
         중복된 파일의 리스트
         키는 파일 해시이며 값은 중복된 해시를 갖는 파일 경로의 리스트이다.
     """
-    hashs = defaultdict(list)  # 파일 해시를 저장할 딕셔너리
+    hashes = defaultdict(list)  # 파일 해시를 저장할 딕셔너리
 
     # 파일 경로 리스트
     paths = [Path(p) for p in paths]
@@ -61,8 +61,8 @@ def find_duplicate(*paths: PathLike, algorithm='md5') -> Dict[bytes, List[Path]]
     # 해시값 저장
     for filepath in filepaths:
         filehash = file_hash(filepath, algorithm)
-        hashs[filehash].append(filepath)
-    return {k: v for k, v in hashs.items() if len(v) >= 2}
+        hashes[filehash].append(filepath)
+    return {k: v for k, v in hashes.items() if len(v) >= 2}
 
 
 def format_output(out: Mapping[bytes, Iterable[Path]], file: TextIO = sys.stdout) -> None:
