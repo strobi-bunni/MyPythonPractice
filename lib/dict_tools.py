@@ -253,7 +253,7 @@ def left_join(d1: Mapping[KT, VT], d2: Mapping[KT, VT2], default=None) -> Dict[K
 
 
 def right_join(d1: Mapping[KT, VT], d2: Mapping[KT, VT2], default=None) -> Dict[KT, Tuple[Optional[VT], VT2]]:
-    r"""{d2의 키: (d1의 값, d2의 키에 매칭되는 d1의 값)} 딕셔너리를 제작한다.
+    r"""{d2의 키: (d2의 키에 매칭되는 d1의 값, d2의 값)} 딕셔너리를 제작한다.
 
     만약에 d2의 키에 매칭되는 d1의 값이 없다면 해당 값은 default로 대체된다.
 
@@ -284,9 +284,9 @@ def right_join(d1: Mapping[KT, VT], d2: Mapping[KT, VT2], default=None) -> Dict[
 
 
 def full_outer_join(
-    d1: Mapping[KT, VT], d2: Mapping[KT, VT2], default=None
+        d1: Mapping[KT, VT], d2: Mapping[KT, VT2], default=None
 ) -> Dict[KT, Tuple[Optional[VT], Optional[VT2]]]:
-    """{d1 및 d2의 키: (매칭되는 d1의 값, 매칭되는 d2의 값)} 딕셔너리를 제작한다.
+    """{d1와 d2에 공통으로 있는 키: (매칭되는 d1의 값, 매칭되는 d2의 값)} 딕셔너리를 제작한다.
 
     만약에 d1의 키에 매칭되는 d2의 값이 없거나, d2의 키에 매칭되는 d1의 값이 해당 값이 없다면 해당 값은 default로 대체된다.
 
@@ -401,7 +401,7 @@ def findall_with_value(d: Mapping[KT, VT], value: VT) -> List[KT]:
 
 
 def swap_key_and_value(
-    d: Mapping[KT, VT], duplicate_handler: Literal["strict", "first", "last"] = "first"
+        d: Mapping[KT, VT], duplicate_handler: Literal["strict", "first", "last"] = "first"
 ) -> Dict[VT, KT]:
     """딕셔너리의 키와 값을 서로 뒤바꾼다.
 
@@ -507,6 +507,28 @@ def flatten_items(d: Mapping[KT, Iterable[VT]]) -> Iterator[Tuple[KT, VT]]:
             yield k, v
 
 
+def squeeze_dict(d: Mapping[KT, Optional[VT]]) -> Dict[KT, VT]:
+    """딕셔너리에서 값이 None인 항목을 지운다.
+
+    Parameters
+    ----------
+    d : Mapping
+        딕셔너리
+
+    Returns
+    -------
+    return_d : dict
+        값이 None인 항목을 제거한 딕셔너리
+
+    Examples
+    --------
+    >>> d = {'a': 1, 'b': None, 'c': 5, 'd': 4, 'e': None}
+    >>> squeeze_dict(d)
+    {'a': 1, 'c': 5, 'd': 4}
+    """
+    return {k: v for (k, v) in d if v is not None}
+
+
 __all__ = [
     "chain_dict",
     "dict_gets",
@@ -521,5 +543,6 @@ __all__ = [
     "rename_key",
     "rename_key_with_mapping",
     "right_join",
+    "squeeze_dict",
     "swap_key_and_value",
 ]
