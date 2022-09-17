@@ -1,6 +1,7 @@
 from collections import defaultdict
 from itertools import groupby
 from typing import (
+    Any,
     Callable,
     DefaultDict,
     Dict,
@@ -377,7 +378,7 @@ def find_with_value(d: Mapping[KT, VT], value: VT, default=None) -> KT:
 
 
 def findall_with_value(d: Mapping[KT, VT], value: VT) -> List[KT]:
-    """딕셔너리에서 키에 대응하는 값이 value인 키들을 찾는다.
+    """딕셔너리에서 키에 대응하는 값이 value인 모든 키들을 찾는다.
 
     Parameters
     ----------
@@ -398,6 +399,59 @@ def findall_with_value(d: Mapping[KT, VT], value: VT) -> List[KT]:
     ['c', 'e']
     """
     return [k for (k, v) in d.items() if v == value]
+
+
+def find_with_value_pred(d: Mapping[KT, VT], pred: Callable[[VT], Any] = bool, default=None) -> KT:
+    """딕셔너리에서 값이 pred를 만족하는 첫 키를 찾는다.
+
+    Parameters
+    ----------
+    d : Mapping
+        대상 딕셔너리
+    pred : Callable
+        값의 조건으로 사용할 함수. 생략 시 bool을 사용한다.
+    default : Any : Optional
+        만약에 값을 찾지 못했을 경우 대신 반환할 값
+
+    Returns
+    -------
+    key : Any
+        찾은 키
+
+    Examples
+    --------
+    >>> a = {'a': 1, 'b': 2, 'c': 3, 'd': 4}
+    >>> find_with_value_pred(a, lambda x: x >= 3)
+    'c'
+    """
+    for (k, v) in d.items():
+        if pred(v):
+            return k
+    return default
+
+
+def findall_with_value_pred(d: Mapping[KT, VT], pred: Callable[[VT], Any] = bool) -> List[KT]:
+    """딕셔너리에서 값이 pred를 만족하는 모든 키들을 찾는다.
+
+    Parameters
+    ----------
+    d : Mapping
+        대상 딕셔너리
+    pred : Callable
+        값의 조건으로 사용할 함수. 생략 시 bool을 사용한다.
+
+    Returns
+    -------
+    key : Any
+        찾은 키들
+
+    Examples
+    --------
+    >>> a = {'a': 1, 'b': 2, 'c': 3, 'd': 4, 'e': 3}
+    >>> findall_with_value_pred(a, lambda x: x >= 3)
+    ['c', 'd', 'e']
+    """
+    return [k for (k, v) in d.items() if pred(v)]
 
 
 def swap_key_and_value(
@@ -526,14 +580,16 @@ def squeeze_dict(d: Mapping[KT, Optional[VT]]) -> Dict[KT, VT]:
     >>> squeeze_dict(d)
     {'a': 1, 'c': 5, 'd': 4}
     """
-    return {k: v for (k, v) in d if v is not None}
+    return {k: v for (k, v) in d.items() if v is not None}
 
 
 __all__ = [
     "chain_dict",
     "dict_gets",
     "find_with_value",
+    "find_with_value_pred",
     "findall_with_value",
+    "findall_with_value_pred",
     "flatten_items",
     "full_outer_join",
     "group_value",
