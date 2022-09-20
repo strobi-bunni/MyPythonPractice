@@ -8,12 +8,15 @@ URL Analysis
 
 ::
 
-    $ url_analysis.py <url>
+    $ python ./url_analysis.py "http://www.example.com"
+    ---- 또는 ----
+    $ echo "http://www.example.com" | python ./url_analysis.py
 
 이 때 url은 반드시 "따옴표"로 감싸야 한다. 안 그러면 하나의 문자열로 인식하지 못할 수 있다.
 """
 import argparse
 import json
+import sys
 from urllib.parse import unquote, urlparse
 
 
@@ -47,7 +50,11 @@ def parse_url(url: str) -> dict:
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('url', type=str, help='분석할 URL')
+    parser.add_argument('url', type=str, nargs='?', help='분석할 URL')
     args = parser.parse_args()
 
-    print(json.dumps(parse_url(args.url), ensure_ascii=False, indent=4))
+    args_url = args.url
+    if not args.url:
+        args_url = sys.stdin.read()
+
+    print(json.dumps(parse_url(args_url.strip()), ensure_ascii=False, indent=4))

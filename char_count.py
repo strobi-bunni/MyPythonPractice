@@ -82,19 +82,19 @@ def convert_newline(s: str, mode: Literal["cr", "lf", "crlf"] = "lf") -> str:
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('-i', '--input', help='입력할 파일', type=argparse.FileType('rb'), default=sys.stdin)
+    parser.add_argument('input', nargs='?', help='입력할 파일', type=argparse.FileType('rb'), default=sys.stdin)
     parser.add_argument('-e', '--encoding', help='인코딩', type=str, default='utf-8')
     parser.add_argument('-n', '--newline', help='개행 문자', type=str,
                         choices=['cr', 'lf', 'crlf', 'auto'], default='auto')
     parser.add_argument('-v', '--verbose', help='자세한 설명을 출력할지 여부', action='store_true')
     args = parser.parse_args()
 
-    if (input_file := args.input) is sys.stdin:
-        filename = '<stdin>'
+    input_file = args.input
+    filename = input_file.name
+    if input_file is sys.stdin:
         text: str = input_file.read()
         size_of_file = len(text.encode(args.encoding))
     else:
-        filename = input_file.name
         data: bytes = input_file.read()
         size_of_file = len(data)
         text: str = data.decode(args.encoding)
