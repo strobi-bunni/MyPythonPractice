@@ -8,7 +8,7 @@
 
 ::
 
-    normalize_unicode_filename.py [-h] [-r] [-m {NFC,NFD,NFKC,NFKD}] path [path ...]
+    normalize_unicode_filename.py [-h] [-r] [-m {NFC,NFD,NFKC,NFKD}] [-v] path [path ...]
 
 -h : 도움말을 표시한다.
 -r : path가 폴더일 경우, 하위 폴더 및 파일의 이름까지 정규화한다.
@@ -16,19 +16,13 @@
 path : 이름을 변경할 파일(들)
 """
 import argparse
+import sys
 import unicodedata
 from os import PathLike
 from pathlib import Path
 from typing import Iterator, List, Literal
 
 T_NormalizeMode = Literal['NFC', 'NFD', 'NFKC', 'NFKD']
-
-
-def rename_to_normalized(path: PathLike, mode: T_NormalizeMode = 'NFC') -> Path:
-    """정규화된 파일 이름으로 이름 바꾸기
-    """
-    path = Path(path)
-    return path.rename(path.with_name(unicodedata.normalize(mode, path.name)))
 
 
 def traverse_subpaths_dfs_post(path: PathLike) -> Iterator[Path]:
@@ -43,24 +37,31 @@ def traverse_subpaths_dfs_post(path: PathLike) -> Iterator[Path]:
     yield path
 
 
-def rename_item(path: PathLike, mode: T_NormalizeMode = 'NFC', recursive: bool = False) -> None:
+def rename_item(path: PathLike, mode: T_NormalizeMode = 'NFC', recursive: bool = False, verbose=False) -> None:
     path = Path(path)
     if path.is_dir() and recursive:
         items: List[Path] = list(traverse_subpaths_dfs_post(path))
     else:
         items: List[Path] = [path]
-    [rename_to_normalized(p, mode=mode) for p in items]
+
+    for p in items:
+        new_name = p.with_name(unicodedata.normalize(mode, p.name))
+        if new_name != p:
+            p.rename(new_name)
+            if verbose:
+                print(f'Renamed {p} --> {new_name}', file=sys.stderr)
 
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='유니코드 파일 이름을 정규화합니다.')
     parser.add_argument('path', type=Path, nargs='+', help='변경할 파일의 경로(들)')
     parser.add_argument('-r', '--recursive', action='store_true', help='폴더 안의 파일이름도 변경할지 여부')
-    parser.add_argument('-m', '--mode', choices=('NFC', 'NFD', 'NFKC', 'NFKD'), default='NFC',
+    parser.add_argument('-m', '--mode', choices=('NFC', 'NFD', 'NFKC', 'NFKD'), default='NFC', type=str,
                         help='유니코드 정규화 형식(NFC/NFD/NFKC/NFKD). 기본값은 NFC')
+    parser.add_argument('-v', '--verbose', action='store_true', help='자세한 설명을 출력')
     args = parser.parse_args()
 
     for path_to_rename in args.path:
         abs_path_to_rename = path_to_rename.absolute()
         if abs_path_to_rename.exists():
-            rename_item(abs_path_to_rename, mode=args.mode, recursive=args.recursive)
+            rename_item(abs_path_to_rename, mode=args.mode, recursive=args.recursive, verbose=args.verbose)
