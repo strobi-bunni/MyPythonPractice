@@ -77,8 +77,7 @@ if __name__ == '__main__':
     # 파일 쓰기
     if args.inplace:
         Path(args.infile.name).write_text(reformatted_json_str, encoding='utf-8')
-    elif args.outfile is sys.stdout:
-        print(reformatted_json_str)
     else:
         args.outfile.write(reformatted_json_str)
-        args.outfile.close()
+        if args.outfile is not sys.stdout:
+            args.outfile.close()

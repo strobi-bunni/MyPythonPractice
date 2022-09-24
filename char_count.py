@@ -98,6 +98,7 @@ if __name__ == '__main__':
         data: bytes = input_file.read()
         size_of_file = len(data)
         text: str = data.decode(args.encoding)
+        input_file.close()
 
     number_of_chars = len(text)
 
@@ -134,7 +135,7 @@ if __name__ == '__main__':
               f'{number_of_valid_lines} valid(meaningful) lines\n'
               f'{number_of_words} words\n'
               f'{number_of_chars} characters\n'
-              f'{number_of_valid_chars} valid(meaningful) characters')
+              f'{number_of_valid_chars} valid(meaningful) characters', end='')
     else:
         print(f'{filename} | {size_of_file}S {number_of_lines}L {number_of_valid_lines}N '
-              f'{number_of_words}W {number_of_chars}C {number_of_valid_chars}V')
+              f'{number_of_words}W {number_of_chars}C {number_of_valid_chars}V', end='')

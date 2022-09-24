@@ -82,8 +82,7 @@ if __name__ == '__main__':
     if not args.dry_run:
         if args.inplace and needs_to_cleanup:
             Path(args.infile.name).write_text(cleaned_text, encoding='utf-8')
-        elif args.outfile is sys.stdout:
-            print(cleaned_text)
         else:
             args.outfile.write(cleaned_text)
-            args.outfile.close()
+            if args.outfile is not sys.stdout:
+                args.outfile.close()

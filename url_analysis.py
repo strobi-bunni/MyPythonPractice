@@ -57,4 +57,4 @@ if __name__ == '__main__':
     if not args.url:
         args_url = sys.stdin.read()
 
-    print(json.dumps(parse_url(args_url.strip()), ensure_ascii=False, indent=4))
+    print(json.dumps(parse_url(args_url.strip()), ensure_ascii=False, indent=4), end='')
