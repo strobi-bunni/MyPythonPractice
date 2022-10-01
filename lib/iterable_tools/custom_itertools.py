@@ -1,4 +1,5 @@
 import itertools
+from functools import wraps
 from typing import Any, Callable, Iterable, Iterator, List, Literal, Sequence, Tuple, TypeVar, Union
 
 from .itertools_recipe import all_equal, consume, partition
@@ -734,7 +735,7 @@ def iterable_with_callback(
     다음 코드는 매 3의 배수 항목마다 정해진 메세지로 출력을 한다.
 
     >>> def notify_every_three(index, value):
-    ...     if i % 3 == 0:
+    ...     if index % 3 == 0:
     ...         print(f'Item #{index} : {value}')
     >>> for num in iterable_with_callback(range(10), notify_every_three):
     ...     print(num)
@@ -761,6 +762,58 @@ def iterable_with_callback(
             callback(i, item)
 
 
+def with_callback(callback: Callable[[int, T], None], call_at: Literal["before", "after"] = "before"):
+    r"""iterable_with_callback 의 데코레이터 버전. 이터러블을 래핑한다.
+
+    Parameters
+    ----------
+    callback : Callable object, ``(int, T) -> None``
+        이터러블의 각각의 값들에 대해서 실행할 함수.
+        첫 번째 인자는 이터러블의 항목 번호이며(0-based) 두번째는 이터러블의 값이다.
+    call_at : {'before', 'after'}
+        callback을 실행할 시점. 'before'이면 값을 산출하기 전에 callback을 실행하며,
+        'after'이면 값을 산출한 후에 callback을 실행한다. 기본값은 'before'이다.
+
+    Examples
+    --------
+    >>> def notify_every_three(index, value):
+    ...     if index % 3 == 0:
+    ...         print(f'Item #{index} : {value}')
+    >>> @with_callback(notify_every_three, 'before')
+    >>> def numbers():
+    ...     i = 0
+    ...     while True:
+    ...         yield i
+    ...         i += 1
+    >>> n = numbers()
+    >>> for _ in range(10):
+    ...     print(next(n))
+    Item #0 : 0
+    0
+    1
+    2
+    Item #3 : 3
+    3
+    4
+    5
+    Item #6 : 6
+    6
+    7
+    8
+    Item #9 : 9
+    9
+    """
+
+    def decorator(func):
+        @wraps(func)
+        def decorated_func(*args, **kwargs):
+            return iterable_with_callback(func(*args, **kwargs), callback=callback, call_at=call_at)
+
+        return decorated_func
+
+    return decorator
+
+
 __all__ = [
     "common_starts",
     "dowhile",
@@ -779,4 +832,5 @@ __all__ = [
     "slice_items",
     "sort_by_specific_order",
     "strip",
+    "with_callback",
 ]
