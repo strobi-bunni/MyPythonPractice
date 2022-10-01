@@ -4,6 +4,7 @@
 """
 import argparse
 import hashlib
+import json
 import sys
 from collections import defaultdict
 from itertools import chain
@@ -65,11 +66,37 @@ def find_duplicate(*paths: PathLike, algorithm='md5') -> Dict[bytes, List[Path]]
     return {k: v for k, v in hashes.items() if len(v) >= 2}
 
 
+def count_duplicate(out: Mapping[bytes, Iterable[Path]]) -> int:
+    """중복된 파일의 갯수를 찾는다.
+    """
+    return sum(len(list(v)) - 1 for v in out.values())
+
+
+def calculate_wasted_spaces(out: Mapping[bytes, Iterable[Path]]) -> int:
+    """낭비된 공간을 바이트 단위로 계산한다.
+    """
+    wasted = 0
+    for v in out.values():
+        vlist = list(v)
+        wasted += vlist[0].stat().st_size * (len(vlist) - 1)
+    return wasted
+
+
 def format_output(out: Mapping[bytes, Iterable[Path]], file: TextIO = sys.stdout) -> None:
     for k, v in out.items():
         print(f'Duplicate file for hash {k.hex()}', file=file)
-        print('\n'.join(str(x) for x in v), file=file)
+        for p in v:
+            print(p, file=file)
         print('', file=file)
+
+    print(f'Found {count_duplicate(out)} duplicate files '
+          f'({calculate_wasted_spaces(out):_d} bytes wasted spaces.)', file=file)
+
+
+def format_output_json(out: Mapping[bytes, Iterable[Path]], file: TextIO = sys.stdout) -> None:
+    dupes_info: Dict[str, List[str]] = {k.hex(): [str(p) for p in v] for (k, v) in out.items()}
+    dupes_stats = {'Count': count_duplicate(out), 'TotalSize': calculate_wasted_spaces(out)}
+    print(json.dumps({'Result': dupes_info, 'Stats': dupes_stats}, ensure_ascii=False, indent=4), file=file)
 
 
 if __name__ == '__main__':
@@ -77,8 +104,13 @@ if __name__ == '__main__':
     parser.add_argument('dir', nargs=argparse.ONE_OR_MORE, metavar='DIR', type=str, help='파일이 저장된 경로')
     parser.add_argument('-a', '--algorithm', metavar='ALGORITHM', type=str, help='해시를 계산할 알고리즘',
                         default='md5', choices=('md5', 'sha1', 'sha224', 'sha256'))
+    parser.add_argument('-f', '--format', type=str, choices=('plain', 'json'), default='plain', help='출력 형식')
     parser.add_argument('-o', '--out', metavar='OUT', type=argparse.FileType('w', encoding='utf-8'),
                         default=sys.stdout, help='결과를 출력할 파일')
     args = parser.parse_args()
-    format_output(find_duplicate(*args.dir, algorithm=args.algorithm), args.out)
+    duplicate_result = find_duplicate(*args.dir, algorithm=args.algorithm)
+    if args.format == 'json':
+        format_output_json(duplicate_result)
+    else:
+        format_output(duplicate_result)
     args.out.close()
