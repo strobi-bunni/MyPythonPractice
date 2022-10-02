@@ -8,9 +8,9 @@ import json
 import sys
 from collections import defaultdict
 from itertools import chain
-from os import PathLike
+from os import PathLike, walk
 from pathlib import Path
-from typing import Dict, Iterable, List, Mapping, TextIO
+from typing import Dict, Iterable, Iterator, List, Mapping, TextIO
 
 HASH_BLOCK_SIZE = 65536
 
@@ -37,7 +37,15 @@ def file_hash(filename: PathLike, algorithm='sha256', **kwargs) -> bytes:
     return h.digest()
 
 
-def find_duplicate(*paths: PathLike, algorithm='md5') -> Dict[bytes, List[Path]]:
+def find_child_files(path: PathLike, verbose=False) -> Iterator[Path]:
+    for parent_dir_name, _, child_file_names in walk(Path(path)):
+        parent_path = Path(parent_dir_name)
+        if verbose:
+            print(f'Checking {parent_path}', file=sys.stderr)
+        yield from (parent_path / child_file_name for child_file_name in child_file_names)
+
+
+def find_duplicate(*paths: PathLike, algorithm='md5', include_zerofile=False, verbose=False) -> Dict[bytes, List[Path]]:
     """중복된 파일을 찾는다.
 
     Parameters
@@ -46,6 +54,10 @@ def find_duplicate(*paths: PathLike, algorithm='md5') -> Dict[bytes, List[Path]]
         파일이 저장된 폴더 경로
     algorithm : str : optional
         사용할 해시 알고리즘
+    include_zerofile : bool
+        크기가 0인 파일을 포함할지 여부
+    verbose : bool
+        자세한 설명을 출력할지 여부
 
     Returns
     -------
@@ -57,10 +69,12 @@ def find_duplicate(*paths: PathLike, algorithm='md5') -> Dict[bytes, List[Path]]
 
     # 파일 경로 리스트
     paths = [Path(p) for p in paths]
-    filepaths = chain.from_iterable(filter(lambda x: x.is_file(), p.glob('**/*')) for p in paths)
+    filepaths = chain.from_iterable(find_child_files(p, verbose=verbose) for p in paths)
 
     # 해시값 저장
     for filepath in filepaths:
+        if not include_zerofile and filepath.stat().st_size == 0:
+            continue
         filehash = file_hash(filepath, algorithm)
         hashes[filehash].append(filepath)
     return {k: v for k, v in hashes.items() if len(v) >= 2}
@@ -105,12 +119,16 @@ if __name__ == '__main__':
     parser.add_argument('-a', '--algorithm', metavar='ALGORITHM', type=str, help='해시를 계산할 알고리즘',
                         default='md5', choices=('md5', 'sha1', 'sha224', 'sha256'))
     parser.add_argument('-f', '--format', type=str, choices=('plain', 'json'), default='plain', help='출력 형식')
+    parser.add_argument('-z', '--zero', action='store_true', dest='include_zerofile',
+                        help='크기가 0인 파일을 포함할지 여부')
+    parser.add_argument('-v', '--verbose', action='store_true', help='자세한 설명을 출력할지 여부')
     parser.add_argument('-o', '--out', metavar='OUT', type=argparse.FileType('w', encoding='utf-8'),
                         default=sys.stdout, help='결과를 출력할 파일')
     args = parser.parse_args()
-    duplicate_result = find_duplicate(*args.dir, algorithm=args.algorithm)
+    duplicate_result = find_duplicate(*args.dir, algorithm=args.algorithm, include_zerofile=args.include_zerofile,
+                                      verbose=args.verbose)
     if args.format == 'json':
-        format_output_json(duplicate_result)
+        format_output_json(duplicate_result, file=args.out)
     else:
-        format_output(duplicate_result)
+        format_output(duplicate_result, file=args.out)
     args.out.close()
