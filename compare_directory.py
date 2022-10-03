@@ -318,3 +318,6 @@ if __name__ == '__main__':
             if args.color:
                 summary_text = colored_output(summary_text)
             print(summary_text, file=args.output_file)
+
+    if args.output_file is not sys.stdout:
+        args.output_file.close()
