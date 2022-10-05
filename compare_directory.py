@@ -73,7 +73,7 @@ class CompareResult(NamedTuple):
 
     def __str__(self):
         return f'{self.compare_result}{self.item_type}  ' \
-               f'{path_to_string(self.path, override_is_dir=(self.item_type == "directory"))}'
+               f'{path_to_string(self.path, override_is_dir=(self.item_type == PATHTYPE_DIRECTORY))}'
 
     # 기본 정렬 순서
     def __lt__(self, other):
@@ -179,8 +179,6 @@ def get_type(p: Path) -> str:
         return PATHTYPE_FILE
     elif p.is_dir():
         return PATHTYPE_DIRECTORY
-    elif p.is_mount():
-        return PATHTYPE_MOUNT
     elif p.is_symlink():
         return PATHTYPE_SYMLINK
     elif p.is_block_device():
@@ -189,8 +187,10 @@ def get_type(p: Path) -> str:
         return PATHTYPE_CHARDEV
     elif p.is_fifo():
         return PATHTYPE_FIFO
-    else:
+    elif p.is_socket():
         return PATHTYPE_SOCKET
+    else:  # p.is_mount() raises NotImplementedError on Windows
+        return PATHTYPE_MOUNT
 
 
 def expand_parents_of_result(x: CompareResult) -> List[CompareResult]:
