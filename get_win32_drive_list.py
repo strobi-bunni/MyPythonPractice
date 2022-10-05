@@ -2,7 +2,6 @@ r"""
 다음 코드는 Windows API를 사용해서 시스템 상의 파티션의 리스트를 구한다.
 """
 import ctypes
-import os
 import re
 import shutil
 from ctypes.wintypes import DWORD, LPCWSTR, LPDWORD, LPWSTR
@@ -204,7 +203,7 @@ def format_percent_to_bar(ratio: float, width: int = 79, fillchar: str = '@', em
     return '{0:{emptychar}<{width}}'.format(bar, emptychar=emptychar, width=width)
 
 
-def print_drive_info(letter: str) -> None:
+def print_drive_info(letter: str, width: int = 77) -> None:
     """드라이브 정보를 보기 쉽게 출력한다.
     """
     drive_type = get_drive_type(letter)
@@ -222,16 +221,14 @@ def print_drive_info(letter: str) -> None:
               f'{disk_usage.free / 1073741824:.1f} GiB free / '
               f'{disk_usage.total / 1073741824:.1f} GiB total '
               f'({use_ratio:.1%})')
-        print(f'[{format_percent_to_bar(use_ratio, width=terminal_width - 3)}]')
+        print(f'[{format_percent_to_bar(use_ratio, width=width)}]')
 
 
 if __name__ == '__main__':
     # 터미널 크기를 구한다.
-    try:
-        terminal_width = os.get_terminal_size()[0]
-    except (ValueError, OSError):  # get_terminal_size가 실패할 경우(예: bad file descriptor (in IDLE))
-        terminal_width = 80
+    terminal_width = shutil.get_terminal_size().columns
 
     for drive_letter in get_drive_letters():
-        print_drive_info(drive_letter)
+        # 바의 전체 길이('[', ']' 제외)는 줄바꿈을 일으키지 않는 최대 길이인 터미널폭-3으로 한다.
+        print_drive_info(drive_letter, terminal_width - 3)
         print()
