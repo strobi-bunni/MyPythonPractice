@@ -5,14 +5,31 @@ reference: https://docs.python.org/3/library/re.html#simulating-scanf
 """
 
 import re
-from typing import List, Tuple
+from typing import Any, Callable, List
 
 
-def scanf(pattern: str, s: str) -> Tuple[...]:
+def convert_oct_to_int(s: str) -> int:
+    return int(s, base=8)
+
+
+def convert_hex_to_int(s: str) -> int:
+    return int(s, base=16)
+
+
+def auto_convert_to_int(s: str) -> int:
+    if re.match(r'[-+]?0[xX][\dA-Fa-f]+', s):
+        return convert_hex_to_int(s)
+    elif re.match(r'[-+]?0[0-7]*', s):
+        return convert_oct_to_int(s)
+    else:
+        return int(s)
+
+
+def scanf(pattern: str, s: str) -> tuple:
     # Split pattern string to tokens
     re_token_split = re.compile(r'(%(?:\d*c|[%deEfgiosuxX]))')
     tokens = re_token_split.split(pattern)
-    inferred_types: List[type] = []
+    inferred_types: List[Callable[[str], Any]] = []
 
     # Convert the tokens to regex
     constructed_regex_pattern = ''
@@ -35,7 +52,18 @@ def scanf(pattern: str, s: str) -> Tuple[...]:
         elif token == '%s':  # %s -> non-whitespace chars
             constructed_regex_pattern += r'(\S+)'
             inferred_types.append(str)
-        # and so on...
+        elif token == '%o':  # %o -> octal numbers(no leading zeros)
+            constructed_regex_pattern += r'([-+]?[0-7]+)'
+            inferred_types.append(convert_oct_to_int)
+        elif token in ['%x', '%X']:  # %x, %X -> hexadecimal(leading 0x or 0X)
+            constructed_regex_pattern += r'([-+]?(?:0[xX])?[\dA-Fa-f]+)'
+            inferred_types.append(convert_hex_to_int)
+        elif token == '%u':  # %u -> unsigned number
+            constructed_regex_pattern += r'(\d+)'
+            inferred_types.append(int)
+        elif token == '%i':  # %i -> any integer types: decimal, hexadecimal or octal
+            constructed_regex_pattern += r'([-+]?(?:0[xX][\dA-Fa-f]+|0[0-7]*|\d+))'
+            inferred_types.append(auto_convert_to_int)
         else:  # None of these: literal string
             constructed_regex_pattern += re.escape(token)
 
