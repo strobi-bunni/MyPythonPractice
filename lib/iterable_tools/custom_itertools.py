@@ -475,6 +475,8 @@ def index_pred(items: Sequence[T], pred: Callable[[T], Any] = bool, fallback_val
 def lstrip(iterable: Iterable[T], pred: Callable[[T], Any] = bool) -> Iterator[T]:
     """iterable에서 pred를 실행한 값이 False가 되는 선행 항목들을 제거한다.
 
+    원본 코드: https://github.com/more-itertools/more-itertools/blob/master/more_itertools/more.py#L2355
+
     Parameters
     ----------
     iterable : Iterable
@@ -499,6 +501,8 @@ def lstrip(iterable: Iterable[T], pred: Callable[[T], Any] = bool) -> Iterator[T
 
 def rstrip(iterable: Iterable[T], pred: Callable[[T], Any] = bool) -> Iterator[T]:
     """iterable에서 pred를 실행한 값이 False가 되는 후행 항목들을 제거한다.
+
+    원본 코드: https://github.com/more-itertools/more-itertools/blob/master/more_itertools/more.py#L2373
 
     Parameters
     ----------
@@ -531,6 +535,8 @@ def rstrip(iterable: Iterable[T], pred: Callable[[T], Any] = bool) -> Iterator[T
 
 def strip(iterable: Iterable[T], pred: Callable[[T], Any] = bool) -> Iterator[T]:
     """iterable에서 pred를 실행한 값이 False가 되는 선행 및 후행 항목들을 제거한다.
+
+    원본 코드: https://github.com/more-itertools/more-itertools/blob/master/more_itertools/more.py#L2399
 
     Parameters
     ----------
