@@ -13,7 +13,7 @@ from typing import List, NamedTuple
 class DriveType(IntEnum):
     """드라이브 타입
 
-    https://docs.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-getdrivetypea
+    https://learn.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-getdrivetypea
     """
     DRIVE_UNKNOWN = 0
     DRIVE_NO_ROOT_DIR = 1
@@ -27,7 +27,7 @@ class DriveType(IntEnum):
 class FileSystemFlags(IntFlag):
     """파일 시스템의 플래그
 
-    https://docs.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-getvolumeinformationw
+    https://learn.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-getvolumeinformationw
     """
     FILE_CASE_SENSITIVE_SEARCH = 0x1
     FILE_CASE_PRESERVED_NAMES = 0x2
@@ -78,7 +78,7 @@ def get_drive_letters() -> List[str]:
 
     이 함수는 WinAPI의 `GetLogicalDrives`_ 함수의 래핑 함수이다.
 
-    .. _`GetLogicalDrives` : https://docs.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-getlogicaldrives
+    .. _`GetLogicalDrives` : https://learn.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-getlogicaldrives
 
     Examples
     --------
@@ -108,7 +108,7 @@ def get_drive_type(letter: str) -> DriveType:
     -----
     이 함수는 WinAPI의 `GetDriveTypeW`_ 함수의 래핑 함수이다.
 
-    .. _GetDriveTypeW : https://docs.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-getdrivetypew
+    .. _GetDriveTypeW : https://learn.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-getdrivetypew
     """
     return DriveType(ctypes.windll.kernel32.GetDriveTypeW(LPCWSTR(normalize_drive_letter(letter))))
 
@@ -130,7 +130,7 @@ def get_drive_info(letter: str) -> DriveInfo:
     -----
     이 함수는 WinAPI의 `GetVolumeInformationW`_ 함수의 래핑 함수이다.
 
-    .. _`GetVolumeInformationW` : https://docs.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-getvolumeinformationw
+    .. _`GetVolumeInformationW` : https://learn.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-getvolumeinformationw
     """
     lp_root_path_name = LPCWSTR(normalize_drive_letter(letter))
     lp_volume_name_buffer = LPWSTR('\x00' * 255)

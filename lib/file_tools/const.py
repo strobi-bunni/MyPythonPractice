@@ -5,7 +5,7 @@ class Win32FileAttribute(IntFlag):
     """Microsoft Windows File Attributes
 
     Reference:
-    https://docs.microsoft.com/en-us/windows/win32/fileio/file-attribute-constants
+    https://learn.microsoft.com/en-us/windows/win32/fileio/file-attribute-constants
     """
 
     READONLY = 0x1

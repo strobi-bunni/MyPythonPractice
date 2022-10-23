@@ -3,7 +3,7 @@ r"""
 
 윈도우에서는 [파일 확장자] -- [파일 타입] -- [연결 프로그램] 순으로 파일이 연결된다.
 
-https://docs.microsoft.com/en-us/windows/win32/shell/fa-file-types
+https://learn.microsoft.com/en-us/windows/win32/shell/fa-file-types
 
 예를 들어 윈도우용 Python을 설치하면 등록되는 '.py' 확장자는 'Python.File' 파일 타입과 연결된다.
 이를 확인하는 명령어는 assoc이다.
