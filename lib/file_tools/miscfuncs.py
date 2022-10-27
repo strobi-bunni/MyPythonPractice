@@ -84,6 +84,6 @@ def repr_file_size(size: int, *, binary: bool = True, decimal: int = 1) -> str:
         exp += 1
 
     if exp == 0:
-        return "{size} {unit_symbol}".format(size=size, unit_symbol=units[exp])
+        return f"{size} {units[exp]}"
     else:
-        return "{size:.{decimal}f} {unit_symbol}".format(decimal=decimal, size=size, unit_symbol=units[exp])
+        return f"{size:.{decimal}f} {units[exp]}"

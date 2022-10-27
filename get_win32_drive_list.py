@@ -200,7 +200,7 @@ def format_percent_to_bar(ratio: float, width: int = 79, fillchar: str = '@', em
 
     length_of_bar = round(ratio * width)
     bar = fillchar * length_of_bar
-    return '{0:{emptychar}<{width}}'.format(bar, emptychar=emptychar, width=width)
+    return f'{bar:{emptychar}<{width}}'
 
 
 def print_drive_info(letter: str, width: int = 77) -> None:

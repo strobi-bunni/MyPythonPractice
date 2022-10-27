@@ -89,7 +89,8 @@ if __name__ == '__main__':
             num_of_formatted_json_files += 1
 
     if args.verbose:
-        print('Successful: {s} / Failed: {f} / Total: {t}'.format(s=num_of_formatted_json_files,
-                                                                  f=num_of_json_files - num_of_formatted_json_files,
-                                                                  t=num_of_json_files),
-              file=sys.stderr)
+        print(
+            f'Successful: {num_of_formatted_json_files} / '
+            f'Failed: {num_of_json_files - num_of_formatted_json_files} / '
+            f'Total: {num_of_json_files}',
+            file=sys.stderr)

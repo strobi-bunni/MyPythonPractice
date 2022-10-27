@@ -37,9 +37,9 @@ def find_prefix(prefix: str, s: str, flags=re.M, *, include_prefix=False) -> Lis
     prefix_pattern = re.escape(prefix)
 
     if include_prefix:
-        regex = re.compile("^{}.*$".format(prefix_pattern), flags)
+        regex = re.compile(f"^{prefix_pattern}.*$", flags)
     else:
-        regex = re.compile("(?<=^{}).*$".format(prefix_pattern), flags)
+        regex = re.compile(f"(?<=^{prefix_pattern}).*$", flags)
     return regex.findall(s)
 
 
@@ -329,7 +329,7 @@ def apart_prefix(s: AnyStr, prefix: AnyStr) -> Tuple[AnyStr, AnyStr]:
     ('', 'Hello World')
     """
     if prefix and s.startswith(prefix):
-        return prefix, s[len(prefix) :]
+        return prefix, s[len(prefix):]
     elif isinstance(s, str):
         return "", s
     else:

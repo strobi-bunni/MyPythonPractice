@@ -61,7 +61,7 @@ if __name__ == '__main__':
     my_value = 123456789
 
     # Format the value using the format specifier.
-    formatted_value = '{0:{fmt_spec}}'.format(my_value, fmt_spec=my_fmt_spec)
+    formatted_value = f'{my_value:{my_fmt_spec}}'
     parsed_fmt_spec = parse_format_spec(my_fmt_spec)
     raw_matches = parsed_fmt_spec.raw_matches
 
