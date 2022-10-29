@@ -135,9 +135,9 @@ def get_drive_info(letter: str) -> DriveInfo:
     lp_root_path_name = LPCWSTR(normalize_drive_letter(letter))
     lp_volume_name_buffer = LPWSTR('\x00' * 255)
     n_volume_name_size = DWORD(256)
-    lp_volume_serial_number = LPDWORD(ctypes.c_ulong(0))
-    lp_maximum_component_length = LPDWORD(ctypes.c_ulong(0))
-    lp_file_system_flags = LPDWORD(ctypes.c_ulong(0))
+    lp_volume_serial_number = LPDWORD(DWORD(0))
+    lp_maximum_component_length = LPDWORD(DWORD(0))
+    lp_file_system_flags = LPDWORD(DWORD(0))
     lp_file_system_name_buffer = LPWSTR('\x00' * 255)
     n_file_system_name_size = DWORD(256)
 
