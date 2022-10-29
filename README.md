@@ -8,7 +8,7 @@ This repository was created for my Git practice.
 
 ## References:
 
-Original source code of `lib/algorithms/knapsack.py`:<br>
+Original source code of `lib/algorithms/knapsack.py`:
 ['Knapsack problem' page from Rosetta Code](https://rosettacode.org/wiki/Knapsack_problem/0-1)
-
+<br>
 Distributed under the Creative Commons Attribution-ShareAlike 4.0 International (CC BY-SA 4.0).

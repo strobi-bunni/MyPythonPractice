@@ -1,6 +1,9 @@
 # Original code from:
 # https://www.rosettacode.org/wiki/Knapsack_problem/0-1#Recursive_dynamic_programming_algorithm
 # Python3에 호환되도록 바꿨으며, 함수로 만들어서 쉽게 사용할 수 있도록 함
+
+# btw: 근데 원본 해답을 적은 사람이 누구지?
+#      Who's the original author of solution?
 from typing import Dict, Iterable, Iterator, List, NamedTuple, Optional, Tuple, TypeVar, Union
 
 from ..iterable_tools.itertools_recipe import powerset
