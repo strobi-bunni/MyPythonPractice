@@ -3,7 +3,7 @@ from functools import wraps
 from typing import Any, Callable, Iterable, Iterator, List, Literal, Sequence, Tuple, TypeVar, Union
 
 from .itertools_recipe import all_equal, consume, partition
-from ..func_tools import deprecated, identity, invert_bool
+from ..func_tools import deprecated, identity
 
 T = TypeVar("T")
 V = TypeVar("V")
@@ -472,94 +472,6 @@ def index_pred(items: Sequence[T], pred: Callable[[T], Any] = bool, fallback_val
         raise ValueError("First truthy value not found")
 
 
-def lstrip(iterable: Iterable[T], pred: Callable[[T], Any] = bool) -> Iterator[T]:
-    """iterable에서 pred를 실행한 값이 False가 되는 선행 항목들을 제거한다.
-
-    원본 코드: https://github.com/more-itertools/more-itertools/blob/master/more_itertools/more.py#L2355
-
-    Parameters
-    ----------
-    iterable : Iterable
-        이터러블
-    pred : Callable
-        실행할 함수
-
-    Returns
-    -------
-    lstrip_iterable: Iterable
-        선행 False 항목들이 제거된 이터러블
-
-    Examples
-    --------
-    >>> list(lstrip([0, 0, 1, 2, 3, 0, 0, 4]))
-    [1, 2, 3, 0, 0, 4]
-    >>> list(lstrip([None, None, 1, 2, None, 0, 3, 4], lambda x: isinstance(x, int)))
-    [1, 2, None, 0, 3, 4]
-    """
-    return itertools.dropwhile(invert_bool(pred), iterable)
-
-
-def rstrip(iterable: Iterable[T], pred: Callable[[T], Any] = bool) -> Iterator[T]:
-    """iterable에서 pred를 실행한 값이 False가 되는 후행 항목들을 제거한다.
-
-    원본 코드: https://github.com/more-itertools/more-itertools/blob/master/more_itertools/more.py#L2373
-
-    Parameters
-    ----------
-    iterable : Iterable
-        이터러블
-    pred : Callable
-        실행할 함수
-
-    Returns
-    -------
-    rstrip_iterable: Iterable
-        후행 False 항목들이 제거된 이터러블
-
-    Examples
-    --------
-    >>> list(lstrip([1, 2, 0, 0, 3, 4, 0, 0]))
-    [1, 2, 0, 0, 3, 4]
-    >>> list(lstrip([1, 2, None, 0, 3, 4, None, None], lambda x: isinstance(x, int)))
-    [1, 2, None, 0, 3, 4]
-    """
-    cache: List[T] = []
-    for item in iterable:
-        if pred(item):
-            yield from cache
-            cache.clear()
-            yield item
-        else:
-            cache.append(item)
-
-
-def strip(iterable: Iterable[T], pred: Callable[[T], Any] = bool) -> Iterator[T]:
-    """iterable에서 pred를 실행한 값이 False가 되는 선행 및 후행 항목들을 제거한다.
-
-    원본 코드: https://github.com/more-itertools/more-itertools/blob/master/more_itertools/more.py#L2399
-
-    Parameters
-    ----------
-    iterable : Iterable
-        이터러블
-    pred : Callable
-        실행할 함수
-
-    Returns
-    -------
-    strip_iterable: Iterable
-        선행 및 후행 False 항목들이 제거된 이터러블
-
-    Examples
-    --------
-    >>> list(lstrip([0, 0, 1, 2, 0, 0, 3, 4, 0, 0]))
-    [1, 2, 0, 0, 3, 4]
-    >>> list(lstrip([None, None, 1, 2, None, 0, 3, 4, None, None], lambda x: isinstance(x, int)))
-    [1, 2, None, 0, 3, 4]
-    """
-    return lstrip(rstrip(iterable, pred), pred)  # noqa # lstrip의 반환타입이 Iterable[T]이므로 억제시켜도 된다
-
-
 def group_by_interval(
     iterable: Iterable[T], interval_size, offset: T = 0, include_empty_index=False
 ) -> Iterator[Tuple[T, List[T]]]:
@@ -830,13 +742,10 @@ __all__ = [
     "index_pred",
     "iterable_with_callback",
     "iterate",
-    "lstrip",
     "multi_sorted",
     "pairs",
-    "rstrip",
     "skipper",
     "slice_items",
     "sort_by_specific_order",
-    "strip",
     "with_callback",
 ]

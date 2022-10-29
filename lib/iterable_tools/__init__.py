@@ -13,14 +13,11 @@ from .custom_itertools import (
     index_pred,
     iterable_with_callback,
     iterate,
-    lstrip,
     multi_sorted,
     pairs,
-    rstrip,
     skipper,
     slice_items,
     sort_by_specific_order,
-    strip,
 )
 from .itertools_recipe import (
     all_equal,
