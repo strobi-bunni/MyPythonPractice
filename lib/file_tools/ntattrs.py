@@ -198,12 +198,8 @@ def get_file_timestamp(path: Union[str, PathLike]) -> FileTimeStamp:
 
     Returns
     -------
-    ctime : datetime.datetime
-        파일/폴더의 만든 시각
-    mtime : datetime.datetime
-        파일/폴더의 수정한 시각
-    atime : datetime.datetime
-        파일/폴더의 마지막 액세스 시각
+    timestamp: FileTimeStamp
+        (ctime, mtime, atime) 네임드 튜플. 각각의 값은 datetime.datetime 객체이다.
 
     Notes
     -----
