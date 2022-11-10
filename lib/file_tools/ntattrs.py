@@ -130,8 +130,8 @@ def from_time_struct(tst: FILETIME) -> datetime:
     return from_nt_timestamp(tst.dwLowDateTime + (tst.dwHighDateTime << 32))
 
 
-def set_file_timestamp(path: Union[str, PathLike], ctime: Optional[datetime] = None, mtime: Optional[datetime] = None,
-                       atime: Optional[datetime] = None, tst: Optional[FileTimeStamp] = None):
+def set_timestamp(path: Union[str, PathLike], ctime: Optional[datetime] = None, mtime: Optional[datetime] = None,
+                  atime: Optional[datetime] = None, tst: Optional[FileTimeStamp] = None):
     r"""파일/폴더의 타임스탬프를 설정한다.
 
     Parameters
@@ -188,7 +188,7 @@ def set_file_timestamp(path: Union[str, PathLike], ctime: Optional[datetime] = N
     ctypes.windll.kernel32.CloseHandle(handle)
 
 
-def get_file_timestamp(path: Union[str, PathLike]) -> FileTimeStamp:
+def get_timestamp(path: Union[str, PathLike]) -> FileTimeStamp:
     r"""파일/폴더의 타임스탬프를 가져온다. ``os.stat_result`` 클래스의 ``st_ctime``, ``st_mtime``, ``st_atime``
 
     Parameters
@@ -227,6 +227,11 @@ def get_file_timestamp(path: Union[str, PathLike]) -> FileTimeStamp:
     ctypes.windll.kernel32.GetFileTime(handle, ctypes.byref(ctime), ctypes.byref(atime), ctypes.byref(mtime))
     ctypes.windll.kernel32.CloseHandle(handle)
     return FileTimeStamp(ctime=from_time_struct(ctime), mtime=from_time_struct(mtime), atime=from_time_struct(atime))
+
+
+# Alias for compatibility
+get_file_timestamp = get_timestamp
+set_file_timestamp = set_timestamp
 
 
 # ================ 파일 속성 함수 ================

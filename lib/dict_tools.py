@@ -182,7 +182,7 @@ def rename_key_with_mapping(target_dict: Mapping[KT, VT], rename_mapping: Mappin
     return {(rename_mapping[k] if k in rename_mapping else k): v for (k, v) in target_dict.items()}
 
 
-def dict_gets(d: Mapping[KT, VT], *keys: KT, default: VT = None) -> VT:
+def gets(d: Mapping[KT, VT], *keys: KT, default: VT = None) -> VT:
     """딕셔너리에서 keys의 각 키가 있는지 확인하며, 맨 처음 찾은 키의 값을 반환한다.
 
     Parameters
@@ -202,9 +202,9 @@ def dict_gets(d: Mapping[KT, VT], *keys: KT, default: VT = None) -> VT:
     Examples
     --------
     >>> my_dict = {'a': 1, 'b': 2, 'c': 3}
-    >>> dict_gets(my_dict, 'b', 'c', 'd')  # *keys의 키 중 처음으로 my_dict에 있는 키는 'b', 따라서 my_dict['b'] 반환
+    >>> gets(my_dict, 'b', 'c', 'd')  # *keys의 키 중 처음으로 my_dict에 있는 키는 'b', 따라서 my_dict['b'] 반환
     2
-    >>> dict_gets(my_dict, 'e', 'f', default=10)  # my_dict에 *keys의 키들이 전부 없다. 따라서 default 반환
+    >>> gets(my_dict, 'e', 'f', default=10)  # my_dict에 *keys의 키들이 전부 없다. 따라서 default 반환
     10
 
     Notes
@@ -212,7 +212,7 @@ def dict_gets(d: Mapping[KT, VT], *keys: KT, default: VT = None) -> VT:
     이 함수는 dict.get 메서드를 여러 번 사용하는 경우를 줄이기 위해 만들었다.
 
     >>> my_dict = {'a': 1, 'b': 2, 'c': 3}
-    >>> # dict_gets(my_dict, 'b', 'c', 'd', default=10) is equivalent to:
+    >>> # gets(my_dict, 'b', 'c', 'd', default=10) is equivalent to:
     >>> my_dict.get('b', my_dict.get('c', my_dict.get('d', 10)))
     2
     """
@@ -220,6 +220,10 @@ def dict_gets(d: Mapping[KT, VT], *keys: KT, default: VT = None) -> VT:
         if key in d:
             return d[key]
     return default
+
+
+# Alias for compatibility
+dict_gets = gets
 
 
 def left_join(d1: Mapping[KT, VT], d2: Mapping[KT, VT2], default=None) -> Dict[KT, Tuple[VT, Optional[VT2]]]:
@@ -592,6 +596,7 @@ __all__ = [
     "findall_with_value_pred",
     "flatten_items",
     "full_outer_join",
+    "gets",
     "group_value",
     "inner_join",
     "left_join",
