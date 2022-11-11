@@ -233,8 +233,54 @@ def get_timestamp(path: Union[str, PathLike]) -> FileTimeStamp:
 get_file_timestamp = get_timestamp
 set_file_timestamp = set_timestamp
 
-
 # ================ 파일 속성 함수 ================
+
+
+SET_FILE_ATTRIBUTE_MASK = (
+        FILE_ATTRIBUTE_ARCHIVE | FILE_ATTRIBUTE_HIDDEN | FILE_ATTRIBUTE_NORMAL | FILE_ATTRIBUTE_NOT_CONTENT_INDEXED
+        | FILE_ATTRIBUTE_OFFLINE | FILE_ATTRIBUTE_READONLY | FILE_ATTRIBUTE_SYSTEM | FILE_ATTRIBUTE_TEMPORARY
+)
+
+
+def set_attribute(path: Union[str, PathLike], flag: int) -> None:
+    """파일/폴더에 해당 속성을 설정한다. 기존의 속성값은 무시되며, flag로 지정된 새 속성으로 덮어씌워진다.
+
+    예를 들어 어떤 파일의 속성이 0x21 (``ARCHIVE | READONLY``)일 시
+    새 flag 값을 0x92(``DIRECTORY | NORMAL | HIDDEN``)으로 지정할 경우
+    대상 파일의 속성은 0x02 (``HIDDEN``)으로 재지정된다.
+
+    Parameters
+    ----------
+    path : Path-like
+        파일/폴더의 경로
+    flag : int
+        파일/폴더의 속성 플래그. 하나 이상의 플래그를 Bitwise OR 연산자로 한번에 지정할 수 있다.
+
+        다음 플래그만을 지원하며 이 밖의 플래그는 무시된다.
+
+        - ``FILE_ATTRIBUTE_ARCHIVE``(0x20) : 보관
+        - ``FILE_ATTRIBUTE_HIDDEN``(0x2) : 숨김
+        - ``FILE_ATTRIBUTE_NORMAL``(0x80) : 일반 (이 속성은 단독으로 지정되었을 때에만 유효하다)
+        - ``FILE_ATTRIBUTE_NOT_CONTENT_INDEXED``(0x2000) : 인덱스 안함
+        - ``FILE_ATTRIBUTE_OFFLINE``(0x1000) : 오프라인
+        - ``FILE_ATTRIBUTE_READONLY``(0x1) : 읽기 전용
+        - ``FILE_ATTRIBUTE_SYSTEM``(0x4) : 시스템
+        - ``FILE_ATTRIBUTE_TEMPORARY``(0x100) : 임시 파일
+
+    Notes
+    -----
+    이 함수는 Win32 API의 `SetFileAttributesW`_ 함수의 래핑 함수이다.
+
+    .. _`SetFileAttributesW` : https://learn.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-setfileattributesw
+    """
+    path = Path(path)
+    if not path.exists():
+        raise FileNotFoundError(f'{path} not found')
+
+    abspath = path.resolve()
+    new_flag = flag
+    ctypes.windll.kernel32.SetFileAttributesW(LPCWSTR(str(abspath)), DWORD(new_flag))
+
 
 def _check_flag_function(flag: int) -> Callable[[Union[str, PathLike]], bool]:
     def _check_flag(path: Union[str, PathLike]) -> bool:
