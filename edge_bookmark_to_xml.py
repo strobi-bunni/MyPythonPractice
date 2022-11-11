@@ -8,7 +8,7 @@ from xml.dom.minidom import parseString
 from xml.etree.ElementTree import Element, SubElement, tostring
 
 
-def insert_data_in_elem(data, root_elem):
+def insert_data_in_elem(data: dict, root_elem: Element):
     if data['type'] == 'folder':
         folder_elem = SubElement(root_elem, 'BookmarkFolder',
                                  attrib={'name': data['name'], 'id': data['id'], 'date_added': data['date_added'],

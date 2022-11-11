@@ -27,8 +27,9 @@ r"""
 - 배경 색 지정 : *ESC* ``[48;2;`` *Red* ``;`` *Green* ``;`` *Blue* ``;m``
 """
 from textwrap import dedent
+from typing import List, Tuple
 
-code_mapping = [
+code_mapping: List[Tuple[int, str]] = [
     (0, 'Reset All'), (1, 'Bold'), (2, 'Faint'), (3, 'Italic'), (4, 'Underline'), (5, 'Slow Blink'), (6, 'Rapid Blink'),
     (7, 'Invert'), (8, 'Hide'), (9, 'Crossed Out'), (21, 'Double Underline/Bold Off'), (22, 'Bold/Faint Off'),
     (23, 'Italic Off'), (24, 'Underline Off'), (25, 'Blink Off'), (27, 'Invert Off'), (28, 'Hide Off'),

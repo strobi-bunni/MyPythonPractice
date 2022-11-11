@@ -4,13 +4,13 @@
 메모이제이션(Memoization)은 동적 계획법의 한 방법으로 이미 계산된 값을 메모리에 저장해서 나중에 사용하는 기법이다.
 이를 사용하면 메모리를 좀 더 사용하는 대신 계산 속도를 높일 수 있다.
 """
-import collections.abc
-from typing import Callable, TypeVar
+from collections.abc import Callable
+from typing import TypeVar
 
 T = TypeVar('T')
 
 
-class Memoize(collections.abc.Callable):
+class Memoize(Callable):
     def __init__(self, func: Callable[..., T]):
         """순수 함수에 메모이제이션을 구현하는 래퍼 클래스
 

@@ -7,7 +7,7 @@ from pathlib import Path
 from xml.etree.ElementTree import Element, SubElement, tostring
 
 
-def insert_data_in_elem(data, root_elem):
+def insert_data_in_elem(data: dict, root_elem: Element):
     if data['type'] == 'folder':
         list_item_elem = SubElement(root_elem, 'li', attrib={'class': 'bookmark-folder', 'id': f"id{data['id']}"})
         para_elem = SubElement(list_item_elem, 'p', attrib={'class': 'collapsible'})
