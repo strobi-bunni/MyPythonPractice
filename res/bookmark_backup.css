@@ -44,3 +44,7 @@ li > ul.bookmark-list {
 a {
     text-decoration: none;
 }
+
+.collapsible.active + ul.bookmark-list {
+	display: block;
+}
