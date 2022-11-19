@@ -1,7 +1,7 @@
 import hashlib
 import re
 import unicodedata
-from typing import AnyStr, Iterator, List, Literal, Tuple, Union, overload
+from typing import AnyStr, Iterator, List, Literal, Optional, Tuple, Union, overload
 
 
 def find_prefix(prefix: str, s: str, flags=re.M, *, include_prefix=False) -> List[str]:
@@ -370,6 +370,104 @@ def apart_suffix(s: AnyStr, suffix: AnyStr) -> Tuple[AnyStr, AnyStr]:
         return s, b""
 
 
+@overload
+def pad_left(s: str, length: int, pad_char: Optional[str] = None) -> str:
+    ...
+
+
+@overload
+def pad_left(s: bytes, length: int, pad_char: Optional[bytes] = None) -> bytes:
+    ...
+
+
+def pad_left(s: AnyStr, length: int, pad_char: Optional[AnyStr] = None) -> AnyStr:
+    r"""문자열의 길이가 length가 되도록 앞에 pad_char를 붙인다.
+
+    Parameters
+    ----------
+    s : str of bytes
+        문자열
+    length : int
+        지정할 길이
+    pad_char: str or bytes
+        붙일 문자. 만약 생략하면 다음과 같은 값을 사용한다:
+
+        - s가 `str`\일 경우 공백 문자(U+0020, ``' '``)
+        - s가 `bytes`\일 경우 NULL 바이트(``'\x00'``)
+
+    Returns
+    -------
+    return_s : str or bytes
+        결과 문자열
+
+    Exceptions
+    ----------
+    ValueError
+        ``len(pad_char) != 1`` 일 경우
+    """
+
+    if pad_char is None:
+        if isinstance(s, str):
+            pad_char = ' '
+        elif isinstance(s, bytes):  # type: bytes
+            pad_char = b'\x00'
+        else:
+            raise ValueError('`s` should be str or bytes')
+    if len(pad_char) != 1:
+        raise ValueError('`pad_char` should be one character.')
+
+    return (length - len(s)) * pad_char + s
+
+
+@overload
+def pad_right(s: str, length: int, pad_char: Optional[str] = None) -> str:
+    ...
+
+
+@overload
+def pad_right(s: bytes, length: int, pad_char: Optional[bytes] = None) -> bytes:
+    ...
+
+
+def pad_right(s: AnyStr, length: int, pad_char: Optional[AnyStr] = None) -> AnyStr:
+    r"""문자열의 길이가 length가 되도록 뒤에 pad_char를 붙인다.
+
+    Parameters
+    ----------
+    s : str of bytes
+        문자열
+    length : int
+        지정할 길이
+    pad_char: str or bytes
+        붙일 문자. 만약 생략하면 다음과 같은 값을 사용한다:
+
+        - s가 `str`\일 경우 공백 문자(U+0020, ``' '``)
+        - s가 `bytes`\일 경우 NULL 바이트(``'\x00'``)
+
+    Returns
+    -------
+    return_s : str or bytes
+        결과 문자열
+
+    Exceptions
+    ----------
+    ValueError
+        ``len(pad_char) != 1`` 일 경우
+    """
+
+    if pad_char is None:
+        if isinstance(s, str):
+            pad_char = ' '
+        elif isinstance(s, bytes):  # type: bytes
+            pad_char = b'\x00'
+        else:
+            raise ValueError('`s` should be str or bytes')
+    if len(pad_char) != 1:
+        raise ValueError('`pad_char` should be one character.')
+
+    return s + (length - len(s)) * pad_char
+
+
 __all__ = [
     "apart_prefix",
     "apart_suffix",
@@ -379,4 +477,6 @@ __all__ = [
     "get_str_hash",
     "get_str_width",
     "get_unicode_repr",
+    'pad_left',
+    'pad_right',
 ]
