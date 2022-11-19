@@ -4,8 +4,8 @@ from typing import Dict, Literal, Optional
 
 iso8601_datetime_regex = re.compile(
     r"^(?P<date>(?P<year>\d{4})(?:(?P<ymd_hyphen>-?)(?P<month>\d{2})(?P=ymd_hyphen)(?P<day>\d{2})|"
-    r"(?P<ywd_hyphen>-?)W(?P<week>\d{2})(?P=ywd_hyphen)(?P<dayoftheweek>[1-7])|"
-    r"-?(?P<dayoftheyear>\d{3})))"
+    r"(?P<ywd_hyphen>-?)W(?P<week>\d{2})(?P=ywd_hyphen)(?P<weekday>[1-7])|"
+    r"-?(?P<ordinalday>\d{3})))"
     r"[ T](?P<time>(?P<hour>\d{2})(?:(?P<hms_colon>:?)(?P<minute>\d{2})"
     r"(?:(?P=hms_colon)(?P<second>\d{2})(?:\.(?P<microsecond>\d{1,6}))?)?)?)"
     r"(?P<tzinfo>Z|(?P<tzsign>[+\-])(?P<tzhour>\d{2})(?::?(?P<tzminute>\d{2}))?)?$")
@@ -32,20 +32,20 @@ def parse_iso8601_datetime(s: str) -> datetime.datetime:
 
         datetime     ::= date datetime_sep time [tzinfo]
         date         ::= year "-" month "-" day | year month day
-                       | year "-W" week "-" dayoftheweek | year "W" week dayoftheweek
-                       | year ["-"] dayoftheyear
+                       | year "-W" week "-" weekday | year "W" week weekday
+                       | year ["-"] ordinalday
         year         ::= <4 digits>
         month        ::= <2 digits, from 01 to 12>
         day          ::= <2 digits, from 01 to 31>
-        week         ::= <2 digits, from 01 to 53>
-        dayoftheweek ::= <1 digits, from 1 to 7>
-        dayoftheyear ::= <3 digits, from 001 to 366>
-        datetime_sep ::= " " | "T"
+        week         ::= <2 digits, from 01 to 53>   # week 01 is the week containing Jan 4.
+        weekday      ::= <1 digit, from 1 to 7>   # 1=Mon, 2=Tue, ..., 7=Sun
+        ordinalday   ::= <3 digits, from 001 to 366>
+        datetime_sep ::= " " | "T"   # ISO 8601 standard uses 'T', but nonstandard ' ' is often used too.
         time         ::= hour ":" minute [":" second ["." microsecond]] | hour minute [second ["." microsecond]]
         hour         ::= <2 digits, from 00 to 23>
         minute       ::= <2 digits, from 00 to 59>
         second       ::= <2 digits, from 00 to 59>
-        microsecond  ::= <3 or 6 digits>
+        microsecond  ::= <1 to 6 digits>
         tzinfo       ::= "Z" | tzhour [[":"] tzminute]
         tzhour       ::= ("+" | "-") <2 digits>
         tzminute     ::= <2 digits, from 00 to 59>
@@ -71,9 +71,9 @@ def parse_iso8601_datetime(s: str) -> datetime.datetime:
             _date = datetime.date(_year, int(month_str), int(matches['day']))
 
         elif week_str := matches['week']:
-            _date = datetime.date.fromisocalendar(_year, int(week_str), int(matches['dayoftheweek']))
+            _date = datetime.date.fromisocalendar(_year, int(week_str), int(matches['weekday']))
         else:
-            _date = datetime.date(_year, 1, 1) + datetime.timedelta(days=int(matches['dayoftheyear']) - 1)
+            _date = datetime.date(_year, 1, 1) + datetime.timedelta(days=int(matches['ordinalday']) - 1)
 
         _hour: int = int(matches['hour'])
         _minute: int = int(minute_str) if (minute_str := matches['minute']) else 0

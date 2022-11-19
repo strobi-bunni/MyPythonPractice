@@ -10,7 +10,7 @@ Translated from: regex_iso8601_datetime.py
 const regex_iso8601_datetime_minimalist = /^\d{4}(?:(-?)\d{2}\1\d{2}|(-?)W\d{2}\2[1-7]|-?\d{3})T\d{2}(?:(:?)\d{2}(?:\3\d{2}(?:\.\d{1,6})?)?)?(?:Z|[+\-]\d{2}(?::?\d{2})?)?$/;
 
 // expanded(verbose) form (for parsing)
-const regex_iso8601_datetime = /^(?<date>(?<year>\d{4})(?:(?<ymd_hyphen>-?)(?<month>\d{2})\k<ymd_hyphen>(?<day>\d{2})|(?<ywd_hyphen>-?)W(?<week>\d{2})\k<ywd_hyphen>(?<dayoftheweek>[1-7])|-?(?<dayoftheyear>\d{3})))T(?<time>(?<hour>\d{2})(?:(?<hms_colon>:?)(?<minute>\d{2})(?:\k<hms_colon>(?<second>\d{2})(?:\.(?<microsecond>\d{1,6}))?)?)?)(?<tzinfo>Z|(?<tzsign>[+\-])(?<tzhour>\d{2})(?::?(?<tzminute>\d{2}))?)?$/;
+const regex_iso8601_datetime = /^(?<date>(?<year>\d{4})(?:(?<ymd_hyphen>-?)(?<month>\d{2})\k<ymd_hyphen>(?<day>\d{2})|(?<ywd_hyphen>-?)W(?<week>\d{2})\k<ywd_hyphen>(?<weekday>[1-7])|-?(?<ordinalday>\d{3})))T(?<time>(?<hour>\d{2})(?:(?<hms_colon>:?)(?<minute>\d{2})(?:\k<hms_colon>(?<second>\d{2})(?:\.(?<microsecond>\d{1,6}))?)?)?)(?<tzinfo>Z|(?<tzsign>[+\-])(?<tzhour>\d{2})(?::?(?<tzminute>\d{2}))?)?$/;
 
 function* product(...iterables) {
     if (iterables.length === 0) {

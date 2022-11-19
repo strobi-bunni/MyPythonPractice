@@ -27,10 +27,10 @@ regex_iso8601_datetime = re.compile(r"""^
         W
         (?P<week>\d{2})
         (?P=ywd_hyphen)
-        (?P<dayoftheweek>[1-7])
+        (?P<weekday>[1-7])
         |
         -?                          (?# yyyy-ddd or yyyyddd format)
-        (?P<dayoftheyear>\d{3})
+        (?P<ordinalday>\d{3})
     )
 )
 T
