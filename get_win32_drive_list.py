@@ -9,6 +9,12 @@ from enum import IntEnum, IntFlag
 from string import ascii_uppercase
 from typing import List, NamedTuple
 
+KIBIBYTE = 1_024  # 2**10 bytes
+MEBIBYTE = 1_048_576  # 2**20 bytes
+GIBIBYTE = 1_073_741_824  # 2**30 bytes
+TEBIBYTE = 1_099_511_627_776  # 2**40 bytes
+PEBIBYTE = 1_125_899_906_842_624  # 2**50 bytes
+
 
 class DriveType(IntEnum):
     """드라이브 타입
@@ -203,6 +209,23 @@ def format_percent_to_bar(ratio: float, width: int = 79, fillchar: str = '@', em
     return f'{bar:{emptychar}<{width}}'
 
 
+def format_size(i: int) -> str:
+    if i >= PEBIBYTE:
+        unit_num, unit = PEBIBYTE, 'TiB'
+    elif i >= TEBIBYTE:
+        unit_num, unit = TEBIBYTE, 'TiB'
+    elif i >= GIBIBYTE:
+        unit_num, unit = GIBIBYTE, 'GiB'
+    elif i >= MEBIBYTE:
+        unit_num, unit = MEBIBYTE, 'MiB'
+    else:
+        unit_num, unit = KIBIBYTE, 'KiB'
+
+    pre_decimal_point_nums = len(str(i // unit_num))
+    post_decimal_point_nums = 4 - pre_decimal_point_nums
+    return f'{i / unit_num:{pre_decimal_point_nums}.{post_decimal_point_nums}f} {unit}'
+
+
 def print_drive_info(letter: str, width: int = 77) -> None:
     """드라이브 정보를 보기 쉽게 출력한다.
     """
@@ -217,9 +240,9 @@ def print_drive_info(letter: str, width: int = 77) -> None:
         print('Drive not available')
     else:
         use_ratio = disk_usage.used / disk_usage.total
-        print(f'{disk_usage.used / 1073741824:.1f} GiB used / '
-              f'{disk_usage.free / 1073741824:.1f} GiB free / '
-              f'{disk_usage.total / 1073741824:.1f} GiB total '
+        print(f'{format_size(disk_usage.used)} used / '
+              f'{format_size(disk_usage.free)} free / '
+              f'{format_size(disk_usage.total)} total '
               f'({use_ratio:.1%})')
         print(f'[{format_percent_to_bar(use_ratio, width=width)}]')
 
