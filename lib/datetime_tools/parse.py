@@ -7,11 +7,11 @@ iso8601_datetime_regex = re.compile(
     r"(?P<ywd_hyphen>-?)W(?P<week>\d{2})(?P=ywd_hyphen)(?P<weekday>[1-7])|"
     r"-?(?P<ordinalday>\d{3})))"
     r"[ T](?P<time>(?P<hour>\d{2})(?:(?P<hms_colon>:?)(?P<minute>\d{2})"
-    r"(?:(?P=hms_colon)(?P<second>\d{2})(?:\.(?P<microsecond>\d{1,6}))?)?)?)"
+    r"(?:(?P=hms_colon)(?P<second>\d{2})(?:\.(?P<microsecond>\d+))?)?)?)"
     r"(?P<tzinfo>Z|(?P<tzsign>[+\-])(?P<tzhour>\d{2})(?::?(?P<tzminute>\d{2}))?)?$")
 iso8601_datetimespan_regex = re.compile(
     r"^P(?P<datespan>(?:(?P<yearspan>\d+)Y)?(?:(?P<monthspan>\d+)M)?(?:(?P<dayspan>\d+)D)?)?"
-    r"(?:T(?P<timespan>(?:(?P<hourspan>\d+)H)?(?:(?P<minutespan>\d+)M)?(?:(?P<secondspan>\d+(?:\.\d{,6})?)S)?))?$"
+    r"(?:T(?P<timespan>(?:(?P<hourspan>\d+)H)?(?:(?P<minutespan>\d+)M)?(?:(?P<secondspan>\d+(?:\.\d+)?)S)?))?$"
 )
 
 
@@ -45,7 +45,7 @@ def parse_iso8601_datetime(s: str) -> datetime.datetime:
         hour         ::= <2 digits, from 00 to 23>
         minute       ::= <2 digits, from 00 to 59>
         second       ::= <2 digits, from 00 to 59>
-        microsecond  ::= <1 to 6 digits>
+        microsecond  ::= <digits>
         tzinfo       ::= "Z" | tzhour [[":"] tzminute]
         tzhour       ::= ("+" | "-") <2 digits>
         tzminute     ::= <2 digits, from 00 to 59>
@@ -78,7 +78,7 @@ def parse_iso8601_datetime(s: str) -> datetime.datetime:
         _hour: int = int(matches['hour'])
         _minute: int = int(minute_str) if (minute_str := matches['minute']) else 0
         _second: int = int(second_str) if (second_str := matches['second']) else 0
-        _microsecond: int = int(f'{microsecond_str:0<6}') if (microsecond_str := matches['microsecond']) else 0
+        _microsecond: int = int(f'{microsecond_str:0<6}'[:6]) if (microsecond_str := matches['microsecond']) else 0
 
         if tzinfo_str := matches['tzinfo']:
             if tzinfo_str == 'Z':
@@ -112,7 +112,7 @@ def parse_iso8601_datetimespan(s: str) -> datetime.timedelta:
         timespan     ::= [hourspan "H"] [minutespan "M"] [secondspan "S"]
         hourspan     ::= digits+
         minutespan   ::= digits+
-        secondspan   ::= digits+ ["." <3 or 6 digits>]
+        secondspan   ::= digits+ ["." digits+]
 
     .. note::
         1년은 정확히 365일, 1달은 정확히 30일로 간주한다.
@@ -147,7 +147,7 @@ def parse_iso8601_datetimespan(s: str) -> datetime.timedelta:
         if second_str:
             second_part, _, microsecond_part = second_str.partition(".")
             second = int(second_part)
-            microsecond = int(microsecond_part + (6 - len(microsecond_part)) * "0")
+            microsecond = int(f'{microsecond_part:0<6}'[:6])
         else:
             second = 0
             microsecond = 0
