@@ -211,7 +211,7 @@ def format_percent_to_bar(ratio: float, width: int = 79, fillchar: str = '@', em
 
 def format_size(i: int) -> str:
     if i >= PEBIBYTE:
-        unit_num, unit = PEBIBYTE, 'TiB'
+        unit_num, unit = PEBIBYTE, 'PiB'
     elif i >= TEBIBYTE:
         unit_num, unit = TEBIBYTE, 'TiB'
     elif i >= GIBIBYTE:
