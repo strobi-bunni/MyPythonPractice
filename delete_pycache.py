@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 r"""
 해당 폴더 안의 모든 하위 폴더에서 __pycache__ 폴더를 지운다.
 

@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 """
 다음은 터미널 내용을 읽는 Python 코드 예제이다.
 """

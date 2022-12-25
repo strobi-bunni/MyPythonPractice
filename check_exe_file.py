@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 """
 이 스크립트는 Windows용 exe 파일의 PE 헤더를 읽어서 대상 아키텍처를 확인한다.
 

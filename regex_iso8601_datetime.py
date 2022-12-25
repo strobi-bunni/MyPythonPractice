@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 """
 Regular expression for ISO 8601 datetime format.
 

@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 """
 Creates Pascal's Triangle SVG file with built-in xml module.
 """

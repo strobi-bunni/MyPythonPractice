@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 """
 JSON 파일들을 리포맷팅하는 코드
 

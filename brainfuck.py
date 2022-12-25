@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 """
 브레인퍽(Brainfuck) 언어의 인터프리터
 

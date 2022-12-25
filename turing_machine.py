@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 import time
 from collections import deque
 from enum import IntEnum

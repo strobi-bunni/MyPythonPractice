@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 """
 '몬티 홀 문제'(Monty Hall Problem)는 유명한 확률 문제이다.
 

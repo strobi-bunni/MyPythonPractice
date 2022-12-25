@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 r"""
 This code parses the `format specifier`_ used in the str.format method.
 

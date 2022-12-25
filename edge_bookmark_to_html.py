@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 """
 다음 스크립트는 Microsoft Edge의 북마크를 HTML 형식으로 내보낸다.
 """

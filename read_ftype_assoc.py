@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 r"""
 윈도우 파일 확장자 연결 확인
 

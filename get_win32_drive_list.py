@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 r"""
 다음 코드는 Windows API를 사용해서 시스템 상의 파티션의 리스트를 구한다.
 """

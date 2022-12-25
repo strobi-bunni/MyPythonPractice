@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 """해시 값을 사용해서 중복되는 파일 찾기
 
 사용법 : find_duplicate_files.py [-h] -d DIR [DIR ...] [-a ALGORITHM] [-o OUT]

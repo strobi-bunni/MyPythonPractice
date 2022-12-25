@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 """
 This script roughly shows how to parse the scanf pattern
 

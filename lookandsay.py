@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 r"""
 Look-and-say sequence
 
