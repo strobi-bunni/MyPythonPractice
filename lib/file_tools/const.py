@@ -6,6 +6,9 @@ class Win32FileAttribute(IntFlag):
 
     Reference:
     https://learn.microsoft.com/en-us/windows/win32/fileio/file-attribute-constants
+
+    DEPRECATED: use stat.FILE_ATTRIBUTE_* instead
+    https://docs.python.org/3/library/stat.html
     """
 
     READONLY = 0x1
