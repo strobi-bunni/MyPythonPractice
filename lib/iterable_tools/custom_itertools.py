@@ -1,6 +1,6 @@
 import itertools
 from functools import wraps
-from typing import Any, Callable, Iterable, Iterator, List, Literal, Sequence, Tuple, TypeVar, Union
+from typing import Any, Callable, Iterable, Iterator, List, Literal, Optional, Sequence, Tuple, TypeVar, Union
 
 from .itertools_recipe import all_equal, consume, partition
 from ..func_tools import deprecated, identity
@@ -628,7 +628,11 @@ def sort_by_specific_order(
 
 
 def iterable_with_callback(
-    iterable: Iterable[T], callback: Callable[[int, T], None], call_at: Literal["before", "after"] = "before"
+    iterable: Iterable[T], callback: Optional[Callable[[int, T], None]] = None,
+    call_at: Literal["before", "after"] = "before",
+    *,
+    before: Optional[Callable[[int, T], None]] = None,
+    after: Optional[Callable[[int, T], None]] = None
 ) -> Iterator[T]:
     """이터러블의 값들을 그대로 Pass-through해서 산출하고, 산출된 값에 대해서 callback 함수를 실행한다.
 
@@ -636,12 +640,16 @@ def iterable_with_callback(
     ----------
     iterable : Iterable of T
         이터러블
-    callback : Callable object, ``(int, T) -> None``
+    callback : Callable object, ``(int, T) -> None`` : Optional
         이터러블의 각각의 값들에 대해서 실행할 함수.
         첫 번째 인자는 이터러블의 항목 번호이며(0-based) 두번째는 이터러블의 값이다.
-    call_at : {'before', 'after'}
+    call_at : {'before', 'after'} : Optional
         callback을 실행할 시점. 'before'이면 값을 산출하기 전에 callback을 실행하며,
         'after'이면 값을 산출한 후에 callback을 실행한다. 기본값은 'before'이다.
+    before : Callable object, ``(int, T) -> None`` : Optional
+        이터러블을 산출하기 전에 실행할 함수. ``before=cb`` 은 ``callback=cb, call_at="before"`` 와 같다.
+    after : Callable object, ``(int, T) -> None`` : Optional
+        이터러블을 산출한 후에 실행할 함수. ``after=cb`` 은 ``callback=cb, call_at="after"`` 와 같다.
 
     Yields
     ------
@@ -671,16 +679,44 @@ def iterable_with_callback(
     8
     Item #9 : 9
     9
+
+    혹은 ``before`` 키워드 인자를 사용할 수도 있다.
+    >>> def notify_every_three(index, value):
+    ...     if index % 3 == 0:
+    ...         print(f'Item #{index} : {value}')
+    >>> for num in iterable_with_callback(range(10), before=notify_every_three):
+    ...     print(num)
+
+    ``before`` 와 ``after``를 같이 쓸 수도 있다.
+    >>> def notify_every_four(index, value):
+    ...     if index % 4 == 0:
+    ...         print(f'Item #{index} : {value}')
+    >>> for num in iterable_with_callback(range(10), before=notify_every_three, after=notify_every_four):
+    ...     print(num)
     """
-    for i, item in enumerate(iterable):
+    before_callback = before
+    after_callback = after
+
+    if callback is not None:
         if call_at == "before":
-            callback(i, item)
+            before_callback = callback
+        elif call_at == "after":
+            after_callback = callback
+    for i, item in enumerate(iterable):
+        if before_callback is not None:
+            before_callback(i, item)
         yield item
-        if call_at == "after":
-            callback(i, item)
+        if after_callback is not None:
+            after_callback(i, item)
 
 
-def with_callback(callback: Callable[[int, T], None], call_at: Literal["before", "after"] = "before"):
+def with_callback(
+    callback: Callable[[int, T], None] = None,
+    call_at: Literal["before", "after"] = "before",
+    *,
+    before: Optional[Callable[[int, T], None]] = None,
+    after: Optional[Callable[[int, T], None]] = None
+):
     r"""iterable_with_callback 의 데코레이터 버전. 이터러블을 래핑한다.
 
     Parameters
@@ -691,6 +727,10 @@ def with_callback(callback: Callable[[int, T], None], call_at: Literal["before",
     call_at : {'before', 'after'}
         callback을 실행할 시점. 'before'이면 값을 산출하기 전에 callback을 실행하며,
         'after'이면 값을 산출한 후에 callback을 실행한다. 기본값은 'before'이다.
+    before : Callable object, ``(int, T) -> None`` : Optional
+        이터러블을 산출하기 전에 실행할 함수. ``before=cb`` 은 ``callback=cb, call_at="before"`` 와 같다.
+    after : Callable object, ``(int, T) -> None`` : Optional
+        이터러블을 산출한 후에 실행할 함수. ``after=cb`` 은 ``callback=cb, call_at="after"`` 와 같다.
 
     Examples
     --------
@@ -725,7 +765,8 @@ def with_callback(callback: Callable[[int, T], None], call_at: Literal["before",
     def decorator(func):
         @wraps(func)
         def decorated_func(*args, **kwargs):
-            return iterable_with_callback(func(*args, **kwargs), callback=callback, call_at=call_at)
+            return iterable_with_callback(func(*args, **kwargs), callback=callback, call_at=call_at,
+                                          before=before, after=after)
 
         return decorated_func
 

@@ -182,7 +182,7 @@ def common_parent(*paths: T_Pathifyable, resolve: bool = False) -> Path:
 
     if not common_parts:
         raise ValueError("Paths don't have the same drive")
-    return Path(os.sep.join(common_parts))
+    return Path(*common_parts)
 
 
 def is_empty_folder(path: T_Pathifyable) -> bool:
