@@ -587,6 +587,32 @@ def squeeze_dict(d: Mapping[KT, Optional[VT]]) -> Dict[KT, VT]:
     return {k: v for (k, v) in d.items() if v is not None}
 
 
+def sort_keys(d: Mapping[KT, VT], key: Callable[[KT], Any] = None, reverse: bool = False) -> Dict[KT, VT]:
+    """딕셔너리의 키를 정렬한다. 일반적으로 필요하지는 않다. 
+    
+    Parameters
+    ----------
+    d : Mapping
+        딕셔너리
+    key: Callable object
+        정렬할 키 함수
+    reverse : bool
+        역순으로 정렬할 지 여부. 기본값은 False이다.
+
+    Returns
+    -------
+    return_d : dict
+        키를 정렬한 딕셔너리
+
+    Examples
+    --------
+    >>> d = {'a': 1, 'c': 10, 'b': 2, 'e': 30, 'd': 20}
+    >>> sort_keys(d)
+    {'a': 1, 'b': 2, 'c': 10, 'd': 20, 'e': 30}
+    """
+    return {k: d[k] for k in sorted(d.keys(), key=key, reverse=reverse)}
+
+
 __all__ = [
     "chain_dict",
     "dict_gets",
