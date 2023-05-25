@@ -4,7 +4,7 @@ ntattrs: 윈도우 NT 파일 속성을 읽고 쓰는 함수들
 import ctypes
 import sys
 from collections.abc import Callable
-from ctypes.wintypes import DWORD, HANDLE, LONG, LPCWSTR, WCHAR, WORD
+from ctypes.wintypes import DWORD, HANDLE, LPCWSTR
 from datetime import datetime, timedelta, timezone
 from os import PathLike
 from pathlib import Path
@@ -30,39 +30,6 @@ class FILETIME(ctypes.Structure):
     ]
 
 
-class SYSTEMTIME(ctypes.Structure):
-    """TIME_ZONE_INFORMATION structure (timezoneapi.h)
-
-    https://learn.microsoft.com/en-us/windows/win32/api/minwinbase/ns-minwinbase-systemtime
-    """
-    _fields_ = [
-        ('wYear', WORD),
-        ('wMonth', WORD),
-        ('wDayOfWeek', WORD),
-        ('wDay', WORD),
-        ('wHour', WORD),
-        ('wMinute', WORD),
-        ('wSecond', WORD),
-        ('wMilliseconds', WORD),
-    ]
-
-
-class TIME_ZONE_INFORMATION(ctypes.Structure):
-    """TIME_ZONE_INFORMATION structure (timezoneapi.h)
-
-    https://learn.microsoft.com/en-us/windows/win32/api/timezoneapi/ns-timezoneapi-time_zone_information
-    """
-    _fields_ = [
-        ('Bias', LONG),
-        ('StandardName', WCHAR * 32),
-        ('StandardDate', SYSTEMTIME),
-        ('StandardBias', LONG),
-        ('DaylightName', WCHAR * 32),
-        ('DaylightDate', SYSTEMTIME),
-        ('DaylightBias', LONG)
-    ]
-
-
 class FileTimeStamp(NamedTuple):
     ctime: Optional[datetime] = None
     mtime: Optional[datetime] = None
@@ -82,26 +49,12 @@ class FileTimeStamp(NamedTuple):
         return self.atime
 
 
-def get_timezone() -> timezone:
-    """시스템 시간대를 구한다.
-
-    사용 가능 : Windows
-    """
-    time_zone_information = TIME_ZONE_INFORMATION(
-        0, '\x00' * 32, SYSTEMTIME(0, 0, 0, 0, 0, 0, 0, 0), 0, '\x00' * 32, SYSTEMTIME(0, 0, 0, 0, 0, 0, 0, 0), 0
-    )
-    ctypes.windll.kernel32.GetTimeZoneInformation(ctypes.byref(time_zone_information))
-    return timezone(timedelta(minutes=-time_zone_information.Bias))
-
-
 def to_nt_timestamp(dt: datetime) -> int:
     r"""``datetime.datetime`` 객체를 NT 시스템 타임스탬프로 변환한다.
 
     만약 dt.tzinfo = None이라면 로컬 시간대로 간주하고 *시스템 시간대*\를 사용한다.
     """
-    if dt.tzinfo is None:
-        dt = dt.replace(tzinfo=get_timezone())
-    delta: timedelta = (dt - NT_EPOCH)
+    delta: timedelta = dt.astimezone(timezone.utc) - NT_EPOCH
     return (delta.days * 86400 + delta.seconds) * 10_000_000 + delta.microseconds * 10
 
 
