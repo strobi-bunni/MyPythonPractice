@@ -17,6 +17,18 @@ if sys.platform != 'win32':
     raise RuntimeError(f'`ntattrs` is available only for Windows.')
 
 NT_EPOCH = datetime(1601, 1, 1, 0, 0, 0, tzinfo=timezone.utc)
+# Windows에서 datetime.astimezone이 오류를 일으키지 않는 최소 시각
+UNIX_SAFE_TIME = datetime(1970, 1, 2, 0, 0, 0, tzinfo=timezone.utc)
+BIAS = UNIX_SAFE_TIME - NT_EPOCH + timedelta(days=2)
+
+
+def astimezone_safer(dt: datetime, tz: Optional[timezone] = None) -> datetime:
+    try:
+        return dt.astimezone(tz)
+    except OSError:
+        modified_dt = dt + BIAS
+        modified_dt = modified_dt.astimezone(tz)
+        return modified_dt - BIAS
 
 
 class FILETIME(ctypes.Structure):
@@ -54,7 +66,7 @@ def to_nt_timestamp(dt: datetime) -> int:
 
     만약 dt.tzinfo = None이라면 로컬 시간대로 간주하고 *시스템 시간대*\를 사용한다.
     """
-    delta: timedelta = dt.astimezone(timezone.utc) - NT_EPOCH
+    delta: timedelta = astimezone_safer(dt, timezone.utc) - NT_EPOCH
     return (delta.days * 86400 + delta.seconds) * 10_000_000 + delta.microseconds * 10
 
 
