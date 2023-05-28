@@ -175,7 +175,7 @@ def print_row(rows: Iterable[SizeReportRow], home_path: Path, simply=False) -> N
                 path_repr = simply_path(row.path.relative_to(home_path), True) if simply \
                     else row.path.relative_to(home_path).as_posix() + '/'
             case _:  # 'root'
-                path_repr = 'sandbox'
+                path_repr = '<total>'
         print(f'{path_repr}\t{format_size(row.size)}\t{row.ratio:.2%}\t{row.ratio_current_level:.2%}')
 
 
