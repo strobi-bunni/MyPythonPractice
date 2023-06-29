@@ -2,13 +2,21 @@ import datetime
 import re
 from typing import Dict, Literal, Optional
 
+iso8601_date_regex = re.compile(
+    r"^(?P<year>\d{4})(?:(?P<ymd_hyphen>-?)(?P<month>\d{2})(?P=ymd_hyphen)(?P<day>\d{2})|"
+    r"(?P<ywd_hyphen>-?)W(?P<week>\d{2})(?P=ywd_hyphen)(?P<weekday>[1-7])|"
+    r"-?(?P<ordinalday>\d{3}))$")
+iso8601_time_regex = re.compile(
+    r"^T?(?P<time>(?P<hour>\d{2})(?:(?P<hms_colon>:?)(?P<minute>\d{2})"
+    r"(?:(?P=hms_colon)(?P<second>\d{2})(?:\.(?P<microsecond>\d+))?)?)?)"
+    r"(?P<tzinfo>Z|(?P<tzsign>[+\-])(?P<tzhour>\d{2})(?::?(?P<tzminute>\d{2}))?)?$")
 iso8601_datetime_regex = re.compile(
     r"^(?P<date>(?P<year>\d{4})(?:(?P<ymd_hyphen>-?)(?P<month>\d{2})(?P=ymd_hyphen)(?P<day>\d{2})|"
     r"(?P<ywd_hyphen>-?)W(?P<week>\d{2})(?P=ywd_hyphen)(?P<weekday>[1-7])|"
     r"-?(?P<ordinalday>\d{3})))"
-    r"[ T](?P<time>(?P<hour>\d{2})(?:(?P<hms_colon>:?)(?P<minute>\d{2})"
+    r"[ T](?P<fulltime>(?P<time>(?P<hour>\d{2})(?:(?P<hms_colon>:?)(?P<minute>\d{2})"
     r"(?:(?P=hms_colon)(?P<second>\d{2})(?:\.(?P<microsecond>\d+))?)?)?)"
-    r"(?P<tzinfo>Z|(?P<tzsign>[+\-])(?P<tzhour>\d{2})(?::?(?P<tzminute>\d{2}))?)?$")
+    r"(?P<tzinfo>Z|(?P<tzsign>[+\-])(?P<tzhour>\d{2})(?::?(?P<tzminute>\d{2}))?)?)$")
 iso8601_datetimespan_regex = re.compile(
     r"^P(?P<datespan>(?:(?P<yearspan>\d+)Y)?(?:(?P<monthspan>\d+)M)?(?:(?P<dayspan>\d+)D)?)?"
     r"(?:T(?P<timespan>(?:(?P<hourspan>\d+)H)?(?:(?P<minutespan>\d+)M)?(?:(?P<secondspan>\d+(?:\.\d+)?)S)?))?$"
@@ -23,10 +31,111 @@ def _copysign(x: int, y: int) -> int:
         return -abs(x)
 
 
-def parse_iso8601_datetime(s: str) -> datetime.datetime:
+def parse_iso8601_date(s: str) -> datetime.date:
+    """ISO 8601 형식으로 표시된 날짜를 해석한다.
+
+    ISO 8601 형식 시각 표기는 다음과 같다:
+
+    ::
+
+        date         ::= year "-" month "-" day | year month day
+                       | year "-W" week "-" weekday | year "W" week weekday
+                       | year ["-"] ordinalday
+        year         ::= <4 digits>
+        month        ::= <2 digits, from 01 to 12>
+        day          ::= <2 digits, from 01 to 31>
+        week         ::= <2 digits, from 01 to 53>   # week 01 is the week containing Jan 4.
+        weekday      ::= <1 digit, from 1 to 7>   # 1=Mon, 2=Tue, ..., 7=Sun
+        ordinalday   ::= <3 digits, from 001 to 366>
+
+    Parameters
+    ----------
+    s : str
+        ISO 8601 형식 날짜 표기법
+
+    Returns
+    -------
+    dt : datetime.datetime
+        변환한 날짜
+
+    Exceptions
+    ----------
+    ValueError
+        s가 올바른 ISO 8601 형식 시각 표기법이 아닐 때
+    """
+    if matches := iso8601_date_regex.match(s):
+        _year = int(matches['year'])
+        if month_str := matches['month']:
+            _date = datetime.date(_year, int(month_str), int(matches['day']))
+
+        elif week_str := matches['week']:
+            _date = datetime.date.fromisocalendar(_year, int(week_str), int(matches['weekday']))
+        else:
+            _date = datetime.date(_year, 1, 1) + datetime.timedelta(days=int(matches['ordinalday']) - 1)
+
+        return _date
+    else:
+        raise ValueError(f"{s} is not a valid ISO8601 format")
+
+
+def parse_iso8601_time(s: str) -> datetime.time:
     """ISO 8601 형식으로 표시된 시각을 해석한다.
 
     ISO 8601 형식 시각 표기는 다음과 같다:
+
+    ::
+
+        time         ::= hour ":" minute [":" second ["." microsecond]] | hour minute [second ["." microsecond]]
+        hour         ::= <2 digits, from 00 to 23>
+        minute       ::= <2 digits, from 00 to 59>
+        second       ::= <2 digits, from 00 to 59>
+        microsecond  ::= <digits>
+        tzinfo       ::= "Z" | tzhour [[":"] tzminute]
+        tzhour       ::= ("+" | "-") <2 digits>
+        tzminute     ::= <2 digits, from 00 to 59>
+
+    Parameters
+    ----------
+    s : str
+        ISO 8601 형식 시각 표기법
+
+    Returns
+    -------
+    dt : datetime.datetime
+        변환한 날짜
+
+    Exceptions
+    ----------
+    ValueError
+        s가 올바른 ISO 8601 형식 시각 표기법이 아닐 때
+    """
+    if matches := iso8601_time_regex.match(s):
+        _hour: int = int(matches['hour'])
+        _minute: int = int(minute_str) if (minute_str := matches['minute']) else 0
+        _second: int = int(second_str) if (second_str := matches['second']) else 0
+        _microsecond: int = int(f'{microsecond_str:0<6}'[:6]) if (microsecond_str := matches['microsecond']) else 0
+
+        if tzinfo_str := matches['tzinfo']:
+            if tzinfo_str == 'Z':
+                _tzinfo = datetime.timezone.utc
+            else:
+                _tzsign: int = 1 if matches['tzsign'] == '+' else -1
+                _tzhour: int = int(matches['tzhour']) * _tzsign
+                _tzminute: int = int(minute_str) * _tzsign if (minute_str := matches['tzminute']) else 0
+                _tzinfo = datetime.timezone(datetime.timedelta(hours=_tzhour, minutes=_tzminute))
+        else:
+            _tzinfo = None
+        _time = datetime.time(_hour, _minute, _second, _microsecond, _tzinfo)
+
+        return _time
+    else:
+        raise ValueError(f"{s} is not a valid ISO8601 format")
+
+
+def parse_iso8601_datetime(s: str) -> datetime.datetime:
+    """ISO 8601 형식으로 표시된 날짜 및 시각을 해석한다.
+
+    ISO 8601 형식 날짜 및 시각 표기는 다음과 같다:
 
     ::
 
@@ -53,7 +162,7 @@ def parse_iso8601_datetime(s: str) -> datetime.datetime:
     Parameters
     ----------
     s : str
-        ISO 8601 형식 시각 표기법
+        ISO 8601 형식 날짜 및 시각 표기법
 
     Returns
     -------
@@ -63,35 +172,11 @@ def parse_iso8601_datetime(s: str) -> datetime.datetime:
     Exceptions
     ----------
     ValueError
-        s가 올바른 ISO 8601 형식 시각 표기법이 아닐 때
+        s가 올바른 ISO 8601 형식 날짜 및 시각 표기법이 아닐 때
     """
     if matches := iso8601_datetime_regex.match(s):
-        _year = int(matches['year'])
-        if month_str := matches['month']:
-            _date = datetime.date(_year, int(month_str), int(matches['day']))
-
-        elif week_str := matches['week']:
-            _date = datetime.date.fromisocalendar(_year, int(week_str), int(matches['weekday']))
-        else:
-            _date = datetime.date(_year, 1, 1) + datetime.timedelta(days=int(matches['ordinalday']) - 1)
-
-        _hour: int = int(matches['hour'])
-        _minute: int = int(minute_str) if (minute_str := matches['minute']) else 0
-        _second: int = int(second_str) if (second_str := matches['second']) else 0
-        _microsecond: int = int(f'{microsecond_str:0<6}'[:6]) if (microsecond_str := matches['microsecond']) else 0
-
-        if tzinfo_str := matches['tzinfo']:
-            if tzinfo_str == 'Z':
-                _tzinfo = datetime.timezone.utc
-            else:
-                _tzsign: int = 1 if matches['tzsign'] == '+' else -1
-                _tzhour: int = int(matches['tzhour']) * _tzsign
-                _tzminute: int = int(minute_str) * _tzsign if (minute_str := matches['tzminute']) else 0
-                _tzinfo = datetime.timezone(datetime.timedelta(hours=_tzhour, minutes=_tzminute))
-        else:
-            _tzinfo = None
-        _time = datetime.time(_hour, _minute, _second, _microsecond, _tzinfo)
-
+        _date = parse_iso8601_date(matches['date'])
+        _time = parse_iso8601_time(matches['fulltime'])
         return datetime.datetime.combine(_date, _time)
     else:
         raise ValueError(f"{s} is not a valid ISO8601 format")
@@ -253,4 +338,5 @@ def timedelta_isoformat(
     return f"P{days_part}T{hours_part}{minutes_part}{seconds_part}"
 
 
-__all__ = ["parse_iso8601_datetime", "parse_iso8601_datetimespan", "timedelta_isoformat"]
+__all__ = ["parse_iso8601_date", "parse_iso8601_datetime", "parse_iso8601_time", "parse_iso8601_datetimespan",
+           "timedelta_isoformat"]

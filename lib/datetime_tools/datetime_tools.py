@@ -1,8 +1,7 @@
 import datetime
 from typing import Literal
 
-UTC = datetime.timezone(datetime.timedelta(hours=0), name="UTC")
-UNIX_TIME_EPOCH = datetime.datetime(1970, 1, 1, 0, 0, 0, 0, tzinfo=UTC)
+UNIX_TIME_EPOCH = datetime.datetime(1970, 1, 1, 0, 0, 0, 0, tzinfo=datetime.timezone.utc)
 
 T_Timespec = Literal["microseconds", "milliseconds", "seconds", "minutes", "hours", "days"]
 
