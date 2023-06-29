@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 r"""
 문제
 ----

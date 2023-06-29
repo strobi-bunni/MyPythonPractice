@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 r"""
 n-퀸 문제(n-queens problem)
 
