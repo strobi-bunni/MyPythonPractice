@@ -6,9 +6,9 @@ r"""
 
 ::
 
-    $ python char_count.py -i filename.txt
+    $ python ./char_count.py -i filename.txt
     filename.txt | 4031S 124L 101N 428W 3659C 1916V
-    $ echo filename.txt | python char_count.py
+    $ < filename.txt python ./char_count.py
     filename.txt | 4031S 124L 101N 428W 3659C 1916V
 
 ``-v`` 옵션을 지정하지 않았을 시 출력 포맷은 다음과 같다:
