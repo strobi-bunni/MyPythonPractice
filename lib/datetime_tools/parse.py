@@ -9,14 +9,14 @@ iso8601_date_regex = re.compile(
 iso8601_time_regex = re.compile(
     r"^T?(?P<time>(?P<hour>\d{2})(?:(?P<hms_colon>:?)(?P<minute>\d{2})"
     r"(?:(?P=hms_colon)(?P<second>\d{2})(?:\.(?P<microsecond>\d+))?)?)?)"
-    r"(?P<tzinfo>Z|(?P<tzsign>[+\-])(?P<tzhour>\d{2})(?::?(?P<tzminute>\d{2}))?)?$")
+    r"(?P<tzinfo>Z|(?P<tzsign>[+\-\u2212])(?P<tzhour>\d{2})(?::?(?P<tzminute>\d{2})(?::?(?P<tzsecond>\d{2}))?)?)?$")
 iso8601_datetime_regex = re.compile(
     r"^(?P<date>(?P<year>\d{4})(?:(?P<ymd_hyphen>-?)(?P<month>\d{2})(?P=ymd_hyphen)(?P<day>\d{2})|"
     r"(?P<ywd_hyphen>-?)W(?P<week>\d{2})(?P=ywd_hyphen)(?P<weekday>[1-7])|"
     r"-?(?P<ordinalday>\d{3})))"
     r"[ T](?P<fulltime>(?P<time>(?P<hour>\d{2})(?:(?P<hms_colon>:?)(?P<minute>\d{2})"
     r"(?:(?P=hms_colon)(?P<second>\d{2})(?:\.(?P<microsecond>\d+))?)?)?)"
-    r"(?P<tzinfo>Z|(?P<tzsign>[+\-])(?P<tzhour>\d{2})(?::?(?P<tzminute>\d{2}))?)?)$")
+    r"(?P<tzinfo>Z|(?P<tzsign>[+\-\u2212])(?P<tzhour>\d{2})(?::?(?P<tzminute>\d{2})(?::?(?P<tzsecond>\d{2}))?)?)?)$")
 iso8601_datetimespan_regex = re.compile(
     r"^P(?P<datespan>(?:(?P<yearspan>\d+)Y)?(?:(?P<monthspan>\d+)M)?(?:(?P<dayspan>\d+)D)?)?"
     r"(?:T(?P<timespan>(?:(?P<hourspan>\d+)H)?(?:(?P<minutespan>\d+)M)?(?:(?P<secondspan>\d+(?:\.\d+)?)S)?))?$"
@@ -122,7 +122,8 @@ def parse_iso8601_time(s: str) -> datetime.time:
                 _tzsign: int = 1 if matches['tzsign'] == '+' else -1
                 _tzhour: int = int(matches['tzhour']) * _tzsign
                 _tzminute: int = int(minute_str) * _tzsign if (minute_str := matches['tzminute']) else 0
-                _tzinfo = datetime.timezone(datetime.timedelta(hours=_tzhour, minutes=_tzminute))
+                _tzsecond: int = int(second_str) * _tzsign if (second_str := matches['tzsecond']) else 0
+                _tzinfo = datetime.timezone(datetime.timedelta(hours=_tzhour, minutes=_tzminute, seconds=_tzsecond))
         else:
             _tzinfo = None
         _time = datetime.time(_hour, _minute, _second, _microsecond, _tzinfo)

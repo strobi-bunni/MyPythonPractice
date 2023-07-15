@@ -11,7 +11,7 @@ from itertools import product
 # minimalist form (no useful groups, for checking-only)
 regex_iso8601_datetime_minimalist = re.compile(
     r"^\d{4}(?:(-?)\d{2}\1\d{2}|(-?)W\d{2}\2[1-7]|-?\d{3})"
-    r"T\d{2}(?:(:?)\d{2}(?:\3\d{2}(?:\.\d{1,6})?)?)?(?:Z|[+\-]\d{2}(?::?\d{2})?)?$"
+    r"T\d{2}(?:(:?)\d{2}(?:\3\d{2}(?:\.\d{1,6})?)?)?(?:Z|[+\-\u2212]\d{2}(?::?\d{2}(?::?\d{2})?)?)?$"
 )
 
 # expanded(verbose) form (for parsing)
@@ -53,11 +53,15 @@ T
 (?P<tzinfo>       (?# ISO 8601 timezone info: Z or +-hh[[:]mm])
     Z
     |
-    (?P<tzsign>[+\-])
+    (?P<tzsign>[+\-\u2212])
     (?P<tzhour>\d{2})
     (?:
         :?
         (?P<tzminute>\d{2})
+        (?:
+            :?
+            (?P<tzsecond>\d{2})
+        )?
     )?
 )?
 $""", re.X)
@@ -65,7 +69,7 @@ $""", re.X)
 # test cases
 test_cases_date = ['2020-01-02', '20200102', '2020-W01-2', '2020W012', '2020123', '2020-123']
 test_cases_time = ['12:34:56', '123456', '12:34:56.123456', '123456.123456']
-test_cases_tzinfo = ['', 'Z', '+12:34', '+1234', '+12']
+test_cases_tzinfo = ['', 'Z', '+12:34', '+1234', '+12', '+123456']
 for (test_case_date, test_case_time, test_case_tzinfo) in product(test_cases_date, test_cases_time, test_cases_tzinfo):
     test_case = f'{test_case_date}T{test_case_time}{test_case_tzinfo}'
     if matches := regex_iso8601_datetime.match(test_case):
