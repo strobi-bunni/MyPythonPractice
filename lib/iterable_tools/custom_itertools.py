@@ -2,8 +2,8 @@ import itertools
 from functools import wraps
 from typing import Any, Callable, Iterable, Iterator, List, Literal, Optional, Sequence, Tuple, TypeVar, Union
 
-from .itertools_recipe import all_equal, consume, partition
 from ..func_tools import deprecated, identity
+from .itertools_recipe import all_equal, consume, partition
 
 T = TypeVar("T")
 V = TypeVar("V")

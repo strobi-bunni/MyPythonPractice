@@ -1,6 +1,6 @@
 import unittest
 
-from lib.str_tools.str_tools import *
+from lib.str_tools.str_tools import convert_newline, findall
 
 
 class TestStrTools(unittest.TestCase):

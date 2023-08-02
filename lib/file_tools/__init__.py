@@ -17,3 +17,15 @@
 from .iofuncs import dummy_copytree, rename
 from .miscfuncs import get_file_hash, repr_file_size
 from .pathfuncs import common_parent, get_dir_size, is_empty_folder, path_walker, relative_level
+
+__all__ = [
+    "dummy_copytree",
+    "rename",
+    "get_file_hash",
+    "repr_file_size",
+    "common_parent",
+    "get_dir_size",
+    "is_empty_folder",
+    "path_walker",
+    "relative_level",
+]
