@@ -628,11 +628,12 @@ def sort_by_specific_order(
 
 
 def iterable_with_callback(
-    iterable: Iterable[T], callback: Optional[Callable[[int, T], None]] = None,
+    iterable: Iterable[T],
+    callback: Optional[Callable[[int, T], None]] = None,
     call_at: Literal["before", "after"] = "before",
     *,
     before: Optional[Callable[[int, T], None]] = None,
-    after: Optional[Callable[[int, T], None]] = None
+    after: Optional[Callable[[int, T], None]] = None,
 ) -> Iterator[T]:
     """이터러블의 값들을 그대로 Pass-through해서 산출하고, 산출된 값에 대해서 callback 함수를 실행한다.
 
@@ -715,7 +716,7 @@ def with_callback(
     call_at: Literal["before", "after"] = "before",
     *,
     before: Optional[Callable[[int, T], None]] = None,
-    after: Optional[Callable[[int, T], None]] = None
+    after: Optional[Callable[[int, T], None]] = None,
 ):
     r"""iterable_with_callback 의 데코레이터 버전. 이터러블을 래핑한다.
 
@@ -765,8 +766,9 @@ def with_callback(
     def decorator(func):
         @wraps(func)
         def decorated_func(*args, **kwargs):
-            return iterable_with_callback(func(*args, **kwargs), callback=callback, call_at=call_at,
-                                          before=before, after=after)
+            return iterable_with_callback(
+                func(*args, **kwargs), callback=callback, call_at=call_at, before=before, after=after
+            )
 
         return decorated_func
 

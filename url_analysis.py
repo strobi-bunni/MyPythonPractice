@@ -26,36 +26,36 @@ def parse_url(url: str) -> dict:
 
     # 쿼리 문자열을 딕셔너리로 변환
     if query_string := parse_result.query:
-        queries = query_string.split('&')
-        query_partitions = [part.partition('=') for part in queries]
+        queries = query_string.split("&")
+        query_partitions = [part.partition("=") for part in queries]
     else:
         query_partitions = []
     query_dict = {x[0]: unquote(x[2]) for x in query_partitions}
 
     return {
-        'url': url,
-        'scheme': parse_result.scheme or '',
-        'netloc': parse_result.netloc or '',
-        'netloc_details': {
-            'username': parse_result.username or '',
-            'password': parse_result.password or '',
-            'hostname': parse_result.hostname or '',
-            'port': parse_result.port or ''
+        "url": url,
+        "scheme": parse_result.scheme or "",
+        "netloc": parse_result.netloc or "",
+        "netloc_details": {
+            "username": parse_result.username or "",
+            "password": parse_result.password or "",
+            "hostname": parse_result.hostname or "",
+            "port": parse_result.port or "",
         },
-        'path': unquote(parse_result.path or ''),
-        'params': parse_result.params or '',
-        'query': query_dict,
-        'fragment': parse_result.fragment or ''
+        "path": unquote(parse_result.path or ""),
+        "params": parse_result.params or "",
+        "query": query_dict,
+        "fragment": parse_result.fragment or "",
     }
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument('url', type=str, nargs='?', help='분석할 URL')
+    parser.add_argument("url", type=str, nargs="?", help="분석할 URL")
     args = parser.parse_args()
 
     args_url = args.url
     if not args.url:
         args_url = sys.stdin.read()
 
-    print(json.dumps(parse_url(args_url.strip()), ensure_ascii=False, indent=4), end='')
+    print(json.dumps(parse_url(args_url.strip()), ensure_ascii=False, indent=4), end="")

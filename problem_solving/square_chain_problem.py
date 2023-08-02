@@ -37,11 +37,10 @@ from typing import Iterator, List
 
 
 def is_square(n: int) -> bool:
-    """자연수 n이 제곱수인지 여부
-    """
+    """자연수 n이 제곱수인지 여부"""
     returns = False
     for x in count():
-        if (x_sq := x ** 2) > n:
+        if (x_sq := x**2) > n:
             break
         elif x_sq == n:
             returns = True

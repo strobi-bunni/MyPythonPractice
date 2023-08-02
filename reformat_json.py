@@ -36,45 +36,46 @@ def reformat_json(filename: PathLike, **kwargs) -> int:
     exit_code : int
         작업이 성공할 시 0, 실패할 시 1
     """
-    jsonfile_read = open(filename, 'r', encoding='utf-8')
+    jsonfile_read = open(filename, "r", encoding="utf-8")
     try:
         data = json.load(jsonfile_read)
     except json.JSONDecodeError as e:
-        print(f'An error occurred while parsing the file: {jsonfile_read.name}\nError details: {e}\n')
+        print(f"An error occurred while parsing the file: {jsonfile_read.name}\nError details: {e}\n")
         jsonfile_read.close()
         return JOB_DONE_FAILED
     else:
         jsonfile_read.close()
 
-        with open(filename, 'w', encoding='utf-8') as jsonfile_write:
+        with open(filename, "w", encoding="utf-8") as jsonfile_write:
             json.dump(data, jsonfile_write, **kwargs)
         return JOB_DONE_SUCCESSFUL
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument('path', metavar='PATH', nargs='+', type=str, help='JSON 파일(들) (와일드카드 지원)')
+    parser.add_argument("path", metavar="PATH", nargs="+", type=str, help="JSON 파일(들) (와일드카드 지원)")
     indent_options = parser.add_mutually_exclusive_group()
-    indent_options.add_argument('-t', '-tab', '--tab-indent', action='store_true', help='탭으로 인덴트를 구분할지 여부')
-    indent_options.add_argument('-i', '-in', '--indent', metavar='INDENT_VALUE', type=int, default=4,
-                                help='들여쓰기 크기(기본값: 4)')
-    parser.add_argument('-a', '-ascii', '--ascii-only', action='store_true', help='ASCII 모드로만 출력하기')
-    parser.add_argument('-s', '-sort', '--sort-keys', action='store_true', help='키 정렬')
-    parser.add_argument('-c', '-com', '--compact', action='store_true', help='모든 화이트스페이스를 없애기')
-    parser.add_argument('-v', '--verbose', action='store_true', help='각각의 파일의 작업 결과를 출력')
+    indent_options.add_argument("-t", "-tab", "--tab-indent", action="store_true", help="탭으로 인덴트를 구분할지 여부")
+    indent_options.add_argument(
+        "-i", "-in", "--indent", metavar="INDENT_VALUE", type=int, default=4, help="들여쓰기 크기(기본값: 4)"
+    )
+    parser.add_argument("-a", "-ascii", "--ascii-only", action="store_true", help="ASCII 모드로만 출력하기")
+    parser.add_argument("-s", "-sort", "--sort-keys", action="store_true", help="키 정렬")
+    parser.add_argument("-c", "-com", "--compact", action="store_true", help="모든 화이트스페이스를 없애기")
+    parser.add_argument("-v", "--verbose", action="store_true", help="각각의 파일의 작업 결과를 출력")
 
     args = parser.parse_args()
 
     ensure_ascii = args.ascii_only
     if args.tab_indent:
-        indent = '\t'
+        indent = "\t"
     else:
         indent = args.indent
     sort_keys = args.sort_keys
-    json_format_option = {'ensure_ascii': ensure_ascii, 'sort_keys': sort_keys, 'indent': indent}
+    json_format_option = {"ensure_ascii": ensure_ascii, "sort_keys": sort_keys, "indent": indent}
     if args.compact:
-        json_format_option['indent'] = None
-        json_format_option['separators'] = (',', ':')
+        json_format_option["indent"] = None
+        json_format_option["separators"] = (",", ":")
 
     json_files: Iterator[Path] = chain.from_iterable(find_files_with_glob(p) for p in args.path)
 
@@ -86,12 +87,13 @@ if __name__ == '__main__':
 
         if reformat_json(json_file, **json_format_option) == JOB_DONE_SUCCESSFUL:
             if args.verbose:
-                print(f'{json_file!s} is formatted successfully', file=sys.stderr)
+                print(f"{json_file!s} is formatted successfully", file=sys.stderr)
             num_of_formatted_json_files += 1
 
     if args.verbose:
         print(
-            f'Successful: {num_of_formatted_json_files} / '
-            f'Failed: {num_of_json_files - num_of_formatted_json_files} / '
-            f'Total: {num_of_json_files}',
-            file=sys.stderr)
+            f"Successful: {num_of_formatted_json_files} / "
+            f"Failed: {num_of_json_files - num_of_formatted_json_files} / "
+            f"Total: {num_of_json_files}",
+            file=sys.stderr,
+        )

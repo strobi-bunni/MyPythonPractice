@@ -17,19 +17,19 @@ from pathlib import Path
 from shutil import rmtree
 
 if len(sys.argv) != 2:
-    print('Invalid parameter.\nUSAGE: delete_pycache.py <TARGET_FOLDER_PATH>')
+    print("Invalid parameter.\nUSAGE: delete_pycache.py <TARGET_FOLDER_PATH>")
     exit(1)
 
 path = Path(sys.argv[1])
-print(f'Deleting __pycache__ folders from every subdirectory of {path!s}?\nTHIS JOB CANNOT BE UNDONE!\n[Y]es | [N]o')
-confirm = input('> ')
+print(f"Deleting __pycache__ folders from every subdirectory of {path!s}?\nTHIS JOB CANNOT BE UNDONE!\n[Y]es | [N]o")
+confirm = input("> ")
 
 # find venv
-venv_folders = [p.parent for p in path.glob('**/pyvenv.cfg')]
+venv_folders = [p.parent for p in path.glob("**/pyvenv.cfg")]
 
-if confirm.strip().lower() in ['y', 'yes']:
-    for pycache_folder in path.glob('**/__pycache__/'):
+if confirm.strip().lower() in ["y", "yes"]:
+    for pycache_folder in path.glob("**/__pycache__/"):
         # do not delete __pycache__ from venv folder
         if all((parent not in venv_folders) for parent in pycache_folder.parents):
-            print(f'{pycache_folder!s} is deleted')
+            print(f"{pycache_folder!s} is deleted")
             rmtree(pycache_folder)

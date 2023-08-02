@@ -8,13 +8,20 @@ from ctypes.wintypes import DWORD, HANDLE, LPCWSTR
 from datetime import datetime, timedelta, timezone
 from os import PathLike
 from pathlib import Path
-from stat import FILE_ATTRIBUTE_ARCHIVE, FILE_ATTRIBUTE_HIDDEN, FILE_ATTRIBUTE_NORMAL, \
-    FILE_ATTRIBUTE_NOT_CONTENT_INDEXED, FILE_ATTRIBUTE_OFFLINE, FILE_ATTRIBUTE_READONLY, FILE_ATTRIBUTE_SYSTEM, \
-    FILE_ATTRIBUTE_TEMPORARY
+from stat import (
+    FILE_ATTRIBUTE_ARCHIVE,
+    FILE_ATTRIBUTE_HIDDEN,
+    FILE_ATTRIBUTE_NORMAL,
+    FILE_ATTRIBUTE_NOT_CONTENT_INDEXED,
+    FILE_ATTRIBUTE_OFFLINE,
+    FILE_ATTRIBUTE_READONLY,
+    FILE_ATTRIBUTE_SYSTEM,
+    FILE_ATTRIBUTE_TEMPORARY,
+)
 from typing import NamedTuple, Optional, Union
 
-if sys.platform != 'win32':
-    raise RuntimeError(f'`ntattrs` is available only for Windows.')
+if sys.platform != "win32":
+    raise RuntimeError(f"`ntattrs` is available only for Windows.")
 
 NT_EPOCH = datetime(1601, 1, 1, 0, 0, 0, tzinfo=timezone.utc)
 # Windows에서 datetime.astimezone이 오류를 일으키지 않는 최소 시각
@@ -36,10 +43,8 @@ class FILETIME(ctypes.Structure):
 
     참고: https://learn.microsoft.com/en-us/windows/win32/api/minwinbase/ns-minwinbase-filetime
     """
-    _fields_ = [
-        ('dwLowDateTime', DWORD),
-        ('dwHighDateTime', DWORD)
-    ]
+
+    _fields_ = [("dwLowDateTime", DWORD), ("dwHighDateTime", DWORD)]
 
 
 class FileTimeStamp(NamedTuple):
@@ -88,15 +93,20 @@ def to_time_struct(dt: Optional[datetime]) -> FILETIME:
     if dt is None:
         return FILETIME(0, 0)
     ts = to_nt_timestamp(dt)
-    return FILETIME(ts & 0xffff_ffff, (ts >> 32) & 0xffff_ffff)
+    return FILETIME(ts & 0xFFFF_FFFF, (ts >> 32) & 0xFFFF_FFFF)
 
 
 def from_time_struct(tst: FILETIME) -> datetime:
     return from_nt_timestamp(tst.dwLowDateTime + (tst.dwHighDateTime << 32))
 
 
-def set_timestamp(path: Union[str, PathLike], ctime: Optional[datetime] = None, mtime: Optional[datetime] = None,
-                  atime: Optional[datetime] = None, tst: Optional[FileTimeStamp] = None):
+def set_timestamp(
+    path: Union[str, PathLike],
+    ctime: Optional[datetime] = None,
+    mtime: Optional[datetime] = None,
+    atime: Optional[datetime] = None,
+    tst: Optional[FileTimeStamp] = None,
+):
     r"""파일/폴더의 타임스탬프를 설정한다.
 
     Parameters
@@ -125,7 +135,7 @@ def set_timestamp(path: Union[str, PathLike], ctime: Optional[datetime] = None, 
     """
     path = Path(path)
     if not path.exists():
-        raise FileNotFoundError(f'{path} cannot found.')
+        raise FileNotFoundError(f"{path} cannot found.")
     filepath = str(path.resolve())
 
     if tst is None:
@@ -145,11 +155,14 @@ def set_timestamp(path: Union[str, PathLike], ctime: Optional[datetime] = None, 
         HANDLE(0),  # lpSecurityAttributes = NULL*
         DWORD(0x3),  # dwCreationDisposition = OPEN_EXISTING
         DWORD(0x0),  # dwFlagsAndAttributes = 0
-        HANDLE(0)  # hTemplateFile = NULL*
+        HANDLE(0),  # hTemplateFile = NULL*
     )
     ctypes.windll.kernel32.SetFileTime(
         handle,
-        ctypes.byref(to_time_struct(ctime)), ctypes.byref(to_time_struct(atime)), ctypes.byref(to_time_struct(mtime)))
+        ctypes.byref(to_time_struct(ctime)),
+        ctypes.byref(to_time_struct(atime)),
+        ctypes.byref(to_time_struct(mtime)),
+    )
     ctypes.windll.kernel32.CloseHandle(handle)
 
 
@@ -184,7 +197,7 @@ def get_timestamp(path: Union[str, PathLike]) -> FileTimeStamp:
         HANDLE(0),  # lpSecurityAttributes = NULL*
         DWORD(0x3),  # dwCreationDisposition = OPEN_EXISTING
         DWORD(0x0),  # dwFlagsAndAttributes = 0
-        HANDLE(0)  # hTemplateFile = NULL*
+        HANDLE(0),  # hTemplateFile = NULL*
     )
     ctime = FILETIME(0, 0)
     mtime = FILETIME(0, 0)
@@ -202,8 +215,14 @@ set_file_timestamp = set_timestamp
 
 
 SET_FILE_ATTRIBUTE_MASK = (
-        FILE_ATTRIBUTE_ARCHIVE | FILE_ATTRIBUTE_HIDDEN | FILE_ATTRIBUTE_NORMAL | FILE_ATTRIBUTE_NOT_CONTENT_INDEXED
-        | FILE_ATTRIBUTE_OFFLINE | FILE_ATTRIBUTE_READONLY | FILE_ATTRIBUTE_SYSTEM | FILE_ATTRIBUTE_TEMPORARY
+    FILE_ATTRIBUTE_ARCHIVE
+    | FILE_ATTRIBUTE_HIDDEN
+    | FILE_ATTRIBUTE_NORMAL
+    | FILE_ATTRIBUTE_NOT_CONTENT_INDEXED
+    | FILE_ATTRIBUTE_OFFLINE
+    | FILE_ATTRIBUTE_READONLY
+    | FILE_ATTRIBUTE_SYSTEM
+    | FILE_ATTRIBUTE_TEMPORARY
 )
 
 
@@ -240,7 +259,7 @@ def set_attribute(path: Union[str, PathLike], flag: int) -> None:
     """
     path = Path(path)
     if not path.exists():
-        raise FileNotFoundError(f'{path} not found')
+        raise FileNotFoundError(f"{path} not found")
 
     abspath = path.resolve()
     new_flag = flag
@@ -258,7 +277,7 @@ def _set_flag_function(flag: int) -> Callable[[Union[str, PathLike]], None]:
     def _set_flag(path: Union[str, PathLike]) -> None:
         path = Path(path)
         if not path.exists():
-            raise FileNotFoundError(f'{path} not found')
+            raise FileNotFoundError(f"{path} not found")
 
         abspath = path.resolve()
         new_flag = abspath.stat().st_file_attributes | flag
@@ -271,7 +290,7 @@ def _clear_flag_function(flag: int) -> Callable[[Union[str, PathLike]], None]:
     def _clear_flag(path: Union[str, PathLike]) -> None:
         path = Path(path)
         if not path.exists():
-            raise FileNotFoundError(f'{path} not found')
+            raise FileNotFoundError(f"{path} not found")
 
         abspath = path.resolve()
         new_flag = abspath.stat().st_file_attributes & ~flag

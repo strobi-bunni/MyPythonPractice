@@ -8,7 +8,7 @@
 from collections.abc import Callable
 from typing import TypeVar
 
-T = TypeVar('T')
+T = TypeVar("T")
 
 
 class Memoize(Callable):
@@ -36,19 +36,18 @@ class Memoize(Callable):
             return returns
 
     def __repr__(self):
-        return f'Memoize({self.func.__name__})'
+        return f"Memoize({self.func.__name__})"
 
 
 @Memoize
 def fib(n: int) -> int:
-    """피보나치 수열을 구한다.
-    """
+    """피보나치 수열을 구한다."""
     if n < 2:
         return n
     else:
         return fib(n - 1) + fib(n - 2)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     for i in range(501):
-        print(f'F({i}) = {fib(i)}')
+        print(f"F({i}) = {fib(i)}")

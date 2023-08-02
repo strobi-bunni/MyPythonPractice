@@ -15,7 +15,8 @@ regex_iso8601_datetime_minimalist = re.compile(
 )
 
 # expanded(verbose) form (for parsing)
-regex_iso8601_datetime = re.compile(r"""^
+regex_iso8601_datetime = re.compile(
+    r"""^
 (?P<date>         (?# ISO 8601 date format)
     (?P<year>\d{4})
     (?:
@@ -64,15 +65,17 @@ T
         )?
     )?
 )?
-$""", re.X)
+$""",
+    re.X,
+)
 
 # test cases
-test_cases_date = ['2020-01-02', '20200102', '2020-W01-2', '2020W012', '2020123', '2020-123']
-test_cases_time = ['12:34:56', '123456', '12:34:56.123456', '123456.123456']
-test_cases_tzinfo = ['', 'Z', '+12:34', '+1234', '+12', '+123456']
-for (test_case_date, test_case_time, test_case_tzinfo) in product(test_cases_date, test_cases_time, test_cases_tzinfo):
-    test_case = f'{test_case_date}T{test_case_time}{test_case_tzinfo}'
+test_cases_date = ["2020-01-02", "20200102", "2020-W01-2", "2020W012", "2020123", "2020-123"]
+test_cases_time = ["12:34:56", "123456", "12:34:56.123456", "123456.123456"]
+test_cases_tzinfo = ["", "Z", "+12:34", "+1234", "+12", "+123456"]
+for test_case_date, test_case_time, test_case_tzinfo in product(test_cases_date, test_cases_time, test_cases_tzinfo):
+    test_case = f"{test_case_date}T{test_case_time}{test_case_tzinfo}"
     if matches := regex_iso8601_datetime.match(test_case):
         print(f'{test_case}: date={matches["date"]}, time={matches["time"]}, tzinfo={matches["tzinfo"]}')
     else:
-        print(f'{test_case}: not matched')
+        print(f"{test_case}: not matched")

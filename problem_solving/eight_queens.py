@@ -24,7 +24,7 @@ from functools import cmp_to_key
 from itertools import filterfalse, zip_longest
 from typing import TypeVar
 
-T = TypeVar('T')
+T = TypeVar("T")
 
 
 def find_diagonal_line_bottom_right(loc: int, size: int) -> int:
@@ -38,17 +38,20 @@ def find_diagonal_line_bottom_left(loc: int, size: int) -> int:
 
 
 def find_threat_area(loc: int, size: int) -> list[int]:
-    """위치 loc에 퀸을 배치할 경우 퀸의 위협을 받는 영역을 표시한다.
-    """
-    return [int((loc % size == p % size) | (loc // size == p // size)
-                | (find_diagonal_line_bottom_right(loc, size) == find_diagonal_line_bottom_right(p, size))
-                | (find_diagonal_line_bottom_left(loc, size) == find_diagonal_line_bottom_left(p, size)))
-            for p in range(size * size)]
+    """위치 loc에 퀸을 배치할 경우 퀸의 위협을 받는 영역을 표시한다."""
+    return [
+        int(
+            (loc % size == p % size)
+            | (loc // size == p // size)
+            | (find_diagonal_line_bottom_right(loc, size) == find_diagonal_line_bottom_right(p, size))
+            | (find_diagonal_line_bottom_left(loc, size) == find_diagonal_line_bottom_left(p, size))
+        )
+        for p in range(size * size)
+    ]
 
 
 def count_queens(board: list[int]) -> int:
-    """체스판 위의 퀸의 갯수를 센다.
-    """
+    """체스판 위의 퀸의 갯수를 센다."""
     return sum(filter(bool, board))
 
 
@@ -65,8 +68,9 @@ def _solve_n_queens(board: list[int], threats: list[int], size: int) -> Iterator
 
             # 다음 자리에 퀸을 올려놓고 위험 지역을 업데이트한다.
             new_board[next_possible_queen_location] = 1
-            new_threats = [th | new_th for (th, new_th)
-                           in zip(threats, find_threat_area(next_possible_queen_location, size))]
+            new_threats = [
+                th | new_th for (th, new_th) in zip(threats, find_threat_area(next_possible_queen_location, size))
+            ]
             yield from _solve_n_queens(new_board, new_threats, size)
 
 
@@ -76,7 +80,7 @@ def solve_n_queens(size: int) -> Iterator[list[int]]:
     yield from _solve_n_queens(board, threats, size)
 
 
-def grouper(iterable, n, *, incomplete='fill', fillvalue=None):
+def grouper(iterable, n, *, incomplete="fill", fillvalue=None):
     """Collect data into non-overlapping fixed-length chunks or blocks
 
     https://docs.python.org/3/library/itertools.html#itertools-recipes
@@ -85,21 +89,21 @@ def grouper(iterable, n, *, incomplete='fill', fillvalue=None):
     # grouper('ABCDEFG', 3, incomplete='strict') --> ABC DEF ValueError
     # grouper('ABCDEFG', 3, incomplete='ignore') --> ABC DEF
     args = [iter(iterable)] * n
-    if incomplete == 'fill':
+    if incomplete == "fill":
         return zip_longest(*args, fillvalue=fillvalue)
-    if incomplete == 'strict':
+    if incomplete == "strict":
         return zip(*args, strict=True)
-    if incomplete == 'ignore':
+    if incomplete == "ignore":
         return zip(*args)
     else:
-        raise ValueError('Expected fill, strict, or ignore')
+        raise ValueError("Expected fill, strict, or ignore")
 
 
 def print_board(board: list[int], size: int) -> None:
     row_str = []
     for row in grouper(board, size):
-        row_str.append(''.join(('\uff31' if c else '\uff0e') for c in row))
-    print('\n'.join(row_str))
+        row_str.append("".join(("\uff31" if c else "\uff0e") for c in row))
+    print("\n".join(row_str))
     print()
 
 
@@ -112,14 +116,14 @@ def reorder(seq: Sequence[T], order: Sequence[int]) -> list[T]:
 def is_same_square_array(seq: Sequence[T], seq2: Sequence[T]) -> int:
     size = math.isqrt(len(seq))
     if (
-            seq == seq2 or
-            (seq == reorder(seq2, [i * size + j for i in range(size - 1, -1, -1) for j in range(size)])) or
-            (seq == reorder(seq2, [i * size + j for i in range(size) for j in range(size - 1, -1, -1)])) or
-            (seq == reorder(seq2, [i * size + j for i in range(size - 1, -1, -1) for j in range(size - 1, -1, -1)])) or
-            (seq == reorder(seq2, [j * size + i for i in range(size) for j in range(size)])) or
-            (seq == reorder(seq2, [j * size + i for i in range(size - 1, -1, -1) for j in range(size)])) or
-            (seq == reorder(seq2, [j * size + i for i in range(size) for j in range(size - 1, -1, -1)])) or
-            (seq == reorder(seq2, [j * size + i for i in range(size - 1, -1, -1) for j in range(size - 1, -1, -1)]))
+        seq == seq2
+        or (seq == reorder(seq2, [i * size + j for i in range(size - 1, -1, -1) for j in range(size)]))
+        or (seq == reorder(seq2, [i * size + j for i in range(size) for j in range(size - 1, -1, -1)]))
+        or (seq == reorder(seq2, [i * size + j for i in range(size - 1, -1, -1) for j in range(size - 1, -1, -1)]))
+        or (seq == reorder(seq2, [j * size + i for i in range(size) for j in range(size)]))
+        or (seq == reorder(seq2, [j * size + i for i in range(size - 1, -1, -1) for j in range(size)]))
+        or (seq == reorder(seq2, [j * size + i for i in range(size) for j in range(size - 1, -1, -1)]))
+        or (seq == reorder(seq2, [j * size + i for i in range(size - 1, -1, -1) for j in range(size - 1, -1, -1)]))
     ):
         return 0
     else:
@@ -148,7 +152,7 @@ def unique_everseen(iterable, key=None):
                 yield element
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     board_size = 8
     num_of_solutions = 0
     nqueens = solve_n_queens(board_size)  # 모든 경우의 수(뒤집거나 회전시키는 것을 다른 것으로 볼 때: A000170)
@@ -156,4 +160,4 @@ if __name__ == '__main__':
     for solution in unique_nqueens:
         num_of_solutions += 1
         print_board(solution, board_size)
-    print(f'{num_of_solutions} unique solutions')
+    print(f"{num_of_solutions} unique solutions")

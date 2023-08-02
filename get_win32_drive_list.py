@@ -22,6 +22,7 @@ class DriveType(IntEnum):
 
     https://learn.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-getdrivetypea
     """
+
     DRIVE_UNKNOWN = 0
     DRIVE_NO_ROOT_DIR = 1
     DRIVE_REMOVABLE = 2
@@ -36,6 +37,7 @@ class FileSystemFlags(IntFlag):
 
     https://learn.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-getvolumeinformationw
     """
+
     FILE_CASE_SENSITIVE_SEARCH = 0x1
     FILE_CASE_PRESERVED_NAMES = 0x2
     FILE_UNICODE_ON_DISK = 0x4
@@ -67,7 +69,7 @@ class DriveInfo(NamedTuple):
     filesystem_name: str  # 파일 시스템 이름(예: 'NTFS')
 
 
-regex_drive_letter = re.compile(r'^([A-Z])(?::\\?)?$', re.I)
+regex_drive_letter = re.compile(r"^([A-Z])(?::\\?)?$", re.I)
 
 
 def normalize_drive_letter(letter: str, trailing_backslash=True) -> str:
@@ -76,7 +78,7 @@ def normalize_drive_letter(letter: str, trailing_backslash=True) -> str:
     trailing_backslash = True일 경우 ``r'C:\'``형식으로 바꾸고, False일 경우 ``r'C:'`` 형식으로 바꾼다.
     """
     if matches := regex_drive_letter.match(letter):
-        suffix = ':\\' if trailing_backslash else ':'
+        suffix = ":\\" if trailing_backslash else ":"
         return matches[1].upper() + suffix
 
 
@@ -140,20 +142,31 @@ def get_drive_info(letter: str) -> DriveInfo:
     .. _`GetVolumeInformationW` : https://learn.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-getvolumeinformationw
     """
     lp_root_path_name = LPCWSTR(normalize_drive_letter(letter))
-    lp_volume_name_buffer = LPWSTR('\x00' * 255)
+    lp_volume_name_buffer = LPWSTR("\x00" * 255)
     n_volume_name_size = DWORD(256)
     lp_volume_serial_number = LPDWORD(DWORD(0))
     lp_maximum_component_length = LPDWORD(DWORD(0))
     lp_file_system_flags = LPDWORD(DWORD(0))
-    lp_file_system_name_buffer = LPWSTR('\x00' * 255)
+    lp_file_system_name_buffer = LPWSTR("\x00" * 255)
     n_file_system_name_size = DWORD(256)
 
     ctypes.windll.kernel32.GetVolumeInformationW(
-        lp_root_path_name, lp_volume_name_buffer, n_volume_name_size, lp_volume_serial_number,
-        lp_maximum_component_length, lp_file_system_flags, lp_file_system_name_buffer, n_file_system_name_size
+        lp_root_path_name,
+        lp_volume_name_buffer,
+        n_volume_name_size,
+        lp_volume_serial_number,
+        lp_maximum_component_length,
+        lp_file_system_flags,
+        lp_file_system_name_buffer,
+        n_file_system_name_size,
     )
-    return DriveInfo(lp_root_path_name.value, lp_volume_name_buffer.value, lp_volume_serial_number.contents.value,
-                     FileSystemFlags(lp_file_system_flags.contents.value), lp_file_system_name_buffer.value)
+    return DriveInfo(
+        lp_root_path_name.value,
+        lp_volume_name_buffer.value,
+        lp_volume_serial_number.contents.value,
+        FileSystemFlags(lp_file_system_flags.contents.value),
+        lp_file_system_name_buffer.value,
+    )
 
 
 def simplified_filesystem_flag(flag: FileSystemFlags) -> str:
@@ -161,18 +174,39 @@ def simplified_filesystem_flag(flag: FileSystemFlags) -> str:
 
     참고 : 공식적인 약어는 아니다
     """
-    flag_abbrs = ['C', 'PN', 'U', 'ACL', 'CO', 'Q', 'SP', 'RP', 'ISCO', 'OID', 'ENC', 'NS', 'RO', 'WO', 'TR', 'HL',
-                  'XA', 'OPENID', 'USN', 'BR', 'DAX']  # 플래그 약어
+    flag_abbrs = [
+        "C",
+        "PN",
+        "U",
+        "ACL",
+        "CO",
+        "Q",
+        "SP",
+        "RP",
+        "ISCO",
+        "OID",
+        "ENC",
+        "NS",
+        "RO",
+        "WO",
+        "TR",
+        "HL",
+        "XA",
+        "OPENID",
+        "USN",
+        "BR",
+        "DAX",
+    ]  # 플래그 약어
     strs = []
     for abbr, value in zip(flag_abbrs, sorted((x.value for x in FileSystemFlags.__members__.values()))):
         if flag & value:
             strs.append(abbr)
         else:
-            strs.append(''.join(' ' for _ in abbr))  # 같은 크기의 공백으로 대체
+            strs.append("".join(" " for _ in abbr))  # 같은 크기의 공백으로 대체
     return f"Flags: {' '.join(strs)}".strip()
 
 
-def format_percent_to_bar(ratio: float, width: int = 79, fillchar: str = '@', emptychar: str = '.') -> str:
+def format_percent_to_bar(ratio: float, width: int = 79, fillchar: str = "@", emptychar: str = ".") -> str:
     r"""0 이상 1 이하의 비율 ratio을 막대로 표시한다.
 
     Parameters
@@ -207,48 +241,51 @@ def format_percent_to_bar(ratio: float, width: int = 79, fillchar: str = '@', em
 
     length_of_bar = round(ratio * width)
     bar = fillchar * length_of_bar
-    return f'{bar:{emptychar}<{width}}'
+    return f"{bar:{emptychar}<{width}}"
 
 
 def format_size(i: int) -> str:
     if i >= PEBIBYTE:
-        unit_num, unit = PEBIBYTE, 'PiB'
+        unit_num, unit = PEBIBYTE, "PiB"
     elif i >= TEBIBYTE:
-        unit_num, unit = TEBIBYTE, 'TiB'
+        unit_num, unit = TEBIBYTE, "TiB"
     elif i >= GIBIBYTE:
-        unit_num, unit = GIBIBYTE, 'GiB'
+        unit_num, unit = GIBIBYTE, "GiB"
     elif i >= MEBIBYTE:
-        unit_num, unit = MEBIBYTE, 'MiB'
+        unit_num, unit = MEBIBYTE, "MiB"
     else:
-        unit_num, unit = KIBIBYTE, 'KiB'
+        unit_num, unit = KIBIBYTE, "KiB"
 
     pre_decimal_point_nums = len(str(i // unit_num))
     post_decimal_point_nums = 4 - pre_decimal_point_nums
-    return f'{i / unit_num:{pre_decimal_point_nums}.{post_decimal_point_nums}f} {unit}'
+    return f"{i / unit_num:{pre_decimal_point_nums}.{post_decimal_point_nums}f} {unit}"
 
 
 def print_drive_info(letter: str, width: int = 77) -> None:
-    """드라이브 정보를 보기 쉽게 출력한다.
-    """
+    """드라이브 정보를 보기 쉽게 출력한다."""
     drive_type = get_drive_type(letter)
     drive_info = get_drive_info(letter)
-    print(f'{drive_info.drive_label} ({normalize_drive_letter(letter, trailing_backslash=False)})\n'
-          f'{drive_type.name}, {drive_info.filesystem_name}\n'
-          f'{simplified_filesystem_flag(drive_info.filesystem_flags)}')
+    print(
+        f"{drive_info.drive_label} ({normalize_drive_letter(letter, trailing_backslash=False)})\n"
+        f"{drive_type.name}, {drive_info.filesystem_name}\n"
+        f"{simplified_filesystem_flag(drive_info.filesystem_flags)}"
+    )
     try:
-        disk_usage = shutil.disk_usage(letter + ':')
+        disk_usage = shutil.disk_usage(letter + ":")
     except OSError:
-        print('Drive not available')
+        print("Drive not available")
     else:
         use_ratio = disk_usage.used / disk_usage.total
-        print(f'{format_size(disk_usage.used)} used / '
-              f'{format_size(disk_usage.free)} free / '
-              f'{format_size(disk_usage.total)} total '
-              f'({use_ratio:.1%})')
-        print(f'[{format_percent_to_bar(use_ratio, width=width)}]')
+        print(
+            f"{format_size(disk_usage.used)} used / "
+            f"{format_size(disk_usage.free)} free / "
+            f"{format_size(disk_usage.total)} total "
+            f"({use_ratio:.1%})"
+        )
+        print(f"[{format_percent_to_bar(use_ratio, width=width)}]")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     # 터미널 크기를 구한다.
     terminal_width = shutil.get_terminal_size().columns
 

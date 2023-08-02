@@ -27,8 +27,15 @@ class TuringMachineResult(NamedTuple):
 
 
 class TuringMachine:
-    def __init__(self, rules: List[TuringMachineRule], start_state: str, initial_tape: Sequence[int] = None,
-                 initial_pos: int = 0, halt_state: str = 'H', blank_symbol: int = 0):
+    def __init__(
+        self,
+        rules: List[TuringMachineRule],
+        start_state: str,
+        initial_tape: Sequence[int] = None,
+        initial_pos: int = 0,
+        halt_state: str = "H",
+        blank_symbol: int = 0,
+    ):
         """튜링 머신을 정의한다.
 
         :param rules: 튜링 머신의 규칙
@@ -60,20 +67,17 @@ class TuringMachine:
 
     @property
     def head_state(self) -> str:
-        """헤드의 상태
-        """
+        """헤드의 상태"""
         return self._head_state
 
     @head_state.setter
     def head_state(self, value: str):
-        """헤드의 상태를 변경한다.
-        """
+        """헤드의 상태를 변경한다."""
         self._head_state = value
 
     @property
     def tape(self) -> Deque[int]:
-        """현재 테이프의 복사본 반환
-        """
+        """현재 테이프의 복사본 반환"""
         return self._tape.copy()
 
     @property
@@ -133,7 +137,7 @@ class TuringMachine:
             if rule.current_state == state and rule.current_symbol == symbol:
                 return rule.next_symbol, rule.head_move_direction, rule.next_state
 
-        raise ValueError(f'Cannot find {state=} and {symbol=} in rule table.')
+        raise ValueError(f"Cannot find {state=} and {symbol=} in rule table.")
 
     def move_head_to_left(self):
         """헤드를 왼쪽으로 한 칸 옮긴다.
@@ -156,18 +160,15 @@ class TuringMachine:
             self._tape_span = self._tape_span[0], self._tape_span[1] + 1  # tape_span 업데이트
 
     def read_tape(self) -> int:
-        """현재 헤드 위치에 있는 테이프 기호를 읽는다.
-        """
+        """현재 헤드 위치에 있는 테이프 기호를 읽는다."""
         return self._tape[self.relative_head_pos]
 
     def write_tape(self, sym: int):
-        """현재 헤드 위치에 기호를 쓴다.
-        """
+        """현재 헤드 위치에 기호를 쓴다."""
         self._tape[self.relative_head_pos] = sym
 
     def iterate_machine(self) -> Iterator[TuringMachineResult]:
-        """튜링 머신이 *정지할 때까지* 작동시킨다.
-        """
+        """튜링 머신이 *정지할 때까지* 작동시킨다."""
         yield TuringMachineResult(self.tape, self.head_pos, self.head_state, self.tape_span)
 
         while self.head_state != self.halt_state:
@@ -191,50 +192,52 @@ class TuringMachine:
 
 
 def pretty_print_result(results: List[TuringMachineResult], blank_symbol=0) -> None:
-    """이 함수는 튜링 머신의 실행 결과를 출력할 때 쓴다.
-    """
+    """이 함수는 튜링 머신의 실행 결과를 출력할 때 쓴다."""
     final_span = results[-1].tape_span
     for i, result in enumerate(results):
         # 테이프의 길이를 똑같이 맞춘다.
-        extended_tape = [blank_symbol] * (result.tape_span[0] - final_span[0]) + list(result.tape) \
-                        + [blank_symbol] * (final_span[1] - result.tape_span[1])
+        extended_tape = (
+            [blank_symbol] * (result.tape_span[0] - final_span[0])
+            + list(result.tape)
+            + [blank_symbol] * (final_span[1] - result.tape_span[1])
+        )
         relative_head_pos = result.current_pos - final_span[0]
-        print(f'{i:>3d} {result.current_state}   {apply_bracket_to_pos(extended_tape, relative_head_pos)}')
+        print(f"{i:>3d} {result.current_state}   {apply_bracket_to_pos(extended_tape, relative_head_pos)}")
 
 
 def apply_bracket_to_pos(items: List[int], pos: int) -> str:
-    items_span: List[str] = [str(x) for x in items] + [' ']
-    bracket_list: List[str] = [' '] * pos + ['[', ']'] + [' '] * (len(items) - pos - 1)
-    return ''.join(''.join(pair) for pair in zip(bracket_list, items_span))
+    items_span: List[str] = [str(x) for x in items] + [" "]
+    bracket_list: List[str] = [" "] * pos + ["[", "]"] + [" "] * (len(items) - pos - 1)
+    return "".join("".join(pair) for pair in zip(bracket_list, items_span))
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     # 3-State 2-Symbol busy beaver
     bb4_rules = [
-        TuringMachineRule('A', 0, 1, HeadMoveDirection.RIGHT, 'B'),
-        TuringMachineRule('A', 1, 1, HeadMoveDirection.LEFT, 'B'),
-        TuringMachineRule('B', 0, 1, HeadMoveDirection.LEFT, 'A'),
-        TuringMachineRule('B', 1, 0, HeadMoveDirection.LEFT, 'C'),
-        TuringMachineRule('C', 0, 1, HeadMoveDirection.RIGHT, 'H'),
-        TuringMachineRule('C', 1, 1, HeadMoveDirection.LEFT, 'D'),
-        TuringMachineRule('D', 0, 1, HeadMoveDirection.RIGHT, 'D'),
-        TuringMachineRule('D', 1, 0, HeadMoveDirection.RIGHT, 'A'),
+        TuringMachineRule("A", 0, 1, HeadMoveDirection.RIGHT, "B"),
+        TuringMachineRule("A", 1, 1, HeadMoveDirection.LEFT, "B"),
+        TuringMachineRule("B", 0, 1, HeadMoveDirection.LEFT, "A"),
+        TuringMachineRule("B", 1, 0, HeadMoveDirection.LEFT, "C"),
+        TuringMachineRule("C", 0, 1, HeadMoveDirection.RIGHT, "H"),
+        TuringMachineRule("C", 1, 1, HeadMoveDirection.LEFT, "D"),
+        TuringMachineRule("D", 0, 1, HeadMoveDirection.RIGHT, "D"),
+        TuringMachineRule("D", 1, 0, HeadMoveDirection.RIGHT, "A"),
     ]
 
     # 5-State 2-Symbol busy beaver(현재까지 알려진 가장 유력한 바쁜 비버 후보)
     bb5_rules = [
-        TuringMachineRule('A', 0, 1, HeadMoveDirection.RIGHT, 'B'),
-        TuringMachineRule('A', 1, 1, HeadMoveDirection.LEFT, 'C'),
-        TuringMachineRule('B', 0, 1, HeadMoveDirection.RIGHT, 'C'),
-        TuringMachineRule('B', 1, 1, HeadMoveDirection.RIGHT, 'B'),
-        TuringMachineRule('C', 0, 1, HeadMoveDirection.RIGHT, 'D'),
-        TuringMachineRule('C', 1, 0, HeadMoveDirection.LEFT, 'E'),
-        TuringMachineRule('D', 0, 1, HeadMoveDirection.LEFT, 'A'),
-        TuringMachineRule('D', 1, 1, HeadMoveDirection.LEFT, 'D'),
-        TuringMachineRule('E', 0, 1, HeadMoveDirection.RIGHT, 'H'),
-        TuringMachineRule('E', 1, 0, HeadMoveDirection.LEFT, 'A')
+        TuringMachineRule("A", 0, 1, HeadMoveDirection.RIGHT, "B"),
+        TuringMachineRule("A", 1, 1, HeadMoveDirection.LEFT, "C"),
+        TuringMachineRule("B", 0, 1, HeadMoveDirection.RIGHT, "C"),
+        TuringMachineRule("B", 1, 1, HeadMoveDirection.RIGHT, "B"),
+        TuringMachineRule("C", 0, 1, HeadMoveDirection.RIGHT, "D"),
+        TuringMachineRule("C", 1, 0, HeadMoveDirection.LEFT, "E"),
+        TuringMachineRule("D", 0, 1, HeadMoveDirection.LEFT, "A"),
+        TuringMachineRule("D", 1, 1, HeadMoveDirection.LEFT, "D"),
+        TuringMachineRule("E", 0, 1, HeadMoveDirection.RIGHT, "H"),
+        TuringMachineRule("E", 1, 0, HeadMoveDirection.LEFT, "A"),
     ]
-    tm = TuringMachine(bb4_rules, start_state='A')
+    tm = TuringMachine(bb4_rules, start_state="A")
     time_start = time.time()
     steps = 0
     busy_beaver = 0
@@ -244,6 +247,6 @@ if __name__ == '__main__':
             busy_beaver = count_1s
 
     time_end = time.time()
-    print(f'Elapsed Time: {time_end - time_start} seconds')
-    print(f'Maximum 1s: {busy_beaver}')
-    print(f'TM Halted after {steps} steps')
+    print(f"Elapsed Time: {time_end - time_start} seconds")
+    print(f"Maximum 1s: {busy_beaver}")
+    print(f"TM Halted after {steps} steps")

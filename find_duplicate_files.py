@@ -16,7 +16,7 @@ from typing import Dict, Iterable, Iterator, List, Mapping, TextIO
 HASH_BLOCK_SIZE = 65536
 
 
-def file_hash(filename: PathLike, algorithm='sha256', **kwargs) -> bytes:
+def file_hash(filename: PathLike, algorithm="sha256", **kwargs) -> bytes:
     """파일의 해시 계산
 
     Parameters
@@ -32,7 +32,7 @@ def file_hash(filename: PathLike, algorithm='sha256', **kwargs) -> bytes:
         계산된 파일 해시
     """
     h = hashlib.new(algorithm, **kwargs)
-    with open(filename, 'rb') as hashfile:
+    with open(filename, "rb") as hashfile:
         while buffer := hashfile.read(HASH_BLOCK_SIZE):
             h.update(buffer)
     return h.digest()
@@ -42,11 +42,11 @@ def find_child_files(path: PathLike, verbose=False) -> Iterator[Path]:
     for parent_dir_name, _, child_file_names in walk(Path(path)):
         parent_path = Path(parent_dir_name)
         if verbose:
-            print(f'Checking {parent_path}', file=sys.stderr)
+            print(f"Checking {parent_path}", file=sys.stderr)
         yield from (parent_path / child_file_name for child_file_name in child_file_names)
 
 
-def find_duplicate(*paths: PathLike, algorithm='md5', include_zerofile=False, verbose=False) -> Dict[bytes, List[Path]]:
+def find_duplicate(*paths: PathLike, algorithm="md5", include_zerofile=False, verbose=False) -> Dict[bytes, List[Path]]:
     """중복된 파일을 찾는다.
 
     Parameters
@@ -82,14 +82,12 @@ def find_duplicate(*paths: PathLike, algorithm='md5', include_zerofile=False, ve
 
 
 def count_duplicate(out: Mapping[bytes, Iterable[Path]]) -> int:
-    """중복된 파일의 갯수를 찾는다.
-    """
+    """중복된 파일의 갯수를 찾는다."""
     return sum(len(list(v)) - 1 for v in out.values())
 
 
 def calculate_wasted_spaces(out: Mapping[bytes, Iterable[Path]]) -> int:
-    """낭비된 공간을 바이트 단위로 계산한다.
-    """
+    """낭비된 공간을 바이트 단위로 계산한다."""
     wasted = 0
     for v in out.values():
         vlist = list(v)
@@ -99,36 +97,51 @@ def calculate_wasted_spaces(out: Mapping[bytes, Iterable[Path]]) -> int:
 
 def format_output(out: Mapping[bytes, Iterable[Path]], file: TextIO = sys.stdout) -> None:
     for k, v in out.items():
-        print(f'Duplicate file for hash {k.hex()}', file=file)
+        print(f"Duplicate file for hash {k.hex()}", file=file)
         for p in v:
             print(p, file=file)
-        print('', file=file)
+        print("", file=file)
 
-    print(f'Found {count_duplicate(out)} duplicate files '
-          f'({calculate_wasted_spaces(out):_d} bytes wasted spaces.)', file=file)
+    print(
+        f"Found {count_duplicate(out)} duplicate files " f"({calculate_wasted_spaces(out):_d} bytes wasted spaces.)",
+        file=file,
+    )
 
 
 def format_output_json(out: Mapping[bytes, Iterable[Path]], file: TextIO = sys.stdout) -> None:
     dupes_info: Dict[str, List[str]] = {k.hex(): [str(p) for p in v] for (k, v) in out.items()}
-    dupes_stats = {'Count': count_duplicate(out), 'TotalSize': calculate_wasted_spaces(out)}
-    print(json.dumps({'Result': dupes_info, 'Stats': dupes_stats}, ensure_ascii=False, indent=4), file=file)
+    dupes_stats = {"Count": count_duplicate(out), "TotalSize": calculate_wasted_spaces(out)}
+    print(json.dumps({"Result": dupes_info, "Stats": dupes_stats}, ensure_ascii=False, indent=4), file=file)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument('dir', nargs=argparse.ONE_OR_MORE, metavar='DIR', type=str, help='파일이 저장된 경로')
-    parser.add_argument('-a', '--algorithm', metavar='ALGORITHM', type=str, help='해시를 계산할 알고리즘',
-                        default='md5', choices=('md5', 'sha1', 'sha224', 'sha256'))
-    parser.add_argument('-f', '--format', type=str, choices=('plain', 'json'), default='plain', help='출력 형식')
-    parser.add_argument('-z', '--zero', action='store_true', dest='include_zerofile',
-                        help='크기가 0인 파일을 포함할지 여부')
-    parser.add_argument('-v', '--verbose', action='store_true', help='자세한 설명을 출력할지 여부')
-    parser.add_argument('-o', '--out', metavar='OUT', type=argparse.FileType('w', encoding='utf-8'),
-                        default=sys.stdout, help='결과를 출력할 파일')
+    parser.add_argument("dir", nargs=argparse.ONE_OR_MORE, metavar="DIR", type=str, help="파일이 저장된 경로")
+    parser.add_argument(
+        "-a",
+        "--algorithm",
+        metavar="ALGORITHM",
+        type=str,
+        help="해시를 계산할 알고리즘",
+        default="md5",
+        choices=("md5", "sha1", "sha224", "sha256"),
+    )
+    parser.add_argument("-f", "--format", type=str, choices=("plain", "json"), default="plain", help="출력 형식")
+    parser.add_argument("-z", "--zero", action="store_true", dest="include_zerofile", help="크기가 0인 파일을 포함할지 여부")
+    parser.add_argument("-v", "--verbose", action="store_true", help="자세한 설명을 출력할지 여부")
+    parser.add_argument(
+        "-o",
+        "--out",
+        metavar="OUT",
+        type=argparse.FileType("w", encoding="utf-8"),
+        default=sys.stdout,
+        help="결과를 출력할 파일",
+    )
     args = parser.parse_args()
-    duplicate_result = find_duplicate(*args.dir, algorithm=args.algorithm, include_zerofile=args.include_zerofile,
-                                      verbose=args.verbose)
-    if args.format == 'json':
+    duplicate_result = find_duplicate(
+        *args.dir, algorithm=args.algorithm, include_zerofile=args.include_zerofile, verbose=args.verbose
+    )
+    if args.format == "json":
         format_output_json(duplicate_result, file=args.out)
     else:
         format_output(duplicate_result, file=args.out)

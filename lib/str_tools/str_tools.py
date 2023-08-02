@@ -329,7 +329,7 @@ def apart_prefix(s: AnyStr, prefix: AnyStr) -> Tuple[AnyStr, AnyStr]:
     ('', 'Hello World')
     """
     if prefix and s.startswith(prefix):
-        return prefix, s[len(prefix):]
+        return prefix, s[len(prefix) :]
     elif isinstance(s, str):
         return "", s
     else:
@@ -408,13 +408,13 @@ def pad_left(s: AnyStr, length: int, pad_char: Optional[AnyStr] = None) -> AnySt
 
     if pad_char is None:
         if isinstance(s, str):
-            pad_char = ' '
-        elif isinstance(s, bytes):  # type: bytes
-            pad_char = b'\x00'
+            pad_char = " "
+        elif isinstance(s, bytes):
+            pad_char = b"\x00"
         else:
-            raise ValueError('`s` should be str or bytes')
+            raise ValueError("`s` should be str or bytes")
     if len(pad_char) != 1:
-        raise ValueError('`pad_char` should be one character.')
+        raise ValueError("`pad_char` should be one character.")
 
     return (length - len(s)) * pad_char + s
 
@@ -457,13 +457,13 @@ def pad_right(s: AnyStr, length: int, pad_char: Optional[AnyStr] = None) -> AnyS
 
     if pad_char is None:
         if isinstance(s, str):
-            pad_char = ' '
-        elif isinstance(s, bytes):  # type: bytes
-            pad_char = b'\x00'
+            pad_char = " "
+        elif isinstance(s, bytes):
+            pad_char = b"\x00"
         else:
-            raise ValueError('`s` should be str or bytes')
+            raise ValueError("`s` should be str or bytes")
     if len(pad_char) != 1:
-        raise ValueError('`pad_char` should be one character.')
+        raise ValueError("`pad_char` should be one character.")
 
     return s + (length - len(s)) * pad_char
 
@@ -477,6 +477,6 @@ __all__ = [
     "get_str_hash",
     "get_str_width",
     "get_unicode_repr",
-    'pad_left',
-    'pad_right',
+    "pad_left",
+    "pad_right",
 ]

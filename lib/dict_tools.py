@@ -289,7 +289,7 @@ def right_join(d1: Mapping[KT, VT], d2: Mapping[KT, VT2], default=None) -> Dict[
 
 
 def full_outer_join(
-        d1: Mapping[KT, VT], d2: Mapping[KT, VT2], default=None
+    d1: Mapping[KT, VT], d2: Mapping[KT, VT2], default=None
 ) -> Dict[KT, Tuple[Optional[VT], Optional[VT2]]]:
     """{d1와 d2에 공통으로 있는 키: (매칭되는 d1의 값, 매칭되는 d2의 값)} 딕셔너리를 제작한다.
 
@@ -375,7 +375,7 @@ def find_with_value(d: Mapping[KT, VT], value: VT, default=None) -> KT:
     >>> find_with_value(a, 4)
     'd'
     """
-    for (k, v) in d.items():
+    for k, v in d.items():
         if v == value:
             return k
     return default
@@ -428,7 +428,7 @@ def find_with_value_pred(d: Mapping[KT, VT], pred: Callable[[VT], Any] = bool, d
     >>> find_with_value_pred(a, lambda x: x >= 3)
     'c'
     """
-    for (k, v) in d.items():
+    for k, v in d.items():
         if pred(v):
             return k
     return default
@@ -459,7 +459,7 @@ def findall_with_value_pred(d: Mapping[KT, VT], pred: Callable[[VT], Any] = bool
 
 
 def swap_key_and_value(
-        d: Mapping[KT, VT], duplicate_handler: Literal["strict", "first", "last"] = "first"
+    d: Mapping[KT, VT], duplicate_handler: Literal["strict", "first", "last"] = "first"
 ) -> Dict[VT, KT]:
     """딕셔너리의 키와 값을 서로 뒤바꾼다.
 
@@ -588,8 +588,8 @@ def squeeze_dict(d: Mapping[KT, Optional[VT]]) -> Dict[KT, VT]:
 
 
 def sort_keys(d: Mapping[KT, VT], key: Callable[[KT], Any] = None, reverse: bool = False) -> Dict[KT, VT]:
-    """딕셔너리의 키를 정렬한다. 일반적으로 필요하지는 않다. 
-    
+    """딕셔너리의 키를 정렬한다. 일반적으로 필요하지는 않다.
+
     Parameters
     ----------
     d : Mapping

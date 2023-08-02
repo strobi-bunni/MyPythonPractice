@@ -34,6 +34,6 @@ for _ in range(tries):
     if your_choice_changed == prize:
         win_if_changed += 1
 
-print(f'{tries} tries')
+print(f"{tries} tries")
 print(f"Win if changed: {win_if_changed} ({win_if_changed / tries:.2%})")
 print(f"Win if not changed: {win_if_not_changed} ({win_if_not_changed / tries:.2%})")

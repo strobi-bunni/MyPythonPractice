@@ -6,16 +6,24 @@
 """
 from typing import List, Optional
 
-OPCODE_INCR_POINTER = '>'
-OPCODE_DECR_POINTER = '<'
-OPCODE_INCR_VALUE = '+'
-OPCODE_DECR_VALUE = '-'
-OPCODE_WRITE = '.'
-OPCODE_READ = ','
-OPCODE_JUMP_FORWARD = '['
-OPCODE_JUMP_BACKWARD = ']'
-OPCODES = [OPCODE_INCR_POINTER, OPCODE_DECR_POINTER, OPCODE_INCR_VALUE, OPCODE_DECR_VALUE,
-           OPCODE_WRITE, OPCODE_READ, OPCODE_JUMP_FORWARD, OPCODE_JUMP_BACKWARD]
+OPCODE_INCR_POINTER = ">"
+OPCODE_DECR_POINTER = "<"
+OPCODE_INCR_VALUE = "+"
+OPCODE_DECR_VALUE = "-"
+OPCODE_WRITE = "."
+OPCODE_READ = ","
+OPCODE_JUMP_FORWARD = "["
+OPCODE_JUMP_BACKWARD = "]"
+OPCODES = [
+    OPCODE_INCR_POINTER,
+    OPCODE_DECR_POINTER,
+    OPCODE_INCR_VALUE,
+    OPCODE_DECR_VALUE,
+    OPCODE_WRITE,
+    OPCODE_READ,
+    OPCODE_JUMP_FORWARD,
+    OPCODE_JUMP_BACKWARD,
+]
 
 
 def match_bracket(s: str, loc: int) -> int:
@@ -64,18 +72,17 @@ def match_bracket(s: str, loc: int) -> int:
                     break
             index -= 1
     else:
-        raise ValueError(f'{bracket} is not a bracket')
+        raise ValueError(f"{bracket} is not a bracket")
 
     if found:
         return found_index
     else:
-        raise ValueError('Cannot find match bracket.')
+        raise ValueError("Cannot find match bracket.")
 
 
 def preprocess(s: str) -> str:
-    """브레인퍽 코드에서 불필요한 부분을 제거한다.
-    """
-    return ''.join(c for c in s if c in OPCODES)
+    """브레인퍽 코드에서 불필요한 부분을 제거한다."""
+    return "".join(c for c in s if c in OPCODES)
 
 
 class BrainfuckInterpreter:
@@ -101,8 +108,7 @@ class BrainfuckInterpreter:
     """
 
     # ==========Initializer==========
-    def __init__(self, memsize: int = 32768, code: Optional[str] = None,
-                 use_null_terminated_str: bool = True):
+    def __init__(self, memsize: int = 32768, code: Optional[str] = None, use_null_terminated_str: bool = True):
         """브레인퍽 인터프리터를 초기화한다.
 
         Parameters
@@ -118,7 +124,7 @@ class BrainfuckInterpreter:
         self._cursor_pos: int = 0  # 명령어를 읽는 커서
         self._pointer: int = 0  # 메모리 포인터
         self._mem: List[int] = [0] * memsize  # 메모리
-        self._read_buffer: str = ''  # 읽기 버퍼
+        self._read_buffer: str = ""  # 읽기 버퍼
         self._use_null_terminated_str: bool = use_null_terminated_str  # 문자열 끝에 NULL 문자를 추가할 지 여부
 
     # ==========Properties==========
@@ -155,8 +161,7 @@ class BrainfuckInterpreter:
         self.run()
 
     def run(self):
-        """현재 코드를 실행한다.
-        """
+        """현재 코드를 실행한다."""
         while self._cursor_pos < len(self._code):
             opcode = self._code[self._cursor_pos]
             if opcode == OPCODE_INCR_VALUE:
@@ -196,15 +201,15 @@ class BrainfuckInterpreter:
 
     def _write(self):
         # 포인터의 값을 문자로 출력
-        print(chr(self._mem[self._pointer]), end='')
+        print(chr(self._mem[self._pointer]), end="")
 
     def _read(self):
         # 문자를 입력해서 그 아스키 코드를 포인터에 저장
         # 만약 여러개의 문자를 입력받으면 버퍼에 저장되서 다음 OPCODE_READ이 실행될 때 자동으로 실행된다.
         if not self._read_buffer:
-            input_str = input('\n>>> ')
+            input_str = input("\n>>> ")
             if self._use_null_terminated_str:
-                input_str += '\x00'
+                input_str += "\x00"
             self._read_buffer = input_str
         self._mem[self._pointer] = ord(self._read_buffer[0])
         self._read_buffer = self._read_buffer[1:]
@@ -222,8 +227,8 @@ class BrainfuckInterpreter:
             self._cursor_pos = match_bracket(self._code, oldpos)
 
 
-if __name__ == '__main__':
-    with open('./res/brainfuck_rot13.txt', 'r', encoding='utf-8') as f:
+if __name__ == "__main__":
+    with open("./res/brainfuck_rot13.txt", "r", encoding="utf-8") as f:
         bf_code = f.read()
     bf = BrainfuckInterpreter(code=bf_code, use_null_terminated_str=True)
     bf.run()

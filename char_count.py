@@ -81,13 +81,12 @@ def convert_newline(s: str, mode: Literal["cr", "lf", "crlf"] = "lf") -> str:
     return new_s
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument('input', nargs='?', help='입력할 파일', type=argparse.FileType('rb'), default=sys.stdin)
-    parser.add_argument('-e', '--encoding', help='인코딩', type=str, default='utf-8')
-    parser.add_argument('-n', '--newline', help='개행 문자', type=str,
-                        choices=['cr', 'lf', 'crlf', 'auto'], default='auto')
-    parser.add_argument('-v', '--verbose', help='자세한 설명을 출력할지 여부', action='store_true')
+    parser.add_argument("input", nargs="?", help="입력할 파일", type=argparse.FileType("rb"), default=sys.stdin)
+    parser.add_argument("-e", "--encoding", help="인코딩", type=str, default="utf-8")
+    parser.add_argument("-n", "--newline", help="개행 문자", type=str, choices=["cr", "lf", "crlf", "auto"], default="auto")
+    parser.add_argument("-v", "--verbose", help="자세한 설명을 출력할지 여부", action="store_true")
     args = parser.parse_args()
 
     input_file = args.input
@@ -104,14 +103,12 @@ if __name__ == '__main__':
     number_of_chars = len(text)
 
     # 개행 문자를 통일함
-    if args.newline == 'auto':
+    if args.newline == "auto":
         text_newline_converted: str = convert_newline(text)
-        newline = '\n'
+        newline = "\n"
     else:
         text_newline_converted: str = text
-        newline = '\n' if args.newline == 'lf' \
-            else '\r\n' if args.newline == 'crlf' \
-            else '\r'
+        newline = "\n" if args.newline == "lf" else "\r\n" if args.newline == "crlf" else "\r"
 
     # split text into lines
     lines: List[str] = text_newline_converted.split(newline)
@@ -125,18 +122,24 @@ if __name__ == '__main__':
         number_of_lines += 1
         if line and not line.isspace():
             number_of_valid_lines += 1
-            words: List[str] = re.findall(r'\b\w+\b', line)
+            words: List[str] = re.findall(r"\b\w+\b", line)
             number_of_words += len(words)
             number_of_valid_chars += sum(len(w) for w in words)
 
     if args.verbose:
-        print(f'{filename}\n'
-              f'{size_of_file} bytes\n'
-              f'{number_of_lines} lines\n'
-              f'{number_of_valid_lines} valid(meaningful) lines\n'
-              f'{number_of_words} words\n'
-              f'{number_of_chars} characters\n'
-              f'{number_of_valid_chars} valid(meaningful) characters', end='')
+        print(
+            f"{filename}\n"
+            f"{size_of_file} bytes\n"
+            f"{number_of_lines} lines\n"
+            f"{number_of_valid_lines} valid(meaningful) lines\n"
+            f"{number_of_words} words\n"
+            f"{number_of_chars} characters\n"
+            f"{number_of_valid_chars} valid(meaningful) characters",
+            end="",
+        )
     else:
-        print(f'{filename} | {size_of_file}S {number_of_lines}L {number_of_valid_lines}N '
-              f'{number_of_words}W {number_of_chars}C {number_of_valid_chars}V', end='')
+        print(
+            f"{filename} | {size_of_file}S {number_of_lines}L {number_of_valid_lines}N "
+            f"{number_of_words}W {number_of_chars}C {number_of_valid_chars}V",
+            end="",
+        )

@@ -92,10 +92,10 @@ def deprecated(since=None, remove=None, instead=None):
         @wraps(func)
         def decorated_func(*args, **kwargs):
             warning_message = (
-                    f"'{func.__name__}' is deprecated"
-                    + (f" since {since}" if since else "")
-                    + (f", and will be removed at {remove}" if remove else "")
-                    + (f". Use {instead} instead." if instead else ".")
+                f"'{func.__name__}' is deprecated"
+                + (f" since {since}" if since else "")
+                + (f", and will be removed at {remove}" if remove else "")
+                + (f". Use {instead} instead." if instead else ".")
             )
             warnings.warn(warning_message, DeprecationWarning)
             return func(*args, **kwargs)

@@ -34,4 +34,4 @@ def truncate_datetime(dt: datetime.datetime, timespec: T_Timespec = "seconds") -
     elif timespec == "days":
         return dt.replace(hour=0, minute=0, second=0, microsecond=0)
     else:
-        raise ValueError('Invalid timespec')
+        raise ValueError("Invalid timespec")

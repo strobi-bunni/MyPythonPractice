@@ -31,11 +31,11 @@ from typing import Iterator
 def lookandsay_gen(x0: str) -> Iterator[str]:
     while True:
         yield x0
-        x0 = ''.join(f'{len(list(j))}{i}' for i, j in groupby(x0))  # type: i: str; j: Iterator[str]
+        x0 = "".join(f"{len(list(j))}{i}" for i, j in groupby(x0))  # type: i: str; j: Iterator[str]
 
 
-las = lookandsay_gen('1')
-print('n\tlength')
+las = lookandsay_gen("1")
+print("n\tlength")
 for n in range(1, 51):
     x = next(las)
-    print(f'{n}\t{len(x)}')
+    print(f"{n}\t{len(x)}")
