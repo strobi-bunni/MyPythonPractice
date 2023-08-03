@@ -128,7 +128,7 @@ if __name__ == "__main__":
     if args.subparser == "extract":
         if not args.minecraft_version:
             print("Cannot find Minecraft index file", file=sys.stderr)
-            exit(1)
+            sys.exit(1)
         data = get_asset_index_data(args.minecraft_version)
         for p in args.path:
             for item in query_items(data, p):
@@ -137,7 +137,7 @@ if __name__ == "__main__":
     elif args.subparser == "query":
         if not args.minecraft_version:
             print("Cannot find Minecraft index file", file=sys.stderr)
-            exit(1)
+            sys.exit(1)
         data = get_asset_index_data(args.minecraft_version)
         for p in args.path:
             for item in query_items(data, p):

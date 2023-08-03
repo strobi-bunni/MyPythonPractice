@@ -338,7 +338,7 @@ def pairs(iterable: Iterable[T]) -> Iterator[List[Union[Tuple[T, T], Tuple[T]]]]
                 yield [(items[0], items[i])] + group
 
 
-def get_duplicate_items(items: Iterable[T], key: Callable[[T], Any] = None):
+def get_duplicate_items(items: Iterable[T], key: Optional[Callable[[T], Any]] = None):
     r"""중복된 항목을 찾는다.
 
     만약 key가 지정되어 있다면 items의 각 항목에 대해서 key 함수를 적용한 결과가
@@ -379,7 +379,7 @@ def get_duplicate_items(items: Iterable[T], key: Callable[[T], Any] = None):
     return {k: list_g for (k, g) in itertools.groupby(sorted_items, key=key) if len(list_g := list(g)) >= 2}
 
 
-def get_sorted_order(items: Iterable[T], key: Callable[[T], Any] = None) -> int:
+def get_sorted_order(items: Iterable[T], key: Optional[Callable[[T], Any]] = None) -> int:
     r"""리스트의 정렬 상태를 구한다.
 
     Parameters
@@ -559,7 +559,7 @@ def group_by_interval(
 def sort_by_specific_order(
     items: Iterable[T],
     orders: Sequence[V],
-    key: Callable[[T], V] = None,
+    key: Optional[Callable[[T], V]] = None,
     reverse: bool = False,
     if_not_found: Literal["strict", "ignore", "before", "after"] = "strict",
 ) -> List[T]:
@@ -712,7 +712,7 @@ def iterable_with_callback(
 
 
 def with_callback(
-    callback: Callable[[int, T], None] = None,
+    callback: Optional[Callable[[int, T], None]] = None,
     call_at: Literal["before", "after"] = "before",
     *,
     before: Optional[Callable[[int, T], None]] = None,

@@ -4,7 +4,7 @@ Messing up string with unicode
 """
 import random
 import unicodedata
-from typing import Dict, Mapping
+from typing import Dict, Mapping, Optional
 
 # Create unnormalization map: {NFKC_normalized_char: unnormalized_chars}
 ascii_char_mapping: Dict[str, str] = dict.fromkeys((chr(i) for i in range(32, 127)), "")
@@ -15,7 +15,7 @@ for i in range(0, 0x4FFFF):
         ascii_char_mapping[normalized_char] += char
 
 
-def randomize_string(s: str, mapping: Mapping[str, str], seed: int = None) -> str:
+def randomize_string(s: str, mapping: Mapping[str, str], seed: Optional[int] = None) -> str:
     r = random.Random(seed)
     return "".join(r.choice(mapping.get(c, c)) for c in s)
 

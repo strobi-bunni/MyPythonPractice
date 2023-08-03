@@ -98,7 +98,9 @@ def merge_dict(d1: Mapping[KT, VT], d2: Mapping[KT, VT], merge_method: Callable[
     {'a': [1, 2], 'b': [3, 4, 5, 3, 4, 5, 6], 'c': [6, 7, 8]}
     """
     if merge_method is None:
-        merge_method = lambda x, y: y
+
+        def merge_method(x, y):
+            return y
 
     d1_copy: Dict[KT, VT] = dict(d1)
     for d2_key, d2_value in d2.items():

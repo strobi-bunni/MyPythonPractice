@@ -21,7 +21,7 @@ from stat import (
 from typing import NamedTuple, Optional, Union
 
 if sys.platform != "win32":
-    raise RuntimeError(f"`ntattrs` is available only for Windows.")
+    raise RuntimeError("`ntattrs` is available only for Windows.")
 
 NT_EPOCH = datetime(1601, 1, 1, 0, 0, 0, tzinfo=timezone.utc)
 # Windows에서 datetime.astimezone이 오류를 일으키지 않는 최소 시각

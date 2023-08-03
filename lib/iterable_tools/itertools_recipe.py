@@ -99,7 +99,7 @@ def dotproduct(vec1: Iterable[Number], vec2: Iterable[Number]) -> Number:
     return sum(map(operator.mul, vec1, vec2))
 
 
-def first_true(iterable: Iterable[T], default=False, pred: Callable[[T], bool] = None):
+def first_true(iterable: Iterable[T], default=False, pred: Optional[Callable[[T], bool]] = None):
     """``iterable``에서 처음으로 참인 값을 반환한다.
 
     만약 참인 값이 없다면 ``default``를 반환한다.
@@ -230,7 +230,7 @@ def quantify(iterable: Iterable[T], pred: Callable[[T], bool] = bool) -> int:
     return sum(map(pred, iterable))
 
 
-def random_combination(iterable: Iterable[T], r: int, rand: random.Random = None) -> Tuple[T, ...]:
+def random_combination(iterable: Iterable[T], r: int, rand: Optional[random.Random] = None) -> Tuple[T, ...]:
     """Random selection from itertools.combinations(iterable, r)"""
     if rand is None:
         rand = random.Random()
@@ -240,7 +240,9 @@ def random_combination(iterable: Iterable[T], r: int, rand: random.Random = None
     return tuple(pool[i] for i in indices)
 
 
-def random_combination_with_replacement(iterable: Iterable[T], r: int, rand: random.Random = None) -> Tuple[T, ...]:
+def random_combination_with_replacement(
+    iterable: Iterable[T], r: int, rand: Optional[random.Random] = None
+) -> Tuple[T, ...]:
     """Random selection from itertools.combinations_with_replacement(iterable, r)"""
     pool: Tuple[T, ...] = tuple(iterable)
     n = len(pool)
@@ -248,7 +250,7 @@ def random_combination_with_replacement(iterable: Iterable[T], r: int, rand: ran
     return tuple(pool[i] for i in indices)
 
 
-def random_permutation(iterable: Iterable[T], r=None, rand: random.Random = None) -> Tuple[T, ...]:
+def random_permutation(iterable: Iterable[T], r=None, rand: Optional[random.Random] = None) -> Tuple[T, ...]:
     """Random selection from itertools.permutations(iterable, r)"""
     if rand is None:
         rand = random.Random()
@@ -257,7 +259,7 @@ def random_permutation(iterable: Iterable[T], r=None, rand: random.Random = None
     return tuple(rand.sample(pool, r))
 
 
-def random_product(*args: Iterable[T], repeat: int = 1, rand: random.Random = None) -> Tuple[T, ...]:
+def random_product(*args: Iterable[T], repeat: int = 1, rand: Optional[random.Random] = None) -> Tuple[T, ...]:
     """Random selection from itertools.product(*args, **kwds)"""
     if rand is None:
         rand = random.Random()
@@ -265,7 +267,7 @@ def random_product(*args: Iterable[T], repeat: int = 1, rand: random.Random = No
     return tuple(rand.choice(pool) for pool in pools)
 
 
-def repeatfunc(func: Callable[[Any], T], times: int = None, *args) -> Iterator[T]:
+def repeatfunc(func: Callable[[Any], T], times: Optional[int] = None, *args) -> Iterator[T]:
     """Repeat calls to func with specified arguments.
 
     Example:  repeatfunc(random.random)
@@ -307,7 +309,7 @@ def take(n: int, iterable: Iterable[T]) -> List[T]:
     return list(itertools.islice(iterable, n))
 
 
-def unique_everseen(iterable: Iterable[T], key: Callable[[T], Any] = None) -> Iterator[T]:
+def unique_everseen(iterable: Iterable[T], key: Optional[Callable[[T], Any]] = None) -> Iterator[T]:
     """List unique elements, preserving order. Remember all elements ever seen.
     unique_everseen('AAAABBBCCDAABBB') --> A B C D
     unique_everseen('ABBCcAD', str.lower) --> A B C D
@@ -326,7 +328,7 @@ def unique_everseen(iterable: Iterable[T], key: Callable[[T], Any] = None) -> It
                 yield element
 
 
-def unique_justseen(iterable: Iterable[T], key: Callable[[T], Any] = None) -> Iterator[T]:
+def unique_justseen(iterable: Iterable[T], key: Optional[Callable[[T], Any]] = None) -> Iterator[T]:
     """List unique elements, preserving order. Remember only the element just seen.
     unique_justseen('AAAABBBCCDAABBB') --> A B C D A B
     unique_justseen('ABBCcAD', str.lower) --> A B C A D

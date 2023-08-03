@@ -74,7 +74,7 @@ if __name__ == "__main__":
     except json.JSONDecodeError as e:
         print(f"An error occurred while parsing the file: {args.infile.name}\nError details: {e}\n", file=sys.stderr)
         reformatted_json_str = None
-        exit(1)
+        sys.exit(1)
 
     # 파일 쓰기
     if args.inplace:

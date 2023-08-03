@@ -31,7 +31,7 @@ from typing import Iterator
 def lookandsay_gen(x0: str) -> Iterator[str]:
     while True:
         yield x0
-        x0 = "".join(f"{len(list(j))}{i}" for i, j in groupby(x0))  # type: i: str; j: Iterator[str]
+        x0 = "".join(f"{len(list(j))}{i}" for i, j in groupby(x0))
 
 
 las = lookandsay_gen("1")

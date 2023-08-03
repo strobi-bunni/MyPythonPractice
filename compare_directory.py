@@ -156,7 +156,7 @@ def compare_dir(orig: Path, diff: Path, working_dir: PurePath = PurePath(".")) -
             if orig_item.stat().st_mtime > diff_item.stat().st_mtime
             else RESULT_DIFFER
         )
-        yield CompareResult(working_dir / name, get_type(orig_item), compare_result_type)  # noqa
+        yield CompareResult(working_dir / name, get_type(orig_item), compare_result_type)
 
     # 동일한 폴더를 찾는다.(폴더의 이름이 동일한지의 여부, 안의 내용은 상관없다.)
     for name in dcmp.common_dirs:

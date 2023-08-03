@@ -2,7 +2,7 @@
 import time
 from collections import deque
 from enum import IntEnum
-from typing import Deque, Iterator, List, NamedTuple, Sequence, Tuple
+from typing import Deque, Iterator, List, NamedTuple, Optional, Sequence, Tuple
 
 
 class HeadMoveDirection(IntEnum):
@@ -31,7 +31,7 @@ class TuringMachine:
         self,
         rules: List[TuringMachineRule],
         start_state: str,
-        initial_tape: Sequence[int] = None,
+        initial_tape: Optional[Sequence[int]] = None,
         initial_pos: int = 0,
         halt_state: str = "H",
         blank_symbol: int = 0,

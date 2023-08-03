@@ -18,7 +18,7 @@ from shutil import rmtree
 
 if len(sys.argv) != 2:
     print("Invalid parameter.\nUSAGE: delete_pycache.py <TARGET_FOLDER_PATH>")
-    exit(1)
+    sys.exit(1)
 
 path = Path(sys.argv[1])
 print(f"Deleting __pycache__ folders from every subdirectory of {path!s}?\nTHIS JOB CANNOT BE UNDONE!\n[Y]es | [N]o")

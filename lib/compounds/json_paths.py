@@ -13,7 +13,7 @@ class NewListItemSingleton:
     def __new__(cls):
         if not hasattr(cls, "instance"):
             cls.instance = super(NewListItemSingleton, cls).__new__(cls)
-        return cls.instance  # noqa
+        return cls.instance
 
     def __repr__(self):
         return "NewListItemSingleton()"
@@ -260,14 +260,14 @@ def delete_json_tree_item(data: T_JSON_Container, *keys: Union[str, int], strict
             if isinstance(keys_head, int) and (-len(data) <= keys_head < len(data)):
                 data.pop(keys_head)
             elif strict:
-                raise KeyError(f"Invalid index")
+                raise KeyError("Invalid index")
 
         else:
             # 만약에 꼬리가 있다면 꼬리에 해당되는 값을 지운다.
             if isinstance(keys_head, int) and (-len(data) <= keys_head < len(data)):
                 delete_json_tree_item(data[keys_head], *keys_tail)
             elif strict:
-                raise KeyError(f"Invalid index")
+                raise KeyError("Invalid index")
 
     else:
         raise ValueError("Cannot delete primitive value")

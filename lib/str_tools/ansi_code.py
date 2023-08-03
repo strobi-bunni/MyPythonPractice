@@ -1,5 +1,5 @@
 from enum import IntEnum
-from typing import Tuple, Union
+from typing import Optional, Tuple, Union
 
 CODE_TEMPLATE = "\x1b[{0}m"
 CODE_FGCOLOR_256_TEMPLATE = "\x1b[38;5;{0}m"
@@ -47,7 +47,7 @@ class BasicColor(IntEnum):
     BRIGHT_WHITE = 15
 
 
-def _fgcolor_code(value: int = None, *values: int) -> str:
+def _fgcolor_code(value: Optional[int] = None, *values: int) -> str:
     if value is None:
         # Reset foreground color
         return CODE_TEMPLATE.format(CODE_RESET_FOREGROUND_COLOR)
@@ -74,7 +74,7 @@ def _fgcolor_code(value: int = None, *values: int) -> str:
         raise ValueError("Input value must be one(16color or 256color) or three(24-bit color) integers.")
 
 
-def _bgcolor_code(value: int = None, *values: int) -> str:
+def _bgcolor_code(value: Optional[int] = None, *values: int) -> str:
     if value is None:
         # Reset foreground color
         return CODE_TEMPLATE.format(CODE_RESET_BACKGROUND_COLOR)
@@ -102,7 +102,7 @@ def _bgcolor_code(value: int = None, *values: int) -> str:
 
 
 def set_fgcolor(
-    text: str = "", color: Union[int, Tuple[int, int, int]] = None, *, reset=False, reset_color=False
+    text: str = "", color: Union[int, Tuple[int, int, int], None] = None, *, reset=False, reset_color=False
 ) -> str:
     """글자의 색을 설정한다. 경우에 따라서 동시에 출력할 수 있다.
 
@@ -158,7 +158,7 @@ def set_fgcolor(
 
 
 def set_bgcolor(
-    text: str = "", color: Union[int, Tuple[int, int, int]] = None, *, reset=False, reset_color=False
+    text: str = "", color: Union[int, Tuple[int, int, int], None] = None, *, reset=False, reset_color=False
 ) -> str:
     """글자 배경의 색을 설정한다. 경우에 따라서 동시에 출력할 수 있다.
 

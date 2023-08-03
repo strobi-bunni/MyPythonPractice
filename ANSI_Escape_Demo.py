@@ -95,7 +95,7 @@ if __name__ == "__main__":
             """
           How to use ANSI escape code: print('\\x1b[\x1b[1m\x1b[93m<CODE>\x1b[0mmTEXT')
           Example: '\\x1b[44mHello\\x1b[0m\\x1b[93mWorld\\x1b[0m' -> \x1b[44mHello\x1b[0m\x1b[93mWorld\x1b[0m
-           
+
           Code    Description                   Example
           --------------------------------------------------------------------"""
         )

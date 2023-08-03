@@ -47,7 +47,7 @@ class StrFormat(NamedTuple):
     width: Optional[int]
     grouping_option: Optional[str]
     precision: Optional[int]
-    type: Optional[str]
+    type_: Optional[str]
     raw_matches: Match[str]
 
 
@@ -87,7 +87,7 @@ if __name__ == "__main__":
           Format specifier    {my_fmt_spec!r}
           Value               {my_value!r} ({type(my_value)})
           Formatted value     {formatted_value!r}
-      
+
           Option              Value               Raw value
           ------------------------------------------------------------
           Fill char           {parsed_fmt_spec.fill!s:<20}{raw_matches["fill"]!r}
@@ -98,6 +98,6 @@ if __name__ == "__main__":
           Minimum width       {parsed_fmt_spec.width!s:<20}{raw_matches["width"]!r}
           Grouping method     {parsed_fmt_spec.grouping_option!s:<20}{raw_matches["grouping_option"]!r}
           Precision           {parsed_fmt_spec.precision!s:<20}{raw_matches["precision"]!r}
-          Type                {parsed_fmt_spec.type!s:<20}{raw_matches["type"]!r}"""
+          Type                {parsed_fmt_spec.type_!s:<20}{raw_matches["type"]!r}"""
         )
     )

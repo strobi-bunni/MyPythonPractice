@@ -30,7 +30,11 @@ def get_dir_size(path: T_Pathifyable) -> int:
 
 
 def path_walker(
-    path: T_Pathifyable, *, dir_first: bool = True, sort_keys: Callable[[Path], Any] = None, reverse: bool = False
+    path: T_Pathifyable,
+    *,
+    dir_first: bool = True,
+    sort_keys: Optional[Callable[[Path], Any]] = None,
+    reverse: bool = False,
 ) -> T_PathIter:
     """path 아래의 모든 폴더와 파일을 산출하는 이터레이터
 
