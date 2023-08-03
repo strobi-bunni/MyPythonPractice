@@ -59,10 +59,7 @@ if __name__ == "__main__":
     # json 포맷팅 옵션 딕셔너리 생성
     ensure_ascii = args.ascii_only
     sort_keys = args.sort_keys
-    if args.tab_indent:
-        indent = "\t"
-    else:
-        indent = args.indent
+    indent = "\t" if args.tab_indent else args.indent
     json_format_option = {"ensure_ascii": ensure_ascii, "sort_keys": sort_keys, "indent": indent}
     if args.compact:
         json_format_option["indent"] = None

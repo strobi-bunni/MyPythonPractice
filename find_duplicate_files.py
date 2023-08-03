@@ -103,7 +103,7 @@ def format_output(out: Mapping[bytes, Iterable[Path]], file: TextIO = sys.stdout
         print("", file=file)
 
     print(
-        f"Found {count_duplicate(out)} duplicate files " f"({calculate_wasted_spaces(out):_d} bytes wasted spaces.)",
+        f"Found {count_duplicate(out)} duplicate files ({calculate_wasted_spaces(out):_d} bytes wasted spaces.)",
         file=file,
     )
 

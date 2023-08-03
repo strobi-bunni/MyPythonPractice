@@ -329,13 +329,13 @@ def pairs(iterable: Iterable[T]) -> Iterator[List[Union[Tuple[T, T], Tuple[T]]]]
         for i in range(len(items) - 1, -1, -1):
             last_items = items[0:i] + items[i + 1 :]
             for group in pairs(last_items):
-                yield group + [(items[i],)]
+                yield [*group, (items[i],)]
     # Handling even number of items(recursive)
     else:
         for i in range(1, len(items)):
             last_items = items[1:i] + items[i + 1 :]
             for group in pairs(last_items):
-                yield [(items[0], items[i])] + group
+                yield [(items[0], items[i]), *group]
 
 
 def get_duplicate_items(items: Iterable[T], key: Optional[Callable[[T], Any]] = None):

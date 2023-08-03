@@ -26,13 +26,7 @@ re_interger = re.compile(r"^[+\-]?\d+$")
 
 
 def _is_primitive(item: T_JSON_Object) -> bool:
-    return (
-        isinstance(item, int)
-        or isinstance(item, float)
-        or isinstance(item, str)
-        or isinstance(item, bool)
-        or item is None
-    )
+    return isinstance(item, (bool, float, int, str))
 
 
 def get_json_tree_item(data: T_JSON_Container, *keys: Union[str, int], default=None, strict=False) -> T_JSON_Types:
@@ -193,21 +187,20 @@ def set_json_tree_item(data: T_JSON_Container, *keys: Union[str, int, NewListIte
             else:
                 # 유효한 인덱스가 아니면 에러 처리
                 raise IndexError(f"Invalid index {keys_head} for list {data}")
+        # 꼬리가 있다면
+        elif keys_head is NEW_LIST_ITEM:
+            # 꼬리가 있으면서 현재 리스트에 새 항목을 만든다 -> 리스트에 새 컨테이너를 추가한다.
+            _prepare_container_for_list(data, None, keys_tail)
+            set_json_tree_item(data[-1], *keys_tail, value=value)
+        elif isinstance(keys_head, int) and (-len(data) <= keys_head < len(data)):
+            # 꼬리가 있으면서 머리가 유효한 리스트 인덱스다:
+            if _is_primitive(data[keys_head]):
+                # 만약에 원시타입이면 새 컨테이너를 만들고 재귀한다
+                _prepare_container_for_list(data, keys_head, keys_tail)
+            set_json_tree_item(data[keys_head], *keys_tail, value=value)
         else:
-            # 꼬리가 있다면
-            if keys_head is NEW_LIST_ITEM:
-                # 꼬리가 있으면서 현재 리스트에 새 항목을 만든다 -> 리스트에 새 컨테이너를 추가한다.
-                _prepare_container_for_list(data, None, keys_tail)
-                set_json_tree_item(data[-1], *keys_tail, value=value)
-            elif isinstance(keys_head, int) and (-len(data) <= keys_head < len(data)):
-                # 꼬리가 있으면서 머리가 유효한 리스트 인덱스다:
-                if _is_primitive(data[keys_head]):
-                    # 만약에 원시타입이면 새 컨테이너를 만들고 재귀한다
-                    _prepare_container_for_list(data, keys_head, keys_tail)
-                set_json_tree_item(data[keys_head], *keys_tail, value=value)
-            else:
-                # 유효한 인덱스가 아니면 에러 처리
-                raise IndexError(f"Invalid index {keys_head} for list {data}")
+            # 유효한 인덱스가 아니면 에러 처리
+            raise IndexError(f"Invalid index {keys_head} for list {data}")
 
     else:
         raise ValueError(f"{data} is primitive type, not a container.")
@@ -262,12 +255,11 @@ def delete_json_tree_item(data: T_JSON_Container, *keys: Union[str, int], strict
             elif strict:
                 raise KeyError("Invalid index")
 
-        else:
-            # 만약에 꼬리가 있다면 꼬리에 해당되는 값을 지운다.
-            if isinstance(keys_head, int) and (-len(data) <= keys_head < len(data)):
-                delete_json_tree_item(data[keys_head], *keys_tail)
-            elif strict:
-                raise KeyError("Invalid index")
+        # 만약에 꼬리가 있다면 꼬리에 해당되는 값을 지운다.
+        elif isinstance(keys_head, int) and (-len(data) <= keys_head < len(data)):
+            delete_json_tree_item(data[keys_head], *keys_tail)
+        elif strict:
+            raise KeyError("Invalid index")
 
     else:
         raise ValueError("Cannot delete primitive value")

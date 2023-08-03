@@ -198,7 +198,7 @@ def simplified_filesystem_flag(flag: FileSystemFlags) -> str:
         "DAX",
     ]  # 플래그 약어
     strs = []
-    for abbr, value in zip(flag_abbrs, sorted((x.value for x in FileSystemFlags.__members__.values()))):
+    for abbr, value in zip(flag_abbrs, sorted(x.value for x in FileSystemFlags.__members__.values())):
         if flag & value:
             strs.append(abbr)
         else:

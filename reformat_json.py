@@ -67,10 +67,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     ensure_ascii = args.ascii_only
-    if args.tab_indent:
-        indent = "\t"
-    else:
-        indent = args.indent
+    indent = "\t" if args.tab_indent else args.indent
     sort_keys = args.sort_keys
     json_format_option = {"ensure_ascii": ensure_ascii, "sort_keys": sort_keys, "indent": indent}
     if args.compact:

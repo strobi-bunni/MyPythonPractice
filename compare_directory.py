@@ -375,10 +375,7 @@ if __name__ == "__main__":
     # 결과 출력
     for i in result:
         if i.compare_result in parse_filter_syntax(args.filter_syntax):
-            if args.color:
-                result_text = colored_output(str(i))
-            else:
-                result_text = str(i)
+            result_text = colored_output(str(i)) if args.color else str(i)
             print(result_text, file=args.output_file)
 
     # 요약본 출력

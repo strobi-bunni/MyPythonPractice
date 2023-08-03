@@ -84,10 +84,7 @@ def unified_diff(source_lines: List[str], dest_lines: List[str], n=3) -> Iterato
 def format_differ_group_header(
     gh: DifferGroupHeader, source_length: int, dest_length: int, colored=True, show_line_no=True
 ):
-    if show_line_no:
-        margin = " " * (int_str_length(source_length) + int_str_length(dest_length) + 3)
-    else:
-        margin = ""
+    margin = " " * (int_str_length(source_length) + int_str_length(dest_length) + 3) if show_line_no else ""
     if colored:
         return f"\n{margin}\x1b[93m{gh}\x1b[0m"
     else:

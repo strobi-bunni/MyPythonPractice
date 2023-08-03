@@ -143,10 +143,7 @@ def set_fgcolor(
 
     >>> print(set_fgcolor('Hello World', 12, reset=True))
     """
-    if color is None or isinstance(color, int):
-        color_code = _fgcolor_code(color)
-    else:
-        color_code = _fgcolor_code(*color)
+    color_code = _fgcolor_code(color) if color is None or isinstance(color, int) else _fgcolor_code(*color)
     reset_code = (
         CODE_TEMPLATE.format(CODE_RESET)
         if reset
@@ -199,10 +196,7 @@ def set_bgcolor(
 
     >>> print(set_bgcolor('Hello World', reset=True))
     """
-    if color is None or isinstance(color, int):
-        color_code = _bgcolor_code(color)
-    else:
-        color_code = _bgcolor_code(*color)
+    color_code = _bgcolor_code(color) if color is None or isinstance(color, int) else _bgcolor_code(*color)
     reset_code = (
         CODE_TEMPLATE.format(CODE_RESET)
         if reset

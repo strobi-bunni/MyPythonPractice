@@ -93,7 +93,7 @@ def _get_sequence(preselected: List[int], pool: List[int]) -> Iterator[List[int]
             if is_square(preselected[-1] + pool_value):
                 pool_copy = pool.copy()
                 pool_copy.pop(pool_index)
-                yield from _get_sequence(preselected + [pool_value], pool_copy)
+                yield from _get_sequence([*preselected, pool_value], pool_copy)
 
 
 def get_sequence(n: int) -> Iterator[List[int]]:

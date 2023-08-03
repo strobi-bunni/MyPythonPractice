@@ -28,7 +28,7 @@ class Memoize(Callable):
         self.__doc__ = func.__doc__
 
     def __call__(self, *args) -> T:
-        if args in self._stored.keys():
+        if args in self._stored:
             return self._stored[args]
         else:
             returns = self.func(*args)
