@@ -1,4 +1,5 @@
-select = ["F", "E", "W", "C90", "I", "N", "UP", "BLE", "B", "A", "C4", "EXE", "ISC", "INP", "PIE", "RSE", "SIM", "ARG", "PL", "RUF"]
+select = ["F", "E", "W", "C90", "I", "N", "UP", "BLE", "B", "A", "C4", "EXE", "ISC", "PIE", "RSE", "SIM", "ARG", "PL", "RUF"]
 ignore = ["E501", "PLR2004", "UP015"]
 line-length = 120
 target-version = "py38"
+allowed-confusables = ["−", "×"]
