@@ -104,7 +104,7 @@ def _create_report_row(
             )
     else:
         # folder_first=False일 경우 폴더와 파일을 합쳐서 내림차순으로 정렬한 다음 순회한다.
-        items = sorted(fi.subfolders + fi.subfiles, key=get_size, reverse=True)  # noqa # 이 합치기는 의도된 것이다
+        items = sorted(fi.subfolders + fi.subfiles, key=get_size, reverse=True)  # 이 합치기는 의도된 것이다
         for item in items:
             size = get_size(item)
             if isinstance(item, Path):
@@ -114,14 +114,13 @@ def _create_report_row(
                 else:
                     various_file_size += size
                     various_file_num += 1
+            # 폴더: 타입이 FolderInfo
+            elif size / current_level_size >= ratio_threshold:
+                yield SizeReportRow(item.path, size, size / total_size, size / current_level_size, "folder")
+                yield from _create_report_row(item, total_size, size, ratio_threshold, folder_first)
             else:
-                # 폴더: 타입이 FolderInfo
-                if size / current_level_size >= ratio_threshold:
-                    yield SizeReportRow(item.path, size, size / total_size, size / current_level_size, "folder")
-                    yield from _create_report_row(item, total_size, size, ratio_threshold, folder_first)
-                else:
-                    various_folder_size += size
-                    various_folder_num += 1
+                various_folder_size += size
+                various_folder_num += 1
 
         # 모든 항목을 산출한 다음에는 기타 항목들을 산출한다.
         if various_folder_num:
@@ -202,7 +201,7 @@ if __name__ == "__main__":
     parser.add_argument("path", metavar="PATH", type=str, help="대상 경로")
     parser.add_argument("-d", "--directory-first", action="store_true", dest="dir_first", help="폴더를 먼저 표시할 지 여부")
     parser.add_argument(
-        "-r", "--ratio", dest="ratio_threshold", type=int, default=1, help="대상 % 이하의 값(0...100, 0일 경우 모든 항목을 보여준다.)"
+        "-r", "--ratio", dest="ratio_threshold", type=int, default=1, help="대상 %% 이하의 값(0...100, 0일 경우 모든 항목을 보여준다.)"
     )
     parser.add_argument("-t", "--tree", action="store_true", dest="tree", help="트리를 간략하게 보여줄 지 여부")
 
