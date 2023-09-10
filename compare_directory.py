@@ -120,7 +120,9 @@ class CompareResult(NamedTuple):
         return path_to_string(self.path) < path_to_string(other.path)
 
 
-def compare_dir(orig: Path, diff: Path, working_dir: PurePath = PurePath(".")) -> Iterator[CompareResult]:
+def compare_dir(
+    orig: Path, diff: Path, working_dir: PurePath = PurePath("."), collapse_dir: bool = False
+) -> Iterator[CompareResult]:
     """두 폴더 orig와 diff의 내용을 비교해서 그 결과를 result 글로벌 변수에 저장한다.
 
     Parameters
@@ -131,6 +133,8 @@ def compare_dir(orig: Path, diff: Path, working_dir: PurePath = PurePath(".")) -
         대상 경로
     working_dir : pathlib.PurePath
         반환된 결과를 저장할 때 기본이 되는 상대 경로(기본값은 '.')
+    collapse_dir : bool
+        생성되거나 삭제된 폴더의 내부 항목을 간략하게 표시할 지 여부. 기본값은 False
 
     Yields
     ------
@@ -162,21 +166,21 @@ def compare_dir(orig: Path, diff: Path, working_dir: PurePath = PurePath(".")) -
     for name in dcmp.common_dirs:
         yield CompareResult(working_dir / name, PATHTYPE_DIRECTORY, RESULT_SAME)
         # 안의 내용물을 재귀적으로 계산한다.
-        yield from compare_dir(orig / name, diff / name, working_dir / name)
+        yield from compare_dir(orig / name, diff / name, working_dir / name, collapse_dir=collapse_dir)
 
     # src에만 있는 항목들을 찾아서 deleted로 저장한다.
     for name in dcmp.left_only:
         yield CompareResult(working_dir / name, get_type(orig / name), RESULT_DELETED)
 
         # 만약에 폴더라면 안의 내용들을 전부 deleted로 간주한다.
-        if (orig / name).is_dir():
+        if (orig / name).is_dir() and not collapse_dir:
             yield from mark_as_deleted_recursive((orig / name), working_dir / name)
 
     # dst에만 있는 항목들을 찾아서 created로 저장한다.
     for name in dcmp.right_only:
         yield CompareResult(working_dir / name, get_type(diff / name), RESULT_CREATED)
         # 만약에 폴더라면 안의 내용들을 전부 created로 간주한다.
-        if (diff / name).is_dir():
+        if (diff / name).is_dir() and not collapse_dir:
             yield from mark_as_created_recursive((diff / name), working_dir / name)
 
     # 형식이 다르거나 비교할 수 없는 항목들을 찾는다.
@@ -187,9 +191,9 @@ def compare_dir(orig: Path, diff: Path, working_dir: PurePath = PurePath(".")) -
         if orig_type != diff_type:
             yield CompareResult(working_dir / name, orig_type, RESULT_DELETED)
             yield CompareResult(working_dir / name, diff_type, RESULT_CREATED)
-            if orig_type == PATHTYPE_DIRECTORY:
+            if orig_type == PATHTYPE_DIRECTORY and not collapse_dir:
                 yield from mark_as_deleted_recursive((orig / name), working_dir / name)
-            if diff_type == PATHTYPE_DIRECTORY:
+            if diff_type == PATHTYPE_DIRECTORY and not collapse_dir:
                 yield from mark_as_created_recursive((diff / name), working_dir / name)
         # 만약 타입이 같다면 비교할 수 없다고 간주한다.
         else:
@@ -343,6 +347,9 @@ if __name__ == "__main__":
         help="대상 결과만을 보여줍니다.\n= + - ! < > @(혹은 S C D I N O U)\n중 하나 이상을 조합합니다.",
     )
     parser.add_argument(
+        "-C", "--collapse-directory", action="store_true", dest="collapse_dir", help="생성되거나 삭제된 폴더를 간략하게 표시합니다."
+    )
+    parser.add_argument(
         "-o",
         "--output",
         dest="output_file",
@@ -368,9 +375,11 @@ if __name__ == "__main__":
     print(f"{header_src}\n{header_tgt}\n", file=args.output_file)
 
     if args.dir_first:
-        result = sorted(compare_dir(orig_dir, diff_dir), key=sort_key_for_directory_first)
+        result = sorted(
+            compare_dir(orig_dir, diff_dir, collapse_dir=args.collapse_dir), key=sort_key_for_directory_first
+        )
     else:
-        result = sorted(compare_dir(orig_dir, diff_dir))
+        result = sorted(compare_dir(orig_dir, diff_dir, collapse_dir=args.collapse_dir))
 
     # 결과 출력
     for i in result:
