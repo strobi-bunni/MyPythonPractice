@@ -170,18 +170,19 @@ def compare_dir(
 
     # src에만 있는 항목들을 찾아서 deleted로 저장한다.
     for name in dcmp.left_only:
-        yield CompareResult(working_dir / name, get_type(orig / name), RESULT_DELETED)
-
         # 만약에 폴더라면 안의 내용들을 전부 deleted로 간주한다.
         if (orig / name).is_dir() and not collapse_dir:
-            yield from mark_as_deleted_recursive((orig / name), working_dir / name)
+            yield from mark_recursive(orig / name, RESULT_DELETED, working_dir / name)
+        else:
+            yield CompareResult(working_dir / name, get_type(orig / name), RESULT_DELETED)
 
     # dst에만 있는 항목들을 찾아서 created로 저장한다.
     for name in dcmp.right_only:
-        yield CompareResult(working_dir / name, get_type(diff / name), RESULT_CREATED)
-        # 만약에 폴더라면 안의 내용들을 전부 created로 간주한다.
+        # 만약에 폴더라면 안의 내용들을 전부 deleted로 간주한다.
         if (diff / name).is_dir() and not collapse_dir:
-            yield from mark_as_created_recursive((diff / name), working_dir / name)
+            yield from mark_recursive(diff / name, RESULT_CREATED, working_dir / name)
+        else:
+            yield CompareResult(working_dir / name, get_type(diff / name), RESULT_CREATED)
 
     # 형식이 다르거나 비교할 수 없는 항목들을 찾는다.
     for name in dcmp.common_funny:
@@ -189,25 +190,31 @@ def compare_dir(
         diff_type = get_type(diff / name)
         # 만약에 타입이 다르다면 src의 항목들을 deleted로, dst의 항목들을 created로 간주한다.
         if orig_type != diff_type:
-            yield CompareResult(working_dir / name, orig_type, RESULT_DELETED)
-            yield CompareResult(working_dir / name, diff_type, RESULT_CREATED)
             if orig_type == PATHTYPE_DIRECTORY and not collapse_dir:
-                yield from mark_as_deleted_recursive((orig / name), working_dir / name)
+                yield from mark_recursive(orig / name, RESULT_DELETED, working_dir / name)
+            else:
+                yield CompareResult(working_dir / name, get_type(orig / name), RESULT_DELETED)
+
             if diff_type == PATHTYPE_DIRECTORY and not collapse_dir:
-                yield from mark_as_created_recursive((diff / name), working_dir / name)
+                yield from mark_recursive(diff / name, RESULT_CREATED, working_dir / name)
+            else:
+                yield CompareResult(working_dir / name, get_type(diff / name), RESULT_CREATED)
+
         # 만약 타입이 같다면 비교할 수 없다고 간주한다.
         else:
             yield CompareResult(working_dir / name, orig_type, RESULT_UNDEFINED)
 
 
-def mark_as_deleted_recursive(path: Path, working_dir=PurePath(".")) -> Iterator[CompareResult]:
-    for item in path.glob("**/*"):
-        yield CompareResult(working_dir / (item.relative_to(path)), get_type(item), RESULT_DELETED)
-
-
-def mark_as_created_recursive(path: Path, working_dir=PurePath(".")) -> Iterator[CompareResult]:
-    for item in path.glob("**/*"):
-        yield CompareResult(working_dir / (item.relative_to(path)), get_type(item), RESULT_CREATED)
+def mark_recursive(path: Path, result: str, working_dir=PurePath(".")) -> Iterator[CompareResult]:
+    """폴더 path와 path안의 모든 하위 항목들의 비교 결과를 result로 표시한다.
+    이 때 하위 항목들의 path에 대한 하위 항목들의 상대 경로는 working_dir 폴더 안의 경로로 산출된다.
+    """
+    yield CompareResult(working_dir, get_type(path), result)
+    for item in path.iterdir():
+        if item.is_dir():
+            yield from mark_recursive(item, result, working_dir / item.name)
+        else:
+            yield CompareResult(working_dir / item.name, get_type(item), result)
 
 
 def get_type(p: Path) -> str:
