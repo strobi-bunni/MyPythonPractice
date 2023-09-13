@@ -234,22 +234,24 @@ def get_type(p: Path) -> str:
     type_ : str
         경로의 유형
     """
-    if p.is_file():
-        return PATHTYPE_FILE
-    elif p.is_dir():
-        return PATHTYPE_DIRECTORY
-    elif p.is_symlink():
-        return PATHTYPE_SYMLINK
-    elif p.is_block_device():
-        return PATHTYPE_BLOCKDEV
-    elif p.is_char_device():
-        return PATHTYPE_CHARDEV
-    elif p.is_fifo():
-        return PATHTYPE_FIFO
-    elif p.is_socket():
-        return PATHTYPE_SOCKET
-    else:  # p.is_mount() raises NotImplementedError on Windows
-        return PATHTYPE_MOUNT
+    return_type = (
+        PATHTYPE_FILE
+        if p.is_file()
+        else PATHTYPE_DIRECTORY
+        if p.is_dir()
+        else PATHTYPE_SYMLINK
+        if p.is_symlink()
+        else PATHTYPE_BLOCKDEV
+        if p.is_block_device()
+        else PATHTYPE_CHARDEV
+        if p.is_char_device()
+        else PATHTYPE_FIFO
+        if p.is_fifo()
+        else PATHTYPE_SOCKET
+        if p.is_socket()
+        else PATHTYPE_MOUNT  # p.is_mount() raises NotImplementedError on Windows
+    )
+    return return_type
 
 
 def expand_parents_of_result(x: CompareResult) -> List[CompareResult]:
@@ -385,12 +387,8 @@ if __name__ == "__main__":
         header_tgt = colored_output(header_tgt)
     print(f"{header_src}\n{header_tgt}\n", file=args.output_file)
 
-    if args.dir_first:
-        result = sorted(
-            compare_dir(orig_dir, diff_dir, collapse_dir=args.collapse_dir), key=sort_key_for_directory_first
-        )
-    else:
-        result = sorted(compare_dir(orig_dir, diff_dir, collapse_dir=args.collapse_dir))
+    sort_key = sort_key_for_directory_first if args.dir_first else None
+    result = sorted(compare_dir(orig_dir, diff_dir, collapse_dir=args.collapse_dir), key=sort_key)
 
     # 결과 출력
     for i in result:
@@ -402,9 +400,7 @@ if __name__ == "__main__":
     if args.summary:
         print(file=args.output_file)
         for summary_text in yield_summary_row(result):
-            if args.color:
-                summary_text = colored_output(summary_text)
-            print(summary_text, file=args.output_file)
+            print(colored_output(summary_text) if args.color else summary_text, file=args.output_file)
 
     if args.output_file is not sys.stdout:
         args.output_file.close()
