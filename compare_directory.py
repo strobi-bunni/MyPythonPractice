@@ -53,6 +53,7 @@ PATHTYPE_BLOCKDEV = "B"
 PATHTYPE_CHARDEV = "C"
 PATHTYPE_FIFO = "I"
 PATHTYPE_SOCKET = "S"
+PATHTYPE_SYMLIMK_MARKER = "*"
 
 PATHTYPE_SORT_ORDER = {
     PATHTYPE_DIRECTORY: 1,
@@ -111,8 +112,8 @@ class CompareResult(NamedTuple):
 
     def __str__(self):
         return (
-            f"{self.compare_result}{self.item_type}  "
-            f"{path_to_string(self.path, override_is_dir=(self.item_type == PATHTYPE_DIRECTORY))}"
+            f"{self.compare_result+self.item_type:<4}"
+            f"{path_to_string(self.path, override_is_dir=(self.item_type.startswith(PATHTYPE_DIRECTORY)))}"
         )
 
     # 기본 정렬 순서
@@ -121,7 +122,13 @@ class CompareResult(NamedTuple):
 
 
 def compare_dir(
-    orig: Path, diff: Path, working_dir: PurePath = PurePath("."), collapse_dir: bool = False
+    orig: Path,
+    diff: Path,
+    working_dir: PurePath = PurePath("."),
+    collapse_dir: bool = False,
+    resolve_symlink: bool = True,
+    real_orig: Path | None = None,
+    real_diff: Path | None = None,
 ) -> Iterator[CompareResult]:
     """두 폴더 orig와 diff의 내용을 비교해서 그 결과를 result 글로벌 변수에 저장한다.
 
@@ -141,52 +148,83 @@ def compare_dir(
     cmp : CompareResult
         각각의 항목에 대해서 비교한 결과
     """
-    dcmp = dircmp(orig, diff)
+    if real_orig is None:
+        real_orig = orig
+    if real_diff is None:
+        real_diff = diff
+
+    same_files, diff_files, common_dirs, left_only, right_only, common_funny = group_items(
+        orig, diff, working_dir, resolve_symlink, real_orig, real_diff
+    )
     # 이름과 내용이 같은 파일들을 처리한다.
-    for name in dcmp.same_files:
-        orig_item = orig / name
-        yield CompareResult(working_dir / name, get_type(orig_item), RESULT_SAME)
+    for name in same_files:
+        orig_item = real_orig / working_dir / name
+        yield CompareResult(working_dir / name, get_type(orig_item, resolve_symlink), RESULT_SAME)
 
     # 이름은 같지만 내용이 다른 파일들을 처리한다.
-    for name in dcmp.diff_files:
-        orig_item = orig / name
-        diff_item = diff / name
+    for name in diff_files:
+        orig_item = real_orig / working_dir / name
+        diff_item = real_diff / working_dir / name
+        stat_function = Path.stat if resolve_symlink else Path.lstat
+        orig_stat = stat_function(orig_item)
+        diff_stat = stat_function(diff_item)
 
         # 파일의 수정 시각을 비교해서 newer 혹은 older를 판단한다.
         compare_result_type = (
             RESULT_NEWER
-            if orig_item.stat().st_mtime < diff_item.stat().st_mtime
+            if orig_stat.st_mtime < diff_stat.st_mtime
             else RESULT_OLDER
-            if orig_item.stat().st_mtime > diff_item.stat().st_mtime
+            if orig_stat.st_mtime > diff_stat.st_mtime
             else RESULT_DIFFER
         )
-        yield CompareResult(working_dir / name, get_type(orig_item), compare_result_type)
+        yield CompareResult(working_dir / name, get_type(orig_item, resolve_symlink), compare_result_type)
 
     # 동일한 폴더를 찾는다.(폴더의 이름이 동일한지의 여부, 안의 내용은 상관없다.)
-    for name in dcmp.common_dirs:
-        yield CompareResult(working_dir / name, PATHTYPE_DIRECTORY, RESULT_SAME)
+    for name in common_dirs:
+        orig_item = real_orig / working_dir / name
+        diff_item = real_diff / working_dir / name
+        yield CompareResult(working_dir / name, get_type(orig_item, resolve_symlink), RESULT_SAME)
         # 안의 내용물을 재귀적으로 계산한다.
-        yield from compare_dir(orig / name, diff / name, working_dir / name, collapse_dir=collapse_dir)
+        if resolve_symlink or not orig_item.is_symlink():
+            yield from compare_dir(
+                orig / name,
+                diff / name,
+                working_dir / name,
+                collapse_dir=collapse_dir,
+                resolve_symlink=resolve_symlink,
+                real_orig=real_orig,
+                real_diff=real_diff,
+            )
 
     # src에만 있는 항목들을 찾아서 deleted로 저장한다.
-    for name in dcmp.left_only:
+    for name in left_only:
         # orig에만 있는 항목들과 (만약 collapse_dir가 지정되어 있다면) 하위 항목들을 전부 deleted로 간주한다.
-        yield from mark_item_recursive(name, orig, RESULT_DELETED, working_dir, collapse_dir=collapse_dir)
+        yield from mark_item_recursive(
+            name, orig, RESULT_DELETED, working_dir, collapse_dir=collapse_dir, resolve_symlink=resolve_symlink
+        )
 
     # dst에만 있는 항목들을 찾아서 created로 저장한다.
-    for name in dcmp.right_only:
+    for name in right_only:
         # diff에만 있는 항목들과 (만약 collapse_dir가 지정되어 있다면) 하위 항목들을 전부 created로 간주한다.
         # 만약에 폴더라면 안의 내용들을 전부 deleted로 간주한다.
-        yield from mark_item_recursive(name, diff, RESULT_CREATED, working_dir, collapse_dir=collapse_dir)
+        yield from mark_item_recursive(
+            name, diff, RESULT_CREATED, working_dir, collapse_dir=collapse_dir, resolve_symlink=resolve_symlink
+        )
 
     # 형식이 다르거나 비교할 수 없는 항목들을 찾는다.
-    for name in dcmp.common_funny:
-        orig_type = get_type(orig / name)
-        diff_type = get_type(diff / name)
+    for name in common_funny:
+        orig_item = real_orig / working_dir / name
+        diff_item = real_diff / working_dir / name
+        orig_type = get_type(orig_item, resolve_symlink)
+        diff_type = get_type(diff_item, resolve_symlink)
         # 만약에 타입이 다르다면 orig의 항목들을 deleted로, diff의 항목들을 created로 간주한다.
         if orig_type != diff_type:
-            yield from mark_item_recursive(name, orig, RESULT_DELETED, working_dir, collapse_dir=collapse_dir)
-            yield from mark_item_recursive(name, diff, RESULT_CREATED, working_dir, collapse_dir=collapse_dir)
+            yield from mark_item_recursive(
+                name, orig, RESULT_DELETED, working_dir, collapse_dir=collapse_dir, resolve_symlink=resolve_symlink
+            )
+            yield from mark_item_recursive(
+                name, diff, RESULT_CREATED, working_dir, collapse_dir=collapse_dir, resolve_symlink=resolve_symlink
+            )
 
         # 만약 타입이 같다면 비교할 수 없다고 간주한다.
         else:
@@ -194,7 +232,12 @@ def compare_dir(
 
 
 def mark_item_recursive(
-    name: str, target_dir: Path, result: str, working_dir: PurePath, collapse_dir: bool = False
+    name: str,
+    target_dir: Path,
+    result: str,
+    working_dir: PurePath,
+    collapse_dir: bool = False,
+    resolve_symlink: bool = True,
 ) -> Iterator[CompareResult]:
     """폴더 target_dir 안의 항목 name의 비교 결과를 result로 표시한다.
     이 때 하위 항목들의 path에 대한 하위 항목들의 상대 경로는 working_dir 폴더 안의 경로로 산출된다.
@@ -203,31 +246,36 @@ def mark_item_recursive(
     - collapse_dir이 True일 경우 target_dir/name 안의 항목도 재귀적으로 result로 표시한다.
     - collapse_dir이 False일 경우 target_dir/name 항목만을 산출한다.
     """
-    if (target_dir / name).is_dir() and not collapse_dir:
-        yield from mark_recursive(target_dir / name, result, working_dir / name)
+    if (target_dir / name).is_dir() and not collapse_dir and (resolve_symlink or not (target_dir / name).is_symlink()):
+        yield from mark_recursive(target_dir / name, result, working_dir / name, resolve_symlink)
     else:
-        yield CompareResult(working_dir / name, get_type(target_dir / name), result)
+        yield CompareResult(working_dir / name, get_type(target_dir / name, resolve_symlink), result)
 
 
-def mark_recursive(path: Path, result: str, working_dir=PurePath(".")) -> Iterator[CompareResult]:
+def mark_recursive(
+    path: Path, result: str, working_dir=PurePath("."), resolve_symlink: bool = True
+) -> Iterator[CompareResult]:
     """폴더 path와 path안의 모든 하위 항목들의 비교 결과를 result로 표시한다.
     이 때 하위 항목들의 path에 대한 하위 항목들의 상대 경로는 working_dir 폴더 안의 경로로 산출된다.
     """
-    yield CompareResult(working_dir, get_type(path), result)
+    yield CompareResult(working_dir, get_type(path, resolve_symlink), result)
     for item in path.iterdir():
-        if item.is_dir():
+        if item.is_dir() and (resolve_symlink or not item.is_symlink()):
             yield from mark_recursive(item, result, working_dir / item.name)
         else:
-            yield CompareResult(working_dir / item.name, get_type(item), result)
+            yield CompareResult(working_dir / item.name, get_type(item, resolve_symlink), result)
 
 
-def get_type(p: Path) -> str:
+def get_type(p: Path, resolve_symlink: bool = True) -> str:
     """경로 p의 유형을 구한다.
 
     Parameters
     ----------
     p : pathlib.Path
         대상 경로
+    resolve_symlink: bool
+        만약 resolve_symlink가 True일 경우 심볼릭 링크를 연결된 파일이나 폴더로 본다.
+        만약 False일 경우 심볼릭 링크 뒤에 *가 붙는다.
 
     Returns
     -------
@@ -251,7 +299,54 @@ def get_type(p: Path) -> str:
         if p.is_socket()
         else PATHTYPE_MOUNT  # p.is_mount() raises NotImplementedError on Windows
     )
-    return return_type
+    return return_type + (p.is_symlink() and not resolve_symlink) * PATHTYPE_SYMLIMK_MARKER
+
+
+def group_items(
+    orig: Path,
+    diff: Path,
+    working_dir: PurePath = PurePath("."),
+    resolve_symlink: bool = True,
+    real_orig: Path | None = None,
+    real_diff: Path | None = None,
+) -> Tuple[List[str], List[str], List[str], List[str], List[str], List[str]]:
+    """orig과 diff의 차이점 항목을 분류한다.
+    resolve_symlink=True일 시 일반 파일/폴더와 심볼릭 링크를 같게 해석하며
+    False일 시 일반 파일/폴더와 심볼릭 링크를 다르게 해석한다."""
+    if real_orig is None:
+        real_orig = orig
+    if real_diff is None:
+        real_diff = diff
+    cmp = dircmp(orig, diff)
+    same_files: List[str] = []
+    diff_files: List[str] = []
+    common_dirs: List[str] = []
+    left_only: List[str] = cmp.left_only.copy()
+    right_only: List[str] = cmp.right_only.copy()
+    common_funny: List[str] = cmp.common_funny.copy()
+    for same_file in cmp.same_files:
+        (
+            same_files
+            if resolve_symlink
+            or (real_orig / working_dir / same_file).is_symlink() == (real_diff / working_dir / same_file).is_symlink()
+            else common_funny
+        ).append(same_file)
+    for diff_file in cmp.diff_files:
+        (
+            diff_files
+            if resolve_symlink
+            or (real_orig / working_dir / diff_file).is_symlink() == (real_diff / working_dir / diff_file).is_symlink()
+            else common_funny
+        ).append(diff_file)
+    for common_dir in cmp.common_dirs:
+        (
+            common_dirs
+            if resolve_symlink
+            or (real_orig / working_dir / common_dir).is_symlink()
+            == (real_diff / working_dir / common_dir).is_symlink()
+            else common_funny
+        ).append(common_dir)
+    return same_files, diff_files, common_dirs, left_only, right_only, common_funny
 
 
 def expand_parents_of_result(x: CompareResult) -> List[CompareResult]:
@@ -363,6 +458,13 @@ if __name__ == "__main__":
         "-C", "--collapse-directory", action="store_true", dest="collapse_dir", help="생성되거나 삭제된 폴더를 간략하게 표시합니다."
     )
     parser.add_argument(
+        "--resolve-symlink",
+        action=argparse.BooleanOptionalAction,
+        default=True,
+        dest="resolve_symlink",
+        help="심볼릭 링크를 해석합니다.",
+    )
+    parser.add_argument(
         "-o",
         "--output",
         dest="output_file",
@@ -388,7 +490,10 @@ if __name__ == "__main__":
     print(f"{header_src}\n{header_tgt}\n", file=args.output_file)
 
     sort_key = sort_key_for_directory_first if args.dir_first else None
-    result = sorted(compare_dir(orig_dir, diff_dir, collapse_dir=args.collapse_dir), key=sort_key)
+    result = sorted(
+        compare_dir(orig_dir, diff_dir, collapse_dir=args.collapse_dir, resolve_symlink=args.resolve_symlink),
+        key=sort_key,
+    )
 
     # 결과 출력
     for i in result:
