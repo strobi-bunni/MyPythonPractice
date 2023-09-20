@@ -12,13 +12,18 @@ from pathlib import Path
 from shutil import copy
 from typing import Dict, Iterator, List, Optional, Tuple, TypedDict, Union
 
-T_ResourceInfo = TypedDict("T_ResourceInfo", {"hash": str, "size": int})
-T_AssetData = Dict[str, T_ResourceInfo]
+
+class ResourceInfo(TypedDict):
+    hash: str
+    size: int
+
+
+T_AssetData = Dict[str, ResourceInfo]
 T_PathLike = Union[str, os.PathLike]
 # 시스템 타입에 맞춰서 마인크래프트 경로 설정
 if sys.platform == "win32":
     # Windows
-    MC_HOME_DIR = Path(os.getenv("appdata")) / ".minecraft/"
+    MC_HOME_DIR = Path(os.getenv("APPDATA")) / ".minecraft/"
 elif sys.platform == "darwin":
     # macOS
     MC_HOME_DIR = Path("~/Library/Application Support/minecraft/")
@@ -100,7 +105,7 @@ def extract_resource(respath: str, output_folder: T_PathLike, asset_data: T_Asse
         return output_file_path
 
 
-def query_items(asset_data: T_AssetData, path_filter: str = "*") -> Iterator[Tuple[str, T_ResourceInfo]]:
+def query_items(asset_data: T_AssetData, path_filter: str = "*") -> Iterator[Tuple[str, ResourceInfo]]:
     for respath, resdata in sorted(asset_data.items()):
         if fnmatch(respath, path_filter):
             yield respath, resdata

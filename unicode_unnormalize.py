@@ -8,7 +8,7 @@ from typing import Dict, Mapping, Optional
 
 # Create unnormalization map: {NFKC_normalized_char: unnormalized_chars}
 ascii_char_mapping: Dict[str, str] = dict.fromkeys((chr(i) for i in range(32, 127)), "")
-for i in range(0, 0x4FFFF):
+for i in range(0x4FFFF):
     char = chr(i)
     normalized_char = unicodedata.normalize("NFKC", char)
     if normalized_char in ascii_char_mapping:

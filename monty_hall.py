@@ -22,7 +22,7 @@ for _ in range(tries):
     your_choice = random.choice(doors)  # 당신이 문을 고른다.
 
     # 사회자는 경품이 없는 문을 열어 준다.
-    halls_choice = random.choice([d for d in doors if d != your_choice and d != prize])
+    halls_choice = random.choice([d for d in doors if d not in (your_choice, prize)])
 
     # 당신은 문을 바꿀 수 있다.
     # 만약 바꾸지 않는다면:
@@ -30,7 +30,7 @@ for _ in range(tries):
         win_if_not_changed += 1
 
     # 만약 바꾼다면:
-    your_choice_changed = [d for d in doors if d != your_choice and d != halls_choice][0]
+    your_choice_changed = next(d for d in doors if d not in (your_choice, halls_choice))
     if your_choice_changed == prize:
         win_if_changed += 1
 

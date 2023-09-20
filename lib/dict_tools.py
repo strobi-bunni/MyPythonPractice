@@ -27,7 +27,7 @@ def _identity(x: T) -> T:
     return x
 
 
-def group_value(d: Mapping[KT, VT], key: Callable[[VT], T] = None) -> Dict[T, Dict[KT, VT]]:
+def group_value(d: Mapping[KT, VT], key: Optional[Callable[[VT], T]] = None) -> Dict[T, Dict[KT, VT]]:
     """딕셔너리의 값을 키를 사용해서 묶는다
 
     Parameters
@@ -70,7 +70,9 @@ def group_value(d: Mapping[KT, VT], key: Callable[[VT], T] = None) -> Dict[T, Di
     return {k: dict(g) for (k, g) in groupby(items, key=lambda x: key(x[1]))}
 
 
-def merge_dict(d1: Mapping[KT, VT], d2: Mapping[KT, VT], merge_method: Callable[[VT, VT], VT] = None) -> Dict[KT, VT]:
+def merge_dict(
+    d1: Mapping[KT, VT], d2: Mapping[KT, VT], merge_method: Optional[Callable[[VT, VT], VT]] = None
+) -> Dict[KT, VT]:
     r"""딕셔너리를 합친다. merge_method에는 같은 키의 값을 합칠 함수를 정의한다.
     만약 merge_method가 정의되어 있지 않다면 d1의 값을 d2로 덮어씌우도록 동작한다.
     이는 Python 3.9에서 추가된 ``d1 | d2`` 문법과 같다.
@@ -589,7 +591,7 @@ def squeeze_dict(d: Mapping[KT, Optional[VT]]) -> Dict[KT, VT]:
     return {k: v for (k, v) in d.items() if v is not None}
 
 
-def sort_keys(d: Mapping[KT, VT], key: Callable[[KT], Any] = None, reverse: bool = False) -> Dict[KT, VT]:
+def sort_keys(d: Mapping[KT, VT], key: Optional[Callable[[KT], Any]] = None, reverse: bool = False) -> Dict[KT, VT]:
     """딕셔너리의 키를 정렬한다. 일반적으로 필요하지는 않다.
 
     Parameters
