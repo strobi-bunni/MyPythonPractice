@@ -7,7 +7,7 @@ class Win32FileAttribute(IntFlag):
     Reference:
     https://learn.microsoft.com/en-us/windows/win32/fileio/file-attribute-constants
 
-    DEPRECATED: use stat.FILE_ATTRIBUTE_* instead
+    You can use stat.FILE_ATTRIBUTE_* instead
     https://docs.python.org/3/library/stat.html
     """
 
@@ -29,4 +29,6 @@ class Win32FileAttribute(IntFlag):
     VIRTUAL = 0x10000
     NO_SCRUB_DATA = 0x20000
     RECALL_ON_OPEN = 0x40000
+    PINNED = 0x80000
+    UNPINNED = 0x100000
     RECALL_ON_DATA_ACCESS = 0x400000
